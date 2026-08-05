@@ -3,11 +3,7 @@ const cors = require("cors");
 const qs = require("qs");
 
 const ApiError = require("./utils/ApiErrors");
-const globalError = require("./middlewares/errorMiddleware");
 
-const userRoutes = require("./routes/user.routes");
-const productRoutes = require("./routes/product.routes");
-const authRoutes = require("./routes/auth.routes");
 
 const app = express();
 
@@ -26,10 +22,6 @@ app.use(express.urlencoded({
 
 app.set("query parser", (str) => qs.parse(str));
 
-
-app.use("/api/users", userRoutes);
-app.use("/api/products", productRoutes);
-app.use("/api/auth", authRoutes);
 
 //    404 Handler
 
