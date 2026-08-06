@@ -5,6 +5,7 @@ dotenv.config();
 
 const app = require("./app");
 
+// console.log(process.env.MONGO_URI);
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => {
@@ -20,3 +21,5 @@ mongoose
     console.error("Database Connection Error:", err);
     process.exit(1);
   });
+
+  

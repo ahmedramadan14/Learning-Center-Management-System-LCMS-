@@ -3,42 +3,32 @@ const cors = require("cors");
 const qs = require("qs");
 
 const ApiError = require("./utils/ApiErrors");
-const globalError = require("./middlewares/errorMiddleware");
+const globalError = require("./middlewares/errorHandler");
 
-const userRoutes = require("./routes/user.routes");
-const productRoutes = require("./routes/product.routes");
-const authRoutes = require("./routes/auth.routes");
+const user = require("./modules/user/user.route")
+const student = require("./modules/student/student.route")
+const teacher = require("./modules/teacher/teacher.route")
+const auth = require("./modules/auth/auth.route")
+
 
 const app = express();
 
-// Global Middlewares
-
-// app.use(cors({
-//   origin: "*",
-//   methods: "*",
-// }));
-
 app.use(express.json());
 
-app.use(express.urlencoded({
-  extended: true,
-}));
 
-app.set("query parser", (str) => qs.parse(str));
+// app.set("query parser", (str) => qs.parse(str));
+app.use("/api/v1/students", student);
+app.use("/api/v1/teachers", teacher);
+app.use("/api/v1/auth", auth);
+app.use("/api/v1/users", user);
 
-
-app.use("/api/users", userRoutes);
-app.use("/api/products", productRoutes);
-app.use("/api/auth", authRoutes);
-
-//    404 Handler
-
+//    404 Handler'
 app.use((req, res, next) => {
   next(new ApiError(`Can't find this route: ${req.originalUrl}`, 404));
 });
 
 //    Global Error Handler
 
-// app.use(globalError);
+app.use(globalError)
 
 module.exports = app;
