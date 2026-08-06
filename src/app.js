@@ -8,7 +8,7 @@ const globalError = require("./middlewares/errorMiddleware");
 const userRoutes = require("./routes/user.routes");
 const productRoutes = require("./routes/product.routes");
 const authRoutes = require("./routes/auth.routes");
-
+const attendrouter = require('../src/modules/attendance/attendance.route.js')
 const app = express();
 
 // Global Middlewares
@@ -30,6 +30,8 @@ app.set("query parser", (str) => qs.parse(str));
 app.use("/api/users", userRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/auth", authRoutes);
+
+app.use("/api/attendance", attendrouter);
 
 //    404 Handler
 
