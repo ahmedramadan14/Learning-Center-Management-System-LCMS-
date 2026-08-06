@@ -8,6 +8,8 @@ router.route("/")
   .get(examController.getAllExams)
   .post(createExamRules, validate, examController.createExam);
 
+router.patch("/:id/publish", idParamRule, validate, examController.publishExam);
+
 router.route("/:id")
   .get(idParamRule, validate, examController.getExam)
   .put([...idParamRule, ...updateExamRules], validate, examController.updateExam)

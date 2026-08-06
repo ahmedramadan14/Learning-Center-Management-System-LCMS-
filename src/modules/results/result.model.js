@@ -2,26 +2,30 @@ const mongoose = require("mongoose");
 
 const resultSchema = new mongoose.Schema(
   {
-    examId: {
+    exam: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Exam",
       required: [true, "Result must belong to an exam"],
     },
-    studentId: {
+    student: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Student",
       required: [true, "Result must belong to a student"],
     },
-    score: {
+    marks: {
       type: Number,
-      required: [true, "Score is required"],
-      min: [0, "Score cannot be negative"],
-      max: [100, "Score cannot exceed 100"],
+      required: [true, "Marks is required"],
+      min: [0, "Marks cannot be negative"],
+    },
+    isPassed: {
+      type: Boolean,
+      default: false,
     },
   },
-  { timestamps: { createdAt: true, updatedAt: false } }
+  { timestamps: true }
 );
 
-resultSchema.index({ studentId: 1, examId: 1 }, { unique: true });
+// one result per student per exam
+resultSchema.index({ exam: 1, student: 1 }, { unique: true });
 
 module.exports = mongoose.model("Result", resultSchema);

@@ -1,26 +1,25 @@
 const { body, param } = require("express-validator");
 
 exports.createResultRules = [
-  body("examId")
-    .isMongoId().withMessage("examId must be a valid ID"),
-  body("studentId")
-    .isMongoId().withMessage("studentId must be a valid ID"),
-  body("score")
-    .isFloat({ min: 0, max: 100 }).withMessage("score must be a number between 0 and 100"),
+  body("exam").isMongoId().withMessage("exam must be a valid ID"),
+  body("student").isMongoId().withMessage("student must be a valid ID"),
+  body("marks").isFloat({ min: 0 }).withMessage("marks must be a non-negative number"),
 ];
 
 exports.updateResultRules = [
-  body("examId")
-    .optional()
-    .isMongoId().withMessage("examId must be a valid ID"),
-  body("studentId")
-    .optional()
-    .isMongoId().withMessage("studentId must be a valid ID"),
-  body("score")
-    .optional()
-    .isFloat({ min: 0, max: 100 }).withMessage("score must be a number between 0 and 100"),
+  body("exam").optional().isMongoId().withMessage("exam must be a valid ID"),
+  body("student").optional().isMongoId().withMessage("student must be a valid ID"),
+  body("marks").optional().isFloat({ min: 0 }).withMessage("marks must be a non-negative number"),
 ];
 
 exports.idParamRule = [
   param("id").isMongoId().withMessage("Invalid result ID"),
+];
+
+exports.examIdParamRule = [
+  param("examId").isMongoId().withMessage("Invalid exam ID"),
+];
+
+exports.studentCodeParamRule = [
+  param("studentCode").trim().notEmpty().withMessage("studentCode is required"),
 ];
