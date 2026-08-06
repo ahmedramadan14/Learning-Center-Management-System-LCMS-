@@ -22,7 +22,7 @@ const groupSchema = new mongoose.Schema(
 
     maxCapacity: {
       type: Number,
-      required: [true, "Max capacity is required"],
+      default: 30,
       min: 1,
     },
 
@@ -32,74 +32,20 @@ const groupSchema = new mongoose.Schema(
       min: 0,
     },
 
+    sessionsPerCycle: {
+      type: Number,
+      default: 8,
+      min: 1,
+    },
+
     billingAnchorDate: {
       type: Date,
     },
 
-    sessionsPerCycle: {
-      type: Number,
-      required: [true, "Sessions per cycle is required"],
-      min: 1,
+    isActive: {
+      type: Boolean,
+      default: true,
     },
-
-    exams: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Exam",
-      },
-    ],
-
-    paperexams: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "PaperExam",
-      },
-    ],
-
-    teacher: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Teacher",
-    },
-
-    gradelevel: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Grade",
-    },
-
-    studentgroup: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "StudentGroup",
-      },
-    ],
-
-    groupschedule: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Schedule",
-      },
-    ],
-
-    attendance_sessions: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "AttendanceSession",
-      },
-    ],
-
-    attendances: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Attendance",
-      },
-    ],
-
-    payments: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Payment",
-      },
-    ],
   },
   {
     timestamps: true,

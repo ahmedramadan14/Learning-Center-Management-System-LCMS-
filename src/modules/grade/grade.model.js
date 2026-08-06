@@ -5,8 +5,13 @@ const gradeSchema = new mongoose.Schema(
     name: {
       type: String,
       required: [true, "Grade name is required"],
-      unique: true,
       trim: true,
+      unique: true,
+    },
+
+    isActive: {
+      type: Boolean,
+      default: true,
     },
   },
   {
@@ -14,6 +19,4 @@ const gradeSchema = new mongoose.Schema(
   }
 );
 
-const Grade = mongoose.model("Grade", gradeSchema);
-
-module.exports = Grade;
+module.exports = mongoose.model("Grade", gradeSchema);
