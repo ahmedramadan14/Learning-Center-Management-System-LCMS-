@@ -5,9 +5,6 @@ const {
   findPaymentById,
   updatePayment,
   recordPayment,
-  waivePayment,
-  sendReminder,
-  getStudentPayments,
 } = require("./payment.service");
 
 // Get actor id from req.user or from body (fallback)
@@ -38,9 +35,9 @@ const getAll = asyncHandler(async (req, res) => {
   });
 });
 
-// Get single payment with full details
+// Get single payment by id
 const getOne = asyncHandler(async (req, res) => {
-  const payment = await findPaymentById(req.params.id, true); // true = populate
+  const payment = await findPaymentById(req.params.id);
   res.status(200).json({
     status: "success",
     data: { payment },
@@ -56,7 +53,7 @@ const update = asyncHandler(async (req, res) => {
   });
 });
 
-// Record a payment amount
+// Record a payment amount (partial or full)
 const record = asyncHandler(async (req, res) => {
   const payment = await recordPayment(
     req.params.id,
@@ -69,53 +66,10 @@ const record = asyncHandler(async (req, res) => {
   });
 });
 
-// Waive a payment
-const waive = asyncHandler(async (req, res) => {
-  const payment = await waivePayment(
-    req.params.id,
-    getActorId(req, "waivedBy"),
-    req.body.waivedReason
-  );
-  res.status(200).json({
-    status: "success",
-    data: { payment },
-  });
-});
-
-// Send reminder to student/parent
-const remind = asyncHandler(async (req, res) => {
-  const result = await sendReminder(req.params.id, getActorId(req, "createdBy"));
-  res.status(200).json({
-    status: "success",
-    data: result,
-  });
-});
-
-// Get payments for current logged-in student
-const getMyPayments = asyncHandler(async (req, res) => {
-  // req.user.student should be the student id (from auth middleware)
-  if (!req.user.student) {
-    return res.status(403).json({
-      status: "fail",
-      message: "Only students can access their payments.",
-    });
-  }
-  
-  const payments = await getStudentPayments(req.user.student);
-  res.status(200).json({
-    status: "success",
-    results: payments.length,
-    data: { payments },
-  });
-});
-
 module.exports = {
   create,
   getAll,
   getOne,
   update,
   record,
-  waive,
-  remind,
-  getMyPayments,
 };

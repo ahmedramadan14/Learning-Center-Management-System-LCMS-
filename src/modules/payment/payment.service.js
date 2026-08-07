@@ -3,11 +3,9 @@ const ApiError = require("../../utils/ApiErrors");
 const Payment = require("./payment.model");
 const Notification = require("../notification/notification.model");
 
-// Round money to 2 decimal places to avoid floating point issues
 const roundCurrency = (value) =>
   Math.round((Number(value) + Number.EPSILON) * 100) / 100;
 
-// Pick only allowed fields from the request body
 const pick = (source, fields) =>
   fields.reduce((result, field) => {
     if (source[field] !== undefined) {
@@ -18,7 +16,6 @@ const pick = (source, fields) =>
 
 /* ---------- Payment notifications ---------- */
 
-// Simple message for each payment event
 const paymentMessage = (event, payment) => {
   const amount = roundCurrency(payment.amountDue);
   const paid = roundCurrency(payment.amountPaid);
@@ -40,11 +37,6 @@ const paymentMessage = (event, payment) => {
         title: "Payment completed",
         body: `The payment of ${amount} was fully paid. Thank you!`,
       };
-    case "waived":
-      return {
-        title: "Payment waived",
-        body: `The payment was waived. Reason: ${payment.waivedReason || "-"}.`,
-      };
     default:
       return {
         title: "Payment updated",
@@ -53,8 +45,6 @@ const paymentMessage = (event, payment) => {
   }
 };
 
-// Find who should receive the notification (student user + parent users).
-// Returns null if the Student model is not registered yet (team still working on it).
 const getPaymentAudience = async (studentId) => {
   const Student = mongoose.models.Student;
   if (!Student) return null;
@@ -78,7 +68,6 @@ const getPaymentAudience = async (studentId) => {
   return { userIds: [...userIds], hasParents };
 };
 
-// Create a payment notification (best effort: never breaks the payment flow)
 const notifyPayment = async (payment, event, actorId) => {
   try {
     const audience = await getPaymentAudience(payment.studentId);
@@ -95,7 +84,6 @@ const notifyPayment = async (payment, event, actorId) => {
       createdBy: actorId || null,
     });
   } catch (error) {
-    // Log only: a notification failure must not fail the payment request
     console.error("[notifyPayment] failed:", error.message);
     return null;
   }
@@ -112,7 +100,6 @@ const findPaymentById = async (id) => {
 };
 
 const createPayment = async (data, recordedBy) => {
-  // Fixed: no trailing spaces in field names
   const paymentData = pick(data, [
     "subscriptionId",
     "studentId",
@@ -129,8 +116,6 @@ const createPayment = async (data, recordedBy) => {
   }
 
   const payment = await Payment.create(paymentData);
-
-  // Send "new payment" notification
   await notifyPayment(payment, "created", recordedBy);
 
   return payment;
@@ -177,8 +162,8 @@ const listPayments = async (query) => {
 const updatePayment = async (id, data) => {
   const payment = await findPaymentById(id);
 
-  if (["paid", "waived"].includes(payment.status)) {
-    throw new ApiError("Paid or waived payments cannot be edited.", 400);
+  if (payment.status === "paid") {
+    throw new ApiError("Paid payments cannot be edited.", 400);
   }
 
   Object.assign(
@@ -193,9 +178,6 @@ const updatePayment = async (id, data) => {
 const recordPayment = async (id, amount, recordedBy) => {
   const payment = await findPaymentById(id);
 
-  if (payment.status === "waived") {
-    throw new ApiError("A waived payment cannot receive additional payments.", 400);
-  }
   if (payment.status === "paid") {
     throw new ApiError("This payment has already been fully paid.", 400);
   }
@@ -211,31 +193,7 @@ const recordPayment = async (id, amount, recordedBy) => {
   }
 
   await payment.save();
-
-  // Send "partial" or "paid" notification based on the new status
   await notifyPayment(payment, payment.status, recordedBy);
-
-  return payment;
-};
-
-const waivePayment = async (id, waivedBy, waivedReason) => {
-  const payment = await findPaymentById(id);
-
-  if (payment.status === "paid") {
-    throw new ApiError("A fully paid payment cannot be waived.", 400);
-  }
-  if (payment.status === "waived") {
-    throw new ApiError("This payment has already been waived.", 400);
-  }
-
-  payment.status = "waived";
-  payment.waivedBy = waivedBy;
-  payment.waivedReason = waivedReason;
-
-  await payment.save();
-
-  // Send "waived" notification
-  await notifyPayment(payment, "waived", waivedBy);
 
   return payment;
 };
@@ -246,5 +204,4 @@ module.exports = {
   findPaymentById,
   updatePayment,
   recordPayment,
-  waivePayment,
 };

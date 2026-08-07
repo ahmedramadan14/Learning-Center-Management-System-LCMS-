@@ -1,8 +1,8 @@
 const mongoose = require("mongoose");
 
-const PAYMENT_STATUSES = ["unpaid", "partial", "paid", "waived"];
+// Removed "waived" from statuses
+const PAYMENT_STATUSES = ["unpaid", "partial", "paid"];
 
-// Round money to 2 decimal places to avoid floating point issues
 const roundCurrency = (value) =>
   Math.round((Number(value) + Number.EPSILON) * 100) / 100;
 
@@ -54,17 +54,6 @@ const paymentSchema = new mongoose.Schema(
       default: "unpaid",
       index: true,
     },
-    waivedBy: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      default: null,
-    },
-    waivedReason: {
-      type: String,
-      trim: true,
-      maxlength: [500, "waivedReason cannot exceed 500 characters."],
-      default: null,
-    },
     recordedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
@@ -76,13 +65,12 @@ const paymentSchema = new mongoose.Schema(
   }
 );
 
-// One payment per student per group per cycle
 paymentSchema.index(
   { studentId: 1, groupId: 1, cycleStart: 1, cycleEnd: 1 },
   { unique: true }
 );
 
-// Auto-calculate remaining + status before validation
+// Auto-calculate remaining + status (without waived logic)
 paymentSchema.pre("validate", function derivePaymentBalance() {
   if (this.cycleStart && this.cycleEnd && this.cycleEnd <= this.cycleStart) {
     this.invalidate("cycleEnd", "cycleEnd must be later than cycleStart.");
@@ -102,20 +90,7 @@ paymentSchema.pre("validate", function derivePaymentBalance() {
     return;
   }
 
-  if (this.status === "waived") {
-    if (!this.waivedBy) {
-      this.invalidate("waivedBy", "waivedBy is required for a waived payment.");
-    }
-    if (!this.waivedReason) {
-      this.invalidate("waivedReason", "waivedReason is required for a waived payment.");
-    }
-    this.remaining = 0;
-    return;
-  }
-
   this.remaining = roundCurrency(amountDue - amountPaid);
-  this.waivedBy = null;
-  this.waivedReason = null;
 
   if (amountDue === 0 || this.remaining === 0) {
     this.status = "paid";
