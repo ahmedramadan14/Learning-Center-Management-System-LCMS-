@@ -11,6 +11,8 @@ const teacher = require("./modules/teacher/teacher.route")
 const auth = require("./modules/auth/auth.route")
 const paymentRoutes = require("./modules/payment/payment.route");
 const notificationRoutes = require("./modules/notification/notification.route");
+const attendrouter = require('../src/modules/attendance/attendance.route.js')
+
 
 const app = express();
 
@@ -41,6 +43,7 @@ app.use("/api/v1/auth", auth);
 app.use("/api/v1/users", user);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/notifications", notificationRoutes);
+app.use("/api/attendance", attendrouter);
 
 //    404 Handler
 app.use((req, res, next) => {
