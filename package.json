@@ -2,23 +2,24 @@
   "name": "learning-center-management-system-lcms",
   "version": "1.0.0",
   "description": "Backend API for Learning Center Management System",
-  "homepage": "https://github.com/ahmedramadan14/Learning-Center-Management-System-LCMS-#readme",
-  "bugs": {
-    "url": "https://github.com/ahmedramadan14/Learning-Center-Management-System-LCMS-/issues"
+  "main": "src/server.js",
+  "type": "commonjs",
+  "scripts": {
+    "dev": "nodemon src/server.js",
+    "start": "node src/server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ahmedramadan14/Learning-Center-Management-System-LCMS-.git"
   },
-  "license": "ISC",
-  "author": "",
-  "type": "commonjs",
-  "main": "src/server.js",
-  "scripts": {
-    "dev": "nodemon src/server.js",
-    "start": "node src/server.js"
+  "bugs": {
+    "url": "https://github.com/ahmedramadan14/Learning-Center-Management-System-LCMS-/issues"
   },
+  "homepage": "https://github.com/ahmedramadan14/Learning-Center-Management-System-LCMS-#readme",
   "keywords": [],
+  "author": "",
+  "license": "ISC",
   "dependencies": {
     "bcrypt": "^6.0.0",
     "bcryptjs": "^3.0.3",
@@ -26,6 +27,7 @@
     "crypto": "^1.0.1",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
+    "express-validator": "^7.3.2",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^8.24.2",
     "validator": "^13.15.35",
