@@ -1,6 +1,6 @@
-// to handle async errors globally
-module.exports = (func) => {
+// Wrapper to catch async errors and pass them to error middleware
+module.exports = (fn) => {
   return (req, res, next) => {
-    func(req, res, next).catch((err) => next(err));
+    Promise.resolve(fn(req, res, next)).catch(next);
   };
-}
+};
