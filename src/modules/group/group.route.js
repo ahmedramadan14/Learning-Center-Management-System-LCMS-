@@ -22,6 +22,28 @@ router
   )
   .get(groupController.getAllGroups);
 
+
+// Add Student To Group
+router.post(
+  "/:groupId/students/:studentCode",
+  groupController.addStudentToGroup
+);
+
+
+// Remove Student From Group
+router.delete(
+  "/:groupId/students/:studentCode",
+  groupController.removeStudentFromGroup
+);
+
+
+// Get Group Students
+router.get(
+  "/:groupId/students",
+  groupController.getGroupStudents
+);
+
+
 router
   .route("/:id")
   .get(

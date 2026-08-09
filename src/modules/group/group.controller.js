@@ -53,3 +53,46 @@ exports.deleteGroup = asyncHandler(async (req, res) => {
     message: "Group deleted successfully",
   });
 });
+
+// Add Student To Group
+exports.addStudentToGroup = asyncHandler(async (req, res) => {
+  const { groupId, studentCode } = req.params;
+
+  const student = await groupService.addStudentToGroup(
+    groupId,
+    studentCode
+  );
+
+  res.status(200).json({
+    success: true,
+    message: "Student added to group successfully",
+    data: student,
+  });
+});
+
+// Remove Student From Group
+exports.removeStudentFromGroup = asyncHandler(async (req, res) => {
+  const { groupId, studentCode } = req.params;
+
+  const student = await groupService.removeStudentFromGroup(
+    groupId,
+    studentCode
+  );
+
+  res.status(200).json({
+    success: true,
+    message: "Student removed from group successfully",
+    data: student,
+  });
+});
+
+// Get Group Students
+exports.getGroupStudents = asyncHandler(async (req, res) => {
+  const students = await groupService.getGroupStudents(req.params.groupId);
+
+  res.status(200).json({
+    success: true,
+    results: students.length,
+    data: students,
+  });
+});
