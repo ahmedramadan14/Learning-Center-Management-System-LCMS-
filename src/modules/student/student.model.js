@@ -47,10 +47,8 @@ const studentSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
-    parentId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-    },
+    // parentId removed — parent↔student linkage now lives exclusively in the
+    // ParentStudent join collection (supports many-to-many, e.g. mother + father)
     isActive: {
       type: Boolean,
       default: true,
@@ -68,4 +66,3 @@ const studentSchema = new mongoose.Schema(
 const Student = mongoose.model("Student", studentSchema);
 
 module.exports = Student;
-

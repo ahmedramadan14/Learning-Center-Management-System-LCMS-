@@ -3,7 +3,7 @@ const scheduleService = require("./schedule.service");
 
 // Create Schedule
 exports.createSchedule = asyncHandler(async (req, res) => {
-  const schedule = await scheduleService.createSchedule(req.body);
+  const schedule = await scheduleService.createSchedule(req.body, req.user);
 
   res.status(201).json({
     success: true,
@@ -14,7 +14,7 @@ exports.createSchedule = asyncHandler(async (req, res) => {
 
 // Get All Schedules
 exports.getAllSchedules = asyncHandler(async (req, res) => {
-  const schedules = await scheduleService.getAllSchedules();
+  const schedules = await scheduleService.getAllSchedules(req.user);
 
   res.status(200).json({
     success: true,

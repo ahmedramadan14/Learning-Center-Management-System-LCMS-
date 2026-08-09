@@ -13,8 +13,12 @@ const {
   validateRecordPayment,
   validatePaymentList,
 } = require("./payment.validation");
+const authController = require("../auth/auth.controller.js");
 
 const router = express.Router();
+
+router.use(authController.protect);
+router.use(authController.allowedTo("admin", "secretary"));
 
 router
   .route("/")

@@ -2,12 +2,21 @@ const bcrypt = require("bcryptjs");
 const User = require("./user.model");
 const Teacher = require("../teacher/teacher.model");
 const Student = require("../student/student.model");
+const Parent = require("../parent/parent.model");
 const ApiError = require("../../utils/ApiErrors");
  
 const ROLE_PROFILE_MODELS = {
   teacher: Teacher,
   student: Student,
+  parent: Parent,
 };
+
+const PROFILE_MODEL_USER_FIELD = {
+  teacher: "userId",
+  student: "userId",
+  parent: "user",
+};
+
 
 const ALLOWED_ADMIN_UPDATE_FIELDS = ["name", "phone", "email", "profileImage"];
 
@@ -62,19 +71,19 @@ const updateUser = async (id, data) => {
   return await User.findByIdAndUpdate(id, filteredData, { new: true, runValidators: true });
 };
  
-// DELETE
+// DELETE (cascades to whichever role-profile document this user owns)
 const deleteUser = async (id) => {
   const user = await User.findByIdAndDelete(id);
   if (user) {
     const ProfileModel = ROLE_PROFILE_MODELS[user.role];
     if (ProfileModel) {
-      await ProfileModel.findOneAndDelete({ userId: user._id }).catch(() => {});
+      const field = PROFILE_MODEL_USER_FIELD[user.role];
+      await ProfileModel.findOneAndDelete({ [field]: user._id }).catch(() => {});
     }
   }
   return user;
 };
- 
-// ASSIGN ROLE (with cascade cleanup for orphaned profile documents)
+ // ASSIGN ROLE (with cascade cleanup for orphaned profile documents)
 const assignRole = async (id, newRole) => {
   const user = await User.findById(id);
   if (!user) return null;
@@ -94,7 +103,8 @@ const assignRole = async (id, newRole) => {
  
   const OldProfileModel = ROLE_PROFILE_MODELS[oldRole];
   if (OldProfileModel) {
-    await OldProfileModel.findOneAndDelete({ userId: id });
+    const field = PROFILE_MODEL_USER_FIELD[oldRole];
+    await OldProfileModel.findOneAndDelete({ [field]: id });
   }
  
   return user;

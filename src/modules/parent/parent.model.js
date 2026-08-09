@@ -2,23 +2,20 @@ const mongoose = require("mongoose");
 
 const parentSchema = new mongoose.Schema(
   {
-    userId: {
+    user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: [true, "User ID is required"],
+      required: true,
       unique: true,
     },
     gender: {
       type: String,
-      enum: {
-        values: ["male", "female"],
-        message: "Gender must be either male or female",
-      },
+      enum: ["male", "female"],
     },
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+  }
 );
 
-const Parent = mongoose.model("Parent", parentSchema);
-
-module.exports = Parent;
+module.exports = mongoose.model("Parent", parentSchema);

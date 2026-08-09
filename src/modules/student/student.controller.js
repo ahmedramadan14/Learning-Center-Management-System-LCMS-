@@ -50,19 +50,19 @@ const getStudentById = asyncHandler(async (req, res) => {
 
 
 const updateStudent = asyncHandler(async (req, res) => {
-    const id = req.params.id;
+    const { studentCode } = req.params;
     const data = req.body;
 
-    const forbiddenFields = ["studentCode", "userId", "createdById", "parentId"];
+    const forbiddenFields = ["studentCode", "userId", "createdById"];
     const hasForbidden = forbiddenFields.some(f => data[f] !== undefined);
     if (hasForbidden) {
         throw new ApiError(`Cannot update fields: ${forbiddenFields.join(", ")} directly`, 400);
     }
 
-    const student = await studentService.getStudentsById(id);
-    if (!student) throw new ApiError("Student not found", 404);
+    const updatedStudent = await studentService.updateStudent(studentCode, data);
+    
+    if (!updatedStudent) throw new ApiError("Student not found", 404);
 
-    const updatedStudent = await studentService.updateStudent(id, data);
     res.status(200).json({
         success: true,
         message: "Student updated successfully",
@@ -71,37 +71,21 @@ const updateStudent = asyncHandler(async (req, res) => {
 });
 
 const deleteStudent = asyncHandler(async (req, res) => {
-    const id = req.params.id;
+    const { studentCode } = req.params;
 
-    const student = await studentService.getStudentsById(id);
-    if (!student) throw new ApiError("Student not found", 404);
+    const deletedStudent = await studentService.deleteStudentByCode(studentCode);
+    
+    if (!deletedStudent) throw new ApiError("Student not found", 404);
 
-    const deletedStudent = await studentService.deleteStudent(id);
     res.status(200).json({
         success: true,
-        message: "Student deleted successfully",
+        message: "Student deactivated successfully",
         data: deletedStudent
     });
 });
 
-
-const linkParent = asyncHandler(async (req, res) => {
-    const id = req.params.id;
-    const parentId = req.body.parentId;
-
-    const student = await studentService.getStudentsById(id);
-    if (!student) throw new ApiError("Student not found", 404);
-
-    const updatedStudent = await studentService.linkParent(id, parentId);
-    res.status(200).json({
-        success: true,
-        message: "Parent linked successfully",
-        data: updatedStudent
-    });
-});
-
 const getStudentByCode = asyncHandler(async (req, res) => {
-    const studentCode = req.params.studentCode;
+const { studentCode } = req.body;
     const student = await studentService.getStudentByCode(studentCode);
 
     if (!student) throw new ApiError("Student not found", 404);
@@ -120,5 +104,4 @@ module.exports = {
     getStudentByCode,
     updateStudent,
     deleteStudent,
-    linkParent,
 };

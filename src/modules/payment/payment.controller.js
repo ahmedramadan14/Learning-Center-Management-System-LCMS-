@@ -7,16 +7,26 @@ const {
   recordPayment,
 } = require("./payment.service");
 
-// Get actor id from req.user or from body (fallback)
-const getActorId = (req, fieldName) => req.user?._id || req.body[fieldName];
+// Actor must always come from the authenticated token — never from the request body
+const getActorId = (req) => req.user._id;
 
 // Create a new payment
-const create = asyncHandler(async (req, res) => {
-  const payment = await createPayment(req.body, getActorId(req, "recordedBy"));
-  res.status(201).json({
-    status: "success",
-    data: { payment },
-  });
+const create = asyncHandler(async (req, res, next) => {
+  try {
+    const payment = await createPayment(req.body, getActorId(req));
+    res.status(201).json({
+      status: "success",
+      data: { payment },
+    });
+  } catch (err) {
+    if (err.code === 11000) {
+      return res.status(409).json({
+        status: "fail",
+        message: "A payment for this student, group, and cycle already exists.",
+      });
+    }
+    next(err);
+  }
 });
 
 // List all payments with filters and pagination
@@ -45,12 +55,22 @@ const getOne = asyncHandler(async (req, res) => {
 });
 
 // Update payment basic info
-const update = asyncHandler(async (req, res) => {
-  const payment = await updatePayment(req.params.id, req.body);
-  res.status(200).json({
-    status: "success",
-    data: { payment },
-  });
+const update = asyncHandler(async (req, res, next) => {
+  try {
+    const payment = await updatePayment(req.params.id, req.body);
+    res.status(200).json({
+      status: "success",
+      data: { payment },
+    });
+  } catch (err) {
+    if (err.code === 11000) {
+      return res.status(409).json({
+        status: "fail",
+        message: "A payment for this student, group, and cycle already exists.",
+      });
+    }
+    next(err);
+  }
 });
 
 // Record a payment amount (partial or full)
@@ -58,7 +78,7 @@ const record = asyncHandler(async (req, res) => {
   const payment = await recordPayment(
     req.params.id,
     req.body.amount,
-    getActorId(req, "recordedBy")
+    getActorId(req)
   );
   res.status(200).json({
     status: "success",

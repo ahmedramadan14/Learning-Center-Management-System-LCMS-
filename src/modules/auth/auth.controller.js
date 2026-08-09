@@ -86,7 +86,7 @@ exports.signup = asyncHandler(async (req, res, next) => {
       profile = student;
     } else if (role === 'parent') {
       const [parent] = await Parent.create(
-        [{ userId: user._id, gender }],
+        [{ user: user._id }],
         { session }
       );
       profile = parent;

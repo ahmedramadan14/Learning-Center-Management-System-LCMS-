@@ -18,7 +18,7 @@ exports.createGrade = asyncHandler(async (req, res) => {
 // @route   GET /api/grades
 // @access  Private
 exports.getAllGrades = asyncHandler(async (req, res) => {
-  const grades = await gradeService.getAllGrades();
+  const grades = await gradeService.getAllGrades(req.user);
 
   res.status(200).json({
     success: true,

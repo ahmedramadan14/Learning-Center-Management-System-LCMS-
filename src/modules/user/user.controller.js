@@ -122,17 +122,19 @@ const getLoggedUserData = asyncHandler(async (req, res, next) => {
 // @route   PUT /api/v1/users/updateMyPassword
 // @access  Private/Protect
 const updateLoggedUserPassword = asyncHandler(async (req, res, next) => {
-  const hashedPassword = await bcrypt.hash(req.body.password, 12);
-  const user = await User.findByIdAndUpdate(
-    req.user.id || req.user._id,
-    {
-      password: hashedPassword,
-      passwordChangedAt: new Date(),
-    },
-    { new: true }
-  );
+  const { currentPassword, password } = req.body;
 
+  const user = await User.findById(req.user.id || req.user._id).select('+password');
   if (!user) return next(new ApiError("User not found", 404));
+
+  const isCorrect = await bcrypt.compare(currentPassword, user.password);
+  if (!isCorrect) {
+    return next(new ApiError("Current password is incorrect", 401));
+  }
+
+  user.password = await bcrypt.hash(password, 12);
+  user.passwordChangedAt = new Date();
+  await user.save();
 
   const token = generateToken(user._id);
 

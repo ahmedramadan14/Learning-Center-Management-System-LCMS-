@@ -1,76 +1,35 @@
-const attendanceservice = require('./attendance.service.js')
-const createattendance = async (req, res, next) => {
+const asyncHandler = require('../../middlewares/asyncHandler');
+const ApiError = require('../../utils/ApiErrors');
+const attendanceservice = require('./attendance.service.js');
 
+const createattendance = asyncHandler(async (req, res) => {
+    const attend = await attendanceservice.createattendance(req.body, req.user);
+    res.status(201).json({ success: true, message: "Attendance Created", data: attend });
+});
 
-    try {
-        const attend = await attendanceservice.createattendance(req.body)
-        return res.status(200).json({ message: "Attendance Created", attend })
-    }
+const updateattendance = asyncHandler(async (req, res, next) => {
+    const { id } = req.params;
+    const update = await attendanceservice.updateattendance(id, req.body);
+    if (!update) return next(new ApiError("Attendance record not found", 404));
+    res.status(200).json({ success: true, message: "Attendance Updated", data: update });
+});
 
-    catch (err) {
-        return res.status(404).json("error");
-    }
-}
+const getallattendance = asyncHandler(async (req, res) => {
+    const allattend = await attendanceservice.getallattendance(req.user);
+    res.status(200).json({ success: true, results: allattend.length, data: allattend });
+});
 
-const updateattendance = async (req, res, next) => {
-    try {
-        const { studentId } = req.params;
-        const updated = req.body
-        const update = await attendanceservice.updateattendance(studentId, updated)
-        return res.status(200).json({ message: "Attendance Updated", update })
-    }
+const getattendancebyid = asyncHandler(async (req, res) => {
+    const { studentCode } = req.params;
+    const attendbyid = await attendanceservice.getbystudentattendance(studentCode, req.user);
+    res.status(200).json({ success: true, data: attendbyid });
+});
 
-    catch (error) {
+const deleteAttendance = asyncHandler(async (req, res, next) => {
+    const { id } = req.params;
+    const deleted = await attendanceservice.deleteattendance(id);
+    if (!deleted) return next(new ApiError("Attendance not found", 404));
+    res.status(200).json({ success: true, message: "Attendance Deleted Successfully" });
+});
 
-
-        return res.status(500).json("error");
-    }
-}
-
-const getallattendance = async (req, res, next) => {
-
-    try {
-        const allattend = await attendanceservice.getallattendance();
-        return res.status(200).json({ message: "all Attendance", allattend })
-    }
-
-    catch (err) {
-        return res.status(404).json("error");
-    }
-}
-
-const getattendancebyid = async (req, res, next) => {
-
-    try {
-        const { studentId } = req.params
-        const attendbyid = await attendanceservice.getbyidattendance(studentId);
-        return res.status(200).json({ message: "Attendance", attendbyid })
-    }
-
-    catch (err) {
-        // console.log(err);
-
-        return res.status(404).json("error");
-    }
-
-}
-
-const deleteAttendance = async (req, res, next) => {
-    try {
-        const { studentId } = req.params
-        const deleted = await attendanceservice.deleteattendance(studentId);
-
-        if (!deleted) {
-            return res.status(404).json({ message: "Attendance not found" });
-        }
-
-        return res.status(200).json({
-            message: "Attendance Deleted Successfully",
-            deleted
-        });
-    } catch (err) {
-        return res.status(500).json("error");
-    }
-}
-
-module.exports = { createattendance, updateattendance, getallattendance, getattendancebyid, deleteAttendance }
+module.exports = { createattendance, updateattendance, getallattendance, getattendancebyid, deleteAttendance };

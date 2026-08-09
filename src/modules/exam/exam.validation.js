@@ -7,7 +7,7 @@ exports.createExamRules = [
   body("teacher").isMongoId().withMessage("teacher must be a valid ID"),
   body("totalMarks").isFloat({ min: 1 }).withMessage("totalMarks must be at least 1"),
   body("passingMarks").isFloat({ min: 0 }).withMessage("passingMarks must be a non-negative number"),
-  body("examDate").isISO8601().withMessage("examDate must be a valid date"),
+  body("examDate").notEmpty().withMessage("Exam date is required").matches(/^\d{4}-\d{2}-\d{2}$/).withMessage("Exam date must be in YYYY-MM-DD format"),
   body("duration").isInt({ min: 1 }).withMessage("duration must be at least 1 minute"),
   body("status").optional().isIn(["draft", "published", "closed"]).withMessage("status must be draft, published, or closed"),
 ];

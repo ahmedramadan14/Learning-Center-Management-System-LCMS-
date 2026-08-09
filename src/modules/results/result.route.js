@@ -1,26 +1,21 @@
 const express = require("express");
-const router = express.Router();
 const resultController = require("./result.controller");
-const validate = require("../../middlewares/validate");
-const {
-  createResultRules,
-  updateResultRules,
-  idParamRule,
-  examIdParamRule,
-  studentCodeParamRule,
-} = require("./result.validation");
+const authController = require("../auth/auth.controller.js");
+
+const router = express.Router();
+
+router.use(authController.protect);
 
 router.route("/")
-  .get(resultController.getAllResults)
-  .post(createResultRules, validate, resultController.createResult);
+  .get(authController.allowedTo("admin", "secretary", "teacher", "student", "parent"), resultController.getAllResults)
+  .post(authController.allowedTo("admin", "secretary", "teacher"), resultController.createResult);
 
-// specific routes MUST come before /:id, or "student"/"exam" get swallowed as an :id param
-router.get("/student/:studentCode", studentCodeParamRule, validate, resultController.getStudentResults);
-router.get("/exam/:examId", examIdParamRule, validate, resultController.examResults);
+router.get("/student/:studentCode", authController.allowedTo("admin", "secretary", "teacher", "student", "parent"), resultController.getStudentResults);
+router.get("/exam/:examId", authController.allowedTo("admin", "secretary", "teacher"), resultController.examResults);
 
 router.route("/:id")
-  .get(idParamRule, validate, resultController.getResult)
-  .put([...idParamRule, ...updateResultRules], validate, resultController.updateResult)
-  .delete(idParamRule, validate, resultController.deleteResult);
+  .get(resultController.getResult)
+  .put(authController.allowedTo("admin", "secretary", "teacher"), resultController.updateResult)
+  .delete(authController.allowedTo("admin", "teacher","secretary"), resultController.deleteResult);
 
 module.exports = router;

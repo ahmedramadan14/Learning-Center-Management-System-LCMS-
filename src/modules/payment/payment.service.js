@@ -2,6 +2,8 @@ const mongoose = require("mongoose");
 const ApiError = require("../../utils/ApiErrors");
 const Payment = require("./payment.model");
 const Notification = require("../notification/notification.model");
+const Student = require("../student/student.model");
+const Group = require("../group/group.model");
 
 const roundCurrency = (value) =>
   Math.round((Number(value) + Number.EPSILON) * 100) / 100;
@@ -45,22 +47,26 @@ const paymentMessage = (event, payment) => {
   }
 };
 
+// Resolve the notification audience via the ParentStudent join collection
 const getPaymentAudience = async (studentId) => {
-  const Student = mongoose.models.Student;
-  if (!Student) return null;
+  const StudentModel = mongoose.models.Student;
+  const ParentStudent = mongoose.models.ParentStudent;
+  if (!StudentModel || !ParentStudent) return null;
 
-  const student = await Student.findById(studentId)
-    .populate("parentIds", "userId")
-    .lean();
+  const student = await StudentModel.findById(studentId).lean();
   if (!student) return null;
 
   const userIds = new Set();
   if (student.userId) userIds.add(student.userId.toString());
 
+  const links = await ParentStudent.find({ student: studentId })
+    .populate("parent", "user")
+    .lean();
+
   let hasParents = false;
-  (student.parentIds || []).forEach((parent) => {
-    if (parent && parent.userId) {
-      userIds.add(parent.userId.toString());
+  links.forEach((link) => {
+    if (link.parent && link.parent.user) {
+      userIds.add(link.parent.user.toString());
       hasParents = true;
     }
   });
@@ -108,12 +114,20 @@ const createPayment = async (data, recordedBy) => {
     "cycleEnd",
     "amountDue",
     "amountPaid",
-    "recordedBy",
   ]);
 
-  if (recordedBy) {
-    paymentData.recordedBy = recordedBy;
+  const student = await Student.findById(paymentData.studentId);
+  if (!student) {
+    throw new ApiError("Student not found.", 404);
   }
+
+  const group = await Group.findById(paymentData.groupId);
+  if (!group) {
+    throw new ApiError("Group not found.", 404);
+  }
+
+  // recordedBy always comes from the authenticated actor, never from the client body
+  paymentData.recordedBy = recordedBy;
 
   const payment = await Payment.create(paymentData);
   await notifyPayment(payment, "created", recordedBy);
@@ -176,6 +190,10 @@ const updatePayment = async (id, data) => {
 };
 
 const recordPayment = async (id, amount, recordedBy) => {
+  if (typeof amount !== "number" || amount <= 0) {
+    throw new ApiError("Amount must be a positive number.", 400);
+  }
+
   const payment = await findPaymentById(id);
 
   if (payment.status === "paid") {
@@ -188,9 +206,7 @@ const recordPayment = async (id, amount, recordedBy) => {
   }
 
   payment.amountPaid = nextAmountPaid;
-  if (recordedBy) {
-    payment.recordedBy = recordedBy;
-  }
+  payment.recordedBy = recordedBy;
 
   await payment.save();
   await notifyPayment(payment, payment.status, recordedBy);

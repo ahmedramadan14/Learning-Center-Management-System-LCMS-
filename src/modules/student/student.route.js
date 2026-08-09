@@ -8,16 +8,21 @@ router.route('/')
     .post(authController.protect , authController.allowedTo('admin', 'teacher', 'secretary') , studentController.createStudent)
     .get(authController.protect , authController.allowedTo('admin', 'teacher', 'secretary') , studentController.getStudents);
 
-router.route('/code/:studentCode')
-    .get(authController.protect , authController.allowedTo('admin', 'teacher', 'secretary') ,studentController.getStudentByCode);
+router.route('/code')
+    .post(
+        authController.protect, 
+        authController.allowedTo('admin', 'teacher', 'secretary'), 
+        studentController.getStudentByCode
+    );
 
-router.route('/:id/link-parent')
-    .patch(authController.protect , authController.allowedTo('admin', 'teacher', 'secretary') ,studentController.linkParent);
-
+router.route('/:studentCode')
+    .patch(authController.protect, authController.allowedTo('admin', 'teacher', 'secretary'), studentController.updateStudent)
+    .delete(authController.protect, authController.allowedTo('admin', 'teacher', 'secretary'), studentController.deleteStudent);
+    
 router.route('/:id')
     .get(authController.protect , authController.allowedTo('admin', 'teacher', 'secretary') , studentController.getStudentById)
-    .patch(authController.protect , authController.allowedTo('admin', 'teacher', 'secretary') , studentController.updateStudent)
-    .delete(authController.protect , authController.allowedTo('admin', 'teacher', 'secretary') , studentController.deleteStudent);
+
+
 
 
 

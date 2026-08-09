@@ -10,13 +10,6 @@ exports.createGroupValidator = [
     .withMessage("Grade is required")
     .isMongoId()
     .withMessage("Invalid Grade ID"),
-
-  check("teacherId")
-    .notEmpty()
-    .withMessage("Teacher is required")
-    .isMongoId()
-    .withMessage("Invalid Teacher ID"),
-
   check("maxCapacity")
     .notEmpty()
     .withMessage("Max capacity is required")

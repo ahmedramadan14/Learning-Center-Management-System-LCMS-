@@ -2,6 +2,8 @@ const Group = require("./group.model");
 const Grade = require("../grade/grade.model");
 const Teacher = require("../teacher/teacher.model");
 const ApiError = require("../../utils/ApiErrors");
+const Schedule = require("../schedule/schedule.model");
+const Student = require('../student/student.model')
 
 // Create Group
 exports.createGroup = async (data) => {
@@ -34,8 +36,29 @@ exports.createGroup = async (data) => {
 };
 
 // Get All Groups
-exports.getAllGroups = async () => {
-  return await Group.find()
+exports.getAllGroups = async (user) => {
+let filter = {};
+if (user.role === "teacher") {
+    const teacher = await Teacher.findOne({ userId: user._id || user.id });
+    if (!teacher) return [];
+    filter = { teacherId: teacher._id };
+  } 
+  
+  else if (user.role === "secretary") {
+    if (!user.createdBy) return [];
+    const teacher = await Teacher.findOne({ userId: user.createdBy });
+    if (!teacher) return [];
+    filter = { teacherId: teacher._id };
+  } 
+  
+  else if (user.role === "student") {
+    const student = await Student.findOne({ userId: user._id || user.id });
+    if (!student) return [];
+    filter = { _id: { $in: student.groups || [] } };
+  }
+  
+
+  return await Group.find(filter)
     .populate("gradeLevelId", "name")
     .populate("teacherId");
 };
@@ -94,12 +117,19 @@ exports.updateGroup = async (id, data) => {
   });
 };
 
-// Delete Group
 exports.deleteGroup = async (id) => {
   const group = await Group.findById(id);
 
   if (!group) {
     throw new ApiError("Group not found", 404);
+  }
+
+  const schedulesUsingGroup = await Schedule.exists({ groupId: id });
+  if (schedulesUsingGroup) {
+    throw new ApiError(
+      "Cannot delete group: it still has schedules attached",
+      400
+    );
   }
 
   await Group.findByIdAndDelete(id);

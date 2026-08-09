@@ -1,29 +1,54 @@
+const mongoose = require("mongoose");
 const Teacher = require("./teacher.model");
 const User = require("../user/user.model");
+const Group = require("../group/group.model");
 const bcrypt = require("bcryptjs");
+const ApiError = require("../../utils/ApiErrors");
 
 const ALLOWED_UPDATE_FIELDS = ["description", "subject"];
 
 const createTeacher = async (data) => {
     const { name, phone, password, description, subject } = data;
 
-    const hashedPassword = await bcrypt.hash(password, 12);
+    const session = await mongoose.startSession();
+    session.startTransaction();
 
-    const user = await User.create({
-        name,
-        phone,
-        password: hashedPassword,
-        role: "teacher",
-        isApproved: true, 
-    });
+    try {
+        const hashedPassword = await bcrypt.hash(password, 12);
 
-    const teacher = await Teacher.create({
-        userId: user._id,
-        ...(description && { description }),
-        ...(subject && { subject }),
-    });
+        const [user] = await User.create(
+            [
+                {
+                    name,
+                    phone,
+                    password: hashedPassword,
+                    role: "teacher",
+                    isApproved: true,
+                },
+            ],
+            { session }
+        );
 
-    return await Teacher.findById(teacher._id).populate("userId", "-password");
+        const [teacher] = await Teacher.create(
+            [
+                {
+                    userId: user._id,
+                    ...(description && { description }),
+                    ...(subject && { subject }),
+                },
+            ],
+            { session }
+        );
+
+        await session.commitTransaction();
+        session.endSession();
+
+        return await Teacher.findById(teacher._id).populate("userId", "-password");
+    } catch (err) {
+        await session.abortTransaction();
+        session.endSession();
+        throw err;
+    }
 };
 
 const getTeachers = async () => {
@@ -33,6 +58,7 @@ const getTeachers = async () => {
 const getTeacherById = async (id) => {
     return await Teacher.findById(id).populate("userId", "-password");
 };
+
 
 const updateTeacher = async (id, data) => {
     const filteredData = {};
@@ -46,13 +72,22 @@ const updateTeacher = async (id, data) => {
         .populate("userId", "-password");
 };
 
+
 const deleteTeacher = async (id) => {
+    const hasGroups = await Group.exists({ teacherId: id });
+    if (hasGroups) {
+        throw new ApiError(
+            "Cannot delete teacher: they still have groups assigned. Reassign or delete those groups first, or use deactivate instead.",
+            400
+        );
+    }
+
     const teacher = await Teacher.findByIdAndDelete(id);
     if (teacher && teacher.userId) {
         await User.findByIdAndDelete(teacher.userId).catch(() => {});
     }
     return teacher;
-};
+}
 
 const activateTeacher = async (id) => {
     return await Teacher.findByIdAndUpdate(id, { isActive: true }, { new: true }).populate("userId", "-password");

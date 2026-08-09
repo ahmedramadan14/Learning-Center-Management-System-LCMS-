@@ -1,6 +1,6 @@
 const mongoose = require("mongoose")
 const attendanceSchema = new mongoose.Schema({
-  
+
     studentId:{
         type:mongoose.Schema.Types.ObjectId,
         ref:"Student",
@@ -26,14 +26,14 @@ const attendanceSchema = new mongoose.Schema({
         default:"Manual",
         required: [true, "Method is required"]
     },
-      sessionId:{
-       type : mongoose.Schema.Types.ObjectId,
-       ref:"Session",
-          required: [true, "SessionId is required"]
-    }
 },{
     timestamps: true    
 })
 
-module.exports =mongoose.model("Attendance",attendanceSchema)
+// منع تسجيل حضور مكرر لنفس الطالب في نفس الجروب في نفس اليوم
+attendanceSchema.index(
+  { studentId: 1, groupId: 1, date: 1 },
+  { unique: true }
+);
 
+module.exports = mongoose.model("Attendance", attendanceSchema)

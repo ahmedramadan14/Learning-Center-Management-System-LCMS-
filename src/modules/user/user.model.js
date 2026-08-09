@@ -50,10 +50,9 @@ const userSchema = new mongoose.Schema(
     passwordResetCode: { type: String },
     passwordResetExpires: { type: Date },
     passwordResetVerified: { type: Boolean },
-    // parent: {type: ObjectId, ref: "Parent"},   // ref -> parents
-    // student: {type: ObjectId, ref: "Student"},  // ref -> students
-    // teacher: {type: ObjectId, ref: "Teacher"},  // ref -> teachers
-
+    // Removed unused reverse-reference fields (parent/student/teacher).
+    // The link is always looked up the other way: Teacher.userId, Student.userId,
+    // Parent.user — these were never populated and would silently read as empty.
   },
   { timestamps: true }
 );
