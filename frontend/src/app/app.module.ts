@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-
+import { CommonModule } from '@angular/common';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { HeaderComponent } from './components/header/header.component';
@@ -19,6 +19,7 @@ import { AttendanceComponent } from './pages/dashboard/attendance/attendance.com
 import { ExamsComponent } from './pages/dashboard/exams/exams.component';
 import { PaymentsComponent } from './pages/dashboard/payments/payments.component';
 import { SettingsComponent } from './pages/dashboard/settings/settings.component';
+import { LoginComponent } from './pages/auth/login/login.component';
 
 @NgModule({
   declarations: [
@@ -37,11 +38,13 @@ import { SettingsComponent } from './pages/dashboard/settings/settings.component
     AttendanceComponent,
     ExamsComponent,
     PaymentsComponent,
-    SettingsComponent
+    SettingsComponent,
+    LoginComponent
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
+    CommonModule,
     FormsModule
   ],
   providers: [],
