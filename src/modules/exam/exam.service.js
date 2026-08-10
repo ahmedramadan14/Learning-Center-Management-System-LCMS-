@@ -2,7 +2,7 @@ const Exam = require("./exam.model");
 const Group = require("../group/group.model");
 const Teacher = require("../teacher/teacher.model");
 const Student = require("../student/student.model");
-const ParentStudent = require("../parentStudent/parentStudent.model");
+const ParentStudent = require("../ParentStudent/parentStudent.model");
 const Result = require("../results/result.model");
 
 

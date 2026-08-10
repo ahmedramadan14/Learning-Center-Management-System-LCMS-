@@ -5,6 +5,7 @@ const {
   findPaymentById,
   updatePayment,
   recordPayment,
+  recordPaymentByCode: recordPaymentByCodeService,
 } = require("./payment.service");
 
 // Actor must always come from the authenticated token — never from the request body
@@ -86,10 +87,25 @@ const record = asyncHandler(async (req, res) => {
   });
 });
 
+const recordByCode = asyncHandler(async (req, res) => {
+  const payment = await recordPaymentByCodeService(
+    req.body.studentCode,
+    req.body.groupId,
+    req.body.amount,
+    getActorId(req)
+  );
+
+  res.status(200).json({
+    status: "success",
+    data: { payment },
+  });
+});
+
 module.exports = {
   create,
   getAll,
   getOne,
   update,
   record,
+  recordByCode,
 };

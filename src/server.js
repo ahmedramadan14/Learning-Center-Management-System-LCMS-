@@ -1,10 +1,13 @@
+const http = require("http");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 
+const { initializeSocket } = require("./socket");
 
 dotenv.config();
 
 const app = require("./app");
+const httpServer = http.createServer(app);
 
 // console.log(process.env.MONGO_URI);
 mongoose
@@ -14,7 +17,9 @@ mongoose
 
     const PORT = process.env.PORT || 3000;
 
-    app.listen(PORT, () => {
+    initializeSocket(httpServer);
+
+    httpServer.listen(PORT, () => {
       console.log(`Server is running on port ${PORT}`);
     });
   })

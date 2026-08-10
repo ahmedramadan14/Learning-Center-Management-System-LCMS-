@@ -1,5 +1,5 @@
 const Parent = require("../parent/parent.model");
-const ParentStudent = require("../parentStudent/parentStudent.model");
+const ParentStudent = require("../ParentStudent/parentStudent.model");
 const User = require("../user/user.model");
 const mongoose = require("mongoose");
 

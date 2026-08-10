@@ -1,4 +1,4 @@
-const ParentStudent = require("../parentStudent/parentStudent.model");
+const ParentStudent = require("../ParentStudent/parentStudent.model");
 const Parent = require("../parent/parent.model");
 const Student = require("../student/student.model");
 const ApiError = require("../../utils/ApiErrors");

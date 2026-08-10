@@ -138,7 +138,40 @@ const validateRecordPayment = (req, res, next) => {
   const idError = validateObjectId(body.recordedBy, "recordedBy");
   return idError ? next(idError) : next();
 };
+const validateRecordPaymentByCode = (req, res, next) => {
+  const body = req.body || {};
 
+  const fieldError = rejectUnexpectedFields(body, [
+    "studentCode",
+    "groupId",
+    "amount",
+  ]);
+
+  if (fieldError) return next(fieldError);
+
+  if (
+    typeof body.studentCode !== "string" ||
+    body.studentCode.trim() === ""
+  ) {
+    return next(new ApiError("studentCode is required.", 400));
+  }
+
+  const groupIdError = validateObjectId(
+    body.groupId,
+    "groupId",
+    true
+  );
+
+  if (groupIdError) return next(groupIdError);
+
+  if (!isCurrency(body.amount, Number.EPSILON)) {
+    return next(
+      new ApiError("amount must be greater than zero.", 400)
+    );
+  }
+
+  next();
+};
 const validatePaymentList = (req, res, next) => {
   const { page, limit, studentId, groupId, status, cycleStart, cycleEnd } = req.query;
 
@@ -181,5 +214,6 @@ module.exports = {
   validateCreatePayment,
   validateUpdatePayment,
   validateRecordPayment,
+  validateRecordPaymentByCode,
   validatePaymentList,
 };

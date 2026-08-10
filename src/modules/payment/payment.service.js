@@ -1,9 +1,10 @@
-const mongoose = require("mongoose");
 const ApiError = require("../../utils/ApiErrors");
 const Payment = require("./payment.model");
-const Notification = require("../notification/notification.model");
+const { emitNotificationCreated, emitPaymentEvent } = require("../../socket");
+const { createNotification } = require("../notification/notification.service");
 const Student = require("../student/student.model");
 const Group = require("../group/group.model");
+const ParentStudent = require("../ParentStudent/parentStudent.model");
 
 const roundCurrency = (value) =>
   Math.round((Number(value) + Number.EPSILON) * 100) / 100;
@@ -47,48 +48,83 @@ const paymentMessage = (event, payment) => {
   }
 };
 
-// Resolve the notification audience via the ParentStudent join collection
+// Resolve student + parents separately so each role gets a correctly-targeted notification.
 const getPaymentAudience = async (studentId) => {
-  const StudentModel = mongoose.models.Student;
-  const ParentStudent = mongoose.models.ParentStudent;
-  if (!StudentModel || !ParentStudent) return null;
+  const student = await Student.findById(studentId).select("userId").lean();
+  if (!student) {
+    return null;
+  }
 
-  const student = await StudentModel.findById(studentId).lean();
-  if (!student) return null;
-
-  const userIds = new Set();
-  if (student.userId) userIds.add(student.userId.toString());
+  const studentUserIds = new Set();
+  if (student.userId) {
+    studentUserIds.add(student.userId.toString());
+  }
 
   const links = await ParentStudent.find({ student: studentId })
     .populate("parent", "user")
     .lean();
 
-  let hasParents = false;
-  links.forEach((link) => {
-    if (link.parent && link.parent.user) {
-      userIds.add(link.parent.user.toString());
-      hasParents = true;
-    }
-  });
+  const parentUserIds = new Set();
 
-  return { userIds: [...userIds], hasParents };
+  for (const link of links) {
+    if (link.parent && link.parent.user) {
+      parentUserIds.add(link.parent.user.toString());
+    }
+  }
+
+  return {
+    studentUserIds: [...studentUserIds],
+    parentUserIds: [...parentUserIds],
+    allUserIds: [...new Set([...studentUserIds, ...parentUserIds])],
+  };
 };
 
 const notifyPayment = async (payment, event, actorId) => {
   try {
     const audience = await getPaymentAudience(payment.studentId);
-    if (!audience || audience.userIds.length === 0) return null;
+    if (!audience || audience.allUserIds.length === 0) {
+      return [];
+    }
 
     const { title, body } = paymentMessage(event, payment);
+    const notifications = [];
 
-    return await Notification.create({
-      title,
-      body,
-      type: "payment",
-      targetRole: audience.hasParents ? "parents" : "students",
-      targetUserIds: audience.userIds,
-      createdBy: actorId || null,
-    });
+    if (audience.studentUserIds.length > 0) {
+      const studentNotification = await createNotification(
+        {
+          title,
+          body,
+          type: "payment",
+          targetRole: "students",
+          targetUserIds: audience.studentUserIds,
+        },
+        actorId
+      );
+
+      emitNotificationCreated(studentNotification);
+      notifications.push(studentNotification);
+    }
+
+    if (audience.parentUserIds.length > 0) {
+      const parentNotification = await createNotification(
+        {
+          title,
+          body,
+          type: "payment",
+          targetRole: "parents",
+          targetUserIds: audience.parentUserIds,
+        },
+        actorId
+      );
+
+      emitNotificationCreated(parentNotification);
+      notifications.push(parentNotification);
+    }
+
+    return {
+      audience,
+      notifications,
+    };
   } catch (error) {
     console.error("[notifyPayment] failed:", error.message);
     return null;
@@ -130,7 +166,21 @@ const createPayment = async (data, recordedBy) => {
   paymentData.recordedBy = recordedBy;
 
   const payment = await Payment.create(paymentData);
-  await notifyPayment(payment, "created", recordedBy);
+  const notificationResult = await notifyPayment(payment, "created", recordedBy);
+
+  if (notificationResult?.audience) {
+    emitPaymentEvent(
+      "payment:created",
+      {
+        payment,
+        notifications: notificationResult.notifications,
+      },
+      {
+        targetRole: "all",
+        targetUserIds: notificationResult.audience.allUserIds,
+      }
+    );
+  }
 
   return payment;
 };
@@ -209,15 +259,52 @@ const recordPayment = async (id, amount, recordedBy) => {
   payment.recordedBy = recordedBy;
 
   await payment.save();
-  await notifyPayment(payment, payment.status, recordedBy);
+  const notificationResult = await notifyPayment(payment, payment.status, recordedBy);
+
+  if (notificationResult?.audience) {
+    emitPaymentEvent(
+      "payment:recorded",
+      {
+        payment,
+        notifications: notificationResult.notifications,
+      },
+      {
+        targetRole: "all",
+        targetUserIds: notificationResult.audience.allUserIds,
+      }
+    );
+  }
 
   return payment;
 };
 
+const recordPaymentByCode = async (studentCode, groupId, amount, recordedBy) => {
+  const student = await Student.findOne({ studentCode });
+
+  if (!student) {
+    throw new ApiError("Student not found.", 404);
+  }
+
+  const payment = await Payment.findOne({
+    studentId: student._id,
+    groupId,
+    status: { $in: ["unpaid", "partial"] },
+  }).sort({ cycleStart: -1 });
+
+  if (!payment) {
+    throw new ApiError(
+      "Payment not found for this student and group.",
+      404
+    );
+  }
+
+  return recordPayment(payment._id, amount, recordedBy);
+};
 module.exports = {
   createPayment,
   listPayments,
   findPaymentById,
   updatePayment,
   recordPayment,
+  recordPaymentByCode,
 };

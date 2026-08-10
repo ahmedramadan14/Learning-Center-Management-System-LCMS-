@@ -3,7 +3,7 @@ const Result = require("./result.model");
 const Exam = require("../exam/exam.model");
 const Student = require("../student/student.model");
 const Teacher = require("../teacher/teacher.model");
-const ParentStudent = require("../parentStudent/parentStudent.model");
+const ParentStudent = require("../ParentStudent/parentStudent.model");
 
 exports.createResult = async (data, user) => {
   const exam = await Exam.findById(data.exam);

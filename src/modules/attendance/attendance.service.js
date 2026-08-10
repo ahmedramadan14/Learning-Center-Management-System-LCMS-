@@ -2,7 +2,7 @@ const attendanceModel = require("./attendance.model");
 const Student = require("../student/student.model");
 const Group = require("../group/group.model");
 const Teacher = require("../teacher/teacher.model");
-const ParentStudent = require("../parentStudent/parentStudent.model");
+const ParentStudent = require("../ParentStudent/parentStudent.model");
 const ApiError = require("../../utils/ApiErrors");
 
 const normalizeDate = (date) => {
