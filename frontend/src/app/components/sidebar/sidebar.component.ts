@@ -16,6 +16,7 @@ export class SidebarComponent {
     { label: 'Courses', icon: '▤', route: '/dashboard/courses' },
     { label: 'Attendance', icon: '✓', route: '/dashboard/attendance' },
     { label: 'Exams', icon: '▣', route: '/dashboard/exams' },
+    { label: 'Results', icon: '📊', route: '/dashboard/results' },
     { label: 'Payments', icon: '$', route: '/dashboard/payments' }
   ];
 

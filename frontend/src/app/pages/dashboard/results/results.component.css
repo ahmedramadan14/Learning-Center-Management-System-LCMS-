@@ -1,0 +1,376 @@
+.results-page {
+  padding: 28px;
+  background: #f8fafc;
+  min-height: calc(100vh - 70px);
+}
+
+
+/* =========================
+   Header
+========================= */
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 28px;
+}
+
+.page-header h1 {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 700;
+  color: #172033;
+}
+
+.page-header p {
+  margin: 7px 0 0;
+  color: #718096;
+  font-size: 14px;
+}
+
+
+/* =========================
+   Button
+========================= */
+
+.primary-btn {
+  border: none;
+  background: #2563eb;
+  color: white;
+  padding: 12px 18px;
+  border-radius: 9px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.primary-btn:hover {
+  background: #1d4ed8;
+}
+
+.primary-btn span {
+  font-size: 18px;
+  margin-right: 6px;
+}
+
+
+/* =========================
+   Statistics
+========================= */
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+  margin-bottom: 22px;
+}
+
+.stat-card {
+  background: white;
+  border: 1px solid #e8edf5;
+  border-radius: 14px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  box-shadow: 0 3px 12px rgba(15, 23, 42, 0.04);
+}
+
+.stat-icon {
+  width: 45px;
+  height: 45px;
+  border-radius: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 18px;
+}
+
+.stat-icon.blue {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.stat-icon.green {
+  background: #ecfdf5;
+  color: #059669;
+}
+
+.stat-icon.red {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.stat-icon.purple {
+  background: #f5f3ff;
+  color: #7c3aed;
+}
+
+.stat-card span {
+  display: block;
+  color: #718096;
+  font-size: 13px;
+  margin-bottom: 5px;
+}
+
+.stat-card h2 {
+  margin: 0;
+  color: #172033;
+  font-size: 23px;
+}
+
+
+/* =========================
+   Filters
+========================= */
+
+.filters-card {
+  background: white;
+  border: 1px solid #e8edf5;
+  border-radius: 14px;
+  padding: 18px;
+  margin-bottom: 20px;
+  display: flex;
+  gap: 15px;
+}
+
+.search-box {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  border: 1px solid #dce3ed;
+  border-radius: 9px;
+  padding: 0 13px;
+  background: white;
+}
+
+.search-box span {
+  color: #94a3b8;
+  font-size: 20px;
+}
+
+.search-box input {
+  border: none;
+  outline: none;
+  width: 100%;
+  padding: 12px 10px;
+  font-size: 14px;
+}
+
+.filters-card select {
+  min-width: 150px;
+  border: 1px solid #dce3ed;
+  border-radius: 9px;
+  padding: 0 12px;
+  background: white;
+  color: #334155;
+  outline: none;
+}
+
+
+/* =========================
+   Table
+========================= */
+
+.table-card {
+  background: white;
+  border: 1px solid #e8edf5;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 3px 12px rgba(15, 23, 42, 0.04);
+}
+
+.table-header {
+  padding: 20px;
+  border-bottom: 1px solid #edf1f6;
+}
+
+.table-header h3 {
+  margin: 0;
+  color: #172033;
+  font-size: 17px;
+}
+
+.table-header p {
+  margin: 5px 0 0;
+  color: #718096;
+  font-size: 13px;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+thead {
+  background: #f8fafc;
+}
+
+th {
+  text-align: left;
+  padding: 14px 18px;
+  font-size: 12px;
+  color: #64748b;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+td {
+  padding: 16px 18px;
+  border-top: 1px solid #edf1f6;
+  color: #475569;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+tbody tr:hover {
+  background: #fafcff;
+}
+
+
+/* =========================
+   Student
+========================= */
+
+.student-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.student-cell strong {
+  color: #1e293b;
+}
+
+.avatar {
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  background: #eff6ff;
+  color: #2563eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+}
+
+
+/* =========================
+   Status
+========================= */
+
+.status {
+  display: inline-block;
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.status.passed {
+  background: #ecfdf5;
+  color: #059669;
+}
+
+.status.failed {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+
+/* =========================
+   Actions
+========================= */
+
+.actions {
+  display: flex;
+  gap: 7px;
+}
+
+.action-btn {
+  border: none;
+  border-radius: 7px;
+  padding: 7px 10px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.action-btn.view {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.action-btn.delete {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+
+/* =========================
+   States
+========================= */
+
+.state-message {
+  background: white;
+  border: 1px solid #e8edf5;
+  border-radius: 14px;
+  padding: 40px;
+  text-align: center;
+  color: #64748b;
+}
+
+.state-message.error {
+  color: #dc2626;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 50px;
+  color: #94a3b8;
+}
+
+
+/* =========================
+   Responsive
+========================= */
+
+@media (max-width: 1000px) {
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+}
+
+@media (max-width: 700px) {
+
+  .results-page {
+    padding: 18px;
+  }
+
+  .page-header {
+    align-items: flex-start;
+    gap: 15px;
+    flex-direction: column;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .filters-card {
+    flex-direction: column;
+  }
+
+  .filters-card select {
+    height: 43px;
+  }
+
+}

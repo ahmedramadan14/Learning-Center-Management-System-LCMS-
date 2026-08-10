@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 
+import { HttpClientModule } from '@angular/common/http';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { HeaderComponent } from './components/header/header.component';
@@ -20,6 +21,8 @@ import { ExamsComponent } from './pages/dashboard/exams/exams.component';
 import { PaymentsComponent } from './pages/dashboard/payments/payments.component';
 import { SettingsComponent } from './pages/dashboard/settings/settings.component';
 import { DashboardLayoutComponent } from './components/dashboard-layout/dashboard-layout.component';
+import { ResultsComponent } from './pages/dashboard/results/results.component';
+
 @NgModule({
   declarations: [
     AppComponent,
@@ -39,11 +42,14 @@ import { DashboardLayoutComponent } from './components/dashboard-layout/dashboar
     PaymentsComponent,
     SettingsComponent,
     DashboardLayoutComponent,
+    ResultsComponent,
+    
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
-    FormsModule
+    FormsModule,
+  HttpClientModule
   ],
   providers: [],
   bootstrap: [AppComponent]

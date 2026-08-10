@@ -17,7 +17,7 @@ import { AttendanceComponent } from './pages/dashboard/attendance/attendance.com
 import { ExamsComponent } from './pages/dashboard/exams/exams.component';
 import { PaymentsComponent } from './pages/dashboard/payments/payments.component';
 import { SettingsComponent } from './pages/dashboard/settings/settings.component';
-
+import { ResultsComponent } from './pages/dashboard/results/results.component';
 const routes: Routes = [
 
   {
@@ -30,68 +30,73 @@ const routes: Routes = [
     component: RegisterComponent
   },
 
-  {
-    path: 'dashboard',
-    component: DashboardLayoutComponent,
-    children: [
+{
+  path: 'dashboard',
+  component: DashboardLayoutComponent,
+  children: [
 
-      {
-        path: '',
-        component: DashboardHomeComponent
-      },
+    {
+      path: '',
+      component: DashboardHomeComponent
+    },
 
-      {
-        path: 'students',
-        component: StudentsComponent
-      },
+    {
+      path: 'students',
+      component: StudentsComponent
+    },
 
-      {
-        path: 'teachers',
-        component: TeachersComponent
-      },
+    {
+      path: 'teachers',
+      component: TeachersComponent
+    },
 
-      {
-        path: 'courses',
-        component: CoursesComponent
-      },
+    {
+      path: 'courses',
+      component: CoursesComponent
+    },
 
-      {
-        path: 'classes',
-        component: ClassesComponent
-      },
+    {
+      path: 'classes',
+      component: ClassesComponent
+    },
 
-      {
-        path: 'parents',
-        component: ParentsComponent
-      },
+    {
+      path: 'parents',
+      component: ParentsComponent
+    },
 
-      {
-        path: 'secretaries',
-        component: SecretariesComponent
-      },
+    {
+      path: 'secretaries',
+      component: SecretariesComponent
+    },
 
-      {
-        path: 'attendance',
-        component: AttendanceComponent
-      },
+    {
+      path: 'attendance',
+      component: AttendanceComponent
+    },
 
-      {
-        path: 'exams',
-        component: ExamsComponent
-      },
+    {
+      path: 'exams',
+      component: ExamsComponent
+    },
 
-      {
-        path: 'payments',
-        component: PaymentsComponent
-      },
+    {
+      path: 'payments',
+      component: PaymentsComponent
+    },
 
-      {
-        path: 'settings',
-        component: SettingsComponent
-      }
+    {
+      path: 'results',
+      component: ResultsComponent
+    },
 
-    ]
-  },
+    {
+      path: 'settings',
+      component: SettingsComponent
+    }
+
+  ]
+},
 
   {
     path: '**',
