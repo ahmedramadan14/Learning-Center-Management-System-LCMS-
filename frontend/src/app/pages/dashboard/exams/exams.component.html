@@ -1,1 +1,437 @@
-<p>exams works!</p>
+<div class="exams-page">
+
+  <!-- Page Header -->
+  <div class="page-header">
+
+    <div>
+
+      <div class="breadcrumb">
+        Dashboard
+        <span>/</span>
+        Exams
+      </div>
+
+      <h1>Exams</h1>
+
+      <p>
+        Manage exams, schedules and assessment activities.
+      </p>
+
+    </div>
+
+    <button class="add-exam-btn">
+      <span>+</span>
+      Create Exam
+    </button>
+
+  </div>
+
+
+  <!-- Statistics -->
+  <div class="statistics-grid">
+
+    <div class="stat-card">
+
+      <div class="stat-content">
+
+        <span class="stat-label">
+          Total Exams
+        </span>
+
+        <strong>
+          {{ totalExams }}
+        </strong>
+
+        <span class="stat-description">
+          All exams
+        </span>
+
+      </div>
+
+      <div class="stat-icon blue">
+        📝
+      </div>
+
+    </div>
+
+
+    <div class="stat-card">
+
+      <div class="stat-content">
+
+        <span class="stat-label">
+          Upcoming
+        </span>
+
+        <strong>
+          {{ upcomingExams }}
+        </strong>
+
+        <span class="stat-description">
+          Scheduled exams
+        </span>
+
+      </div>
+
+      <div class="stat-icon orange">
+        ◷
+      </div>
+
+    </div>
+
+
+    <div class="stat-card">
+
+      <div class="stat-content">
+
+        <span class="stat-label">
+          Completed
+        </span>
+
+        <strong>
+          {{ completedExams }}
+        </strong>
+
+        <span class="stat-description">
+          Finished exams
+        </span>
+
+      </div>
+
+      <div class="stat-icon green">
+        ✓
+      </div>
+
+    </div>
+
+
+    <div class="stat-card">
+
+      <div class="stat-content">
+
+        <span class="stat-label">
+          Groups
+        </span>
+
+        <strong>
+          3
+        </strong>
+
+        <span class="stat-description">
+          Active groups
+        </span>
+
+      </div>
+
+      <div class="stat-icon purple">
+        👥
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- Exams Card -->
+  <div class="exams-card">
+
+    <div class="card-header">
+
+      <div>
+
+        <h2>
+          Exams List
+        </h2>
+
+        <span>
+          {{ filteredExams.length }} exams found
+        </span>
+
+      </div>
+
+
+      <div class="filters">
+
+        <!-- Subject -->
+        <select [(ngModel)]="selectedSubject">
+
+          <option>
+            All Subjects
+          </option>
+
+          <option>
+            Mathematics
+          </option>
+
+          <option>
+            English
+          </option>
+
+          <option>
+            Physics
+          </option>
+
+          <option>
+            Chemistry
+          </option>
+
+          <option>
+            Arabic
+          </option>
+
+          <option>
+            Biology
+          </option>
+
+        </select>
+
+
+        <!-- Group -->
+        <select [(ngModel)]="selectedGroup">
+
+          <option>
+            All Groups
+          </option>
+
+          <option>
+            Group A
+          </option>
+
+          <option>
+            Group B
+          </option>
+
+          <option>
+            Group C
+          </option>
+
+        </select>
+
+
+        <!-- Status -->
+        <select [(ngModel)]="selectedStatus">
+
+          <option>
+            All Status
+          </option>
+
+          <option>
+            Upcoming
+          </option>
+
+          <option>
+            Completed
+          </option>
+
+        </select>
+
+
+        <!-- Search -->
+        <div class="search-box">
+
+          <span class="search-icon">
+            ⌕
+          </span>
+
+          <input
+            type="text"
+            [(ngModel)]="searchText"
+            placeholder="Search exams..."
+          />
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- Table -->
+    <div class="table-container">
+
+      <table>
+
+        <thead>
+
+          <tr>
+
+            <th>
+              Exam
+            </th>
+
+            <th>
+              Subject
+            </th>
+
+            <th>
+              Group
+            </th>
+
+            <th>
+              Date
+            </th>
+
+            <th>
+              Duration
+            </th>
+
+            <th>
+              Status
+            </th>
+
+            <th>
+              Actions
+            </th>
+
+          </tr>
+
+        </thead>
+
+
+        <tbody>
+
+          <tr
+            *ngFor="let exam of filteredExams"
+          >
+
+            <!-- Exam -->
+            <td>
+
+              <div class="exam-info">
+
+                <div class="exam-icon">
+                  📝
+                </div>
+
+                <div>
+
+                  <strong>
+                    {{ exam.name }}
+                  </strong>
+
+                  <span>
+                    Examination
+                  </span>
+
+                </div>
+
+              </div>
+
+            </td>
+
+
+            <!-- Subject -->
+            <td>
+              <span class="subject-badge">
+                {{ exam.subject }}
+              </span>
+            </td>
+
+
+            <!-- Group -->
+            <td>
+              <span class="group-badge">
+                {{ exam.group }}
+              </span>
+            </td>
+
+
+            <!-- Date -->
+            <td>
+              {{ exam.date }}
+            </td>
+
+
+            <!-- Duration -->
+            <td>
+              {{ exam.duration }} min
+            </td>
+
+
+            <!-- Status -->
+            <td>
+
+              <span
+                class="status"
+                [ngClass]="{
+                  'upcoming': exam.status === 'Upcoming',
+                  'completed': exam.status === 'Completed'
+                }"
+              >
+
+                <span class="status-dot"></span>
+
+                {{ exam.status }}
+
+              </span>
+
+            </td>
+
+
+            <!-- Actions -->
+            <td>
+
+              <div class="actions">
+
+                <button
+                  class="action-btn"
+                  title="View"
+                >
+                  👁
+                </button>
+
+                <button
+                  class="action-btn"
+                  title="Edit"
+                >
+                  ✎
+                </button>
+
+                <button
+                  class="action-btn delete"
+                  title="Delete"
+                >
+                  🗑
+                </button>
+
+              </div>
+
+            </td>
+
+          </tr>
+
+
+          <!-- Empty State -->
+          <tr *ngIf="filteredExams.length === 0">
+
+            <td colspan="7">
+
+              <div class="empty-state">
+
+                <div class="empty-icon">
+                  🔍
+                </div>
+
+                <h3>
+                  No exams found
+                </h3>
+
+                <p>
+                  Try changing your search or filters.
+                </p>
+
+              </div>
+
+            </td>
+
+          </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+</div>

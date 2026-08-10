@@ -19,7 +19,7 @@ import { AttendanceComponent } from './pages/dashboard/attendance/attendance.com
 import { ExamsComponent } from './pages/dashboard/exams/exams.component';
 import { PaymentsComponent } from './pages/dashboard/payments/payments.component';
 import { SettingsComponent } from './pages/dashboard/settings/settings.component';
-
+import { DashboardLayoutComponent } from './components/dashboard-layout/dashboard-layout.component';
 @NgModule({
   declarations: [
     AppComponent,
@@ -37,7 +37,8 @@ import { SettingsComponent } from './pages/dashboard/settings/settings.component
     AttendanceComponent,
     ExamsComponent,
     PaymentsComponent,
-    SettingsComponent
+    SettingsComponent,
+    DashboardLayoutComponent,
   ],
   imports: [
     BrowserModule,
