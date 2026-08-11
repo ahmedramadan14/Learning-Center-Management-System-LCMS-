@@ -1,0 +1,507 @@
+.teachers-page {
+  width: 100%;
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+
+/* =========================================
+   Page Header
+========================================= */
+
+.page-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 26px;
+}
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #98a2b3;
+  font-size: 11px;
+  margin-bottom: 8px;
+}
+
+.breadcrumb span {
+  color: #c4cad4;
+}
+
+.page-header h1 {
+  margin: 0;
+  color: #172033;
+  font-size: 27px;
+  font-weight: 800;
+  letter-spacing: -0.6px;
+}
+
+.page-header p {
+  margin: 7px 0 0;
+  color: #7b8494;
+  font-size: 12px;
+}
+
+
+/* =========================================
+   Add Button
+========================================= */
+
+.add-teacher-btn {
+  height: 42px;
+  padding: 0 17px;
+  border: none;
+  border-radius: 9px;
+  background: #2563eb;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 5px 12px rgba(37, 99, 235, 0.18);
+  transition: 0.2s ease;
+}
+
+.add-teacher-btn:hover {
+  background: #1d4ed8;
+  transform: translateY(-1px);
+}
+
+.btn-icon {
+  font-size: 18px;
+  line-height: 1;
+}
+
+
+/* =========================================
+   Statistics
+========================================= */
+
+.statistics-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 17px;
+  margin-bottom: 22px;
+}
+
+.stat-card {
+  min-height: 125px;
+  padding: 20px;
+  background: #ffffff;
+  border: 1px solid #e8edf4;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 2px 8px rgba(16, 24, 40, 0.025);
+}
+
+.stat-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-label {
+  color: #7b8494;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.stat-content strong {
+  margin-top: 8px;
+  color: #172033;
+  font-size: 25px;
+  line-height: 1;
+  font-weight: 800;
+}
+
+.stat-description {
+  margin-top: 8px;
+  color: #98a2b3;
+  font-size: 9px;
+}
+
+.stat-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.stat-icon.blue {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.stat-icon.green {
+  background: #ecfdf3;
+  color: #12b76a;
+}
+
+.stat-icon.orange {
+  background: #fff7ed;
+  color: #f97316;
+}
+
+.stat-icon.purple {
+  background: #f5f3ff;
+  color: #7c3aed;
+}
+
+
+/* =========================================
+   Teachers Card
+========================================= */
+
+.teachers-card {
+  background: #ffffff;
+  border: 1px solid #e8edf4;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(16, 24, 40, 0.025);
+  overflow: hidden;
+}
+
+.card-header {
+  min-height: 80px;
+  padding: 18px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  border-bottom: 1px solid #edf1f6;
+}
+
+.card-header h2 {
+  margin: 0;
+  color: #172033;
+  font-size: 15px;
+  font-weight: 750;
+}
+
+.card-header span {
+  display: block;
+  margin-top: 5px;
+  color: #98a2b3;
+  font-size: 10px;
+}
+
+
+/* =========================================
+   Search & Filter
+========================================= */
+
+.table-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.search-box {
+  width: 235px;
+  height: 38px;
+  padding: 0 11px;
+  display: flex;
+  align-items: center;
+  background: #f8fafc;
+  border: 1px solid #e5eaf1;
+  border-radius: 8px;
+}
+
+.search-icon {
+  color: #98a2b3;
+  font-size: 18px;
+  margin-right: 7px;
+}
+
+.search-box input {
+  width: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: #344054;
+  font-size: 11px;
+}
+
+.search-box input::placeholder {
+  color: #98a2b3;
+}
+
+.table-actions select {
+  height: 38px;
+  padding: 0 30px 0 11px;
+  border: 1px solid #e5eaf1;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #596579;
+  outline: none;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+
+/* =========================================
+   Table
+========================================= */
+
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  min-width: 950px;
+  border-collapse: collapse;
+}
+
+thead {
+  background: #fafbfc;
+}
+
+th {
+  height: 45px;
+  padding: 0 20px;
+  color: #7b8494;
+  font-size: 9px;
+  font-weight: 700;
+  text-align: left;
+  white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+td {
+  height: 72px;
+  padding: 0 20px;
+  border-top: 1px solid #f0f2f5;
+  color: #596579;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+tbody tr {
+  transition: background 0.15s ease;
+}
+
+tbody tr:hover {
+  background: #fafcff;
+}
+
+
+/* =========================================
+   Teacher Info
+========================================= */
+
+.teacher-info {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+
+.teacher-avatar {
+  width: 37px;
+  height: 37px;
+  border-radius: 10px;
+  background: #eff6ff;
+  color: #2563eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.teacher-info strong {
+  display: block;
+  color: #344054;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.teacher-info span {
+  display: block;
+  margin-top: 4px;
+  color: #98a2b3;
+  font-size: 9px;
+}
+
+
+/* =========================================
+   Table Data
+========================================= */
+
+.phone,
+.classes {
+  color: #667085;
+}
+
+.specialization {
+  color: #344054;
+  font-weight: 600;
+}
+
+
+/* =========================================
+   Status
+========================================= */
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 9px;
+  border-radius: 20px;
+  font-size: 9px;
+  font-weight: 600;
+}
+
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.status.active {
+  background: #ecfdf3;
+  color: #087443;
+}
+
+.status.active .status-dot {
+  background: #12b76a;
+}
+
+.status.inactive {
+  background: #fef3f2;
+  color: #b42318;
+}
+
+.status.inactive .status-dot {
+  background: #f04438;
+}
+
+
+/* =========================================
+   Actions
+========================================= */
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.action-btn {
+  width: 30px;
+  height: 30px;
+  border: 1px solid #e5eaf1;
+  border-radius: 7px;
+  background: #ffffff;
+  color: #667085;
+  font-size: 12px;
+  cursor: pointer;
+  transition: 0.15s ease;
+}
+
+.action-btn:hover {
+  background: #f5f8ff;
+  color: #2563eb;
+  border-color: #c9d8f5;
+}
+
+.action-btn.delete:hover {
+  background: #fef3f2;
+  color: #d92d20;
+  border-color: #fecdca;
+}
+
+
+/* =========================================
+   Empty State
+========================================= */
+
+.empty-state {
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.empty-icon {
+  font-size: 28px;
+  margin-bottom: 10px;
+}
+
+.empty-state h3 {
+  margin: 0;
+  color: #344054;
+  font-size: 14px;
+}
+
+.empty-state p {
+  margin-top: 6px;
+  color: #98a2b3;
+  font-size: 10px;
+}
+
+
+/* =========================================
+   Responsive
+========================================= */
+
+@media (max-width: 1150px) {
+
+  .statistics-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+}
+
+@media (max-width: 800px) {
+
+  .page-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .card-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .table-actions {
+    width: 100%;
+  }
+
+  .search-box {
+    flex: 1;
+  }
+
+}
+
+@media (max-width: 550px) {
+
+  .statistics-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .table-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .table-actions select,
+  .search-box {
+    width: 100%;
+  }
+
+  .page-header h1 {
+    font-size: 23px;
+  }
+
+}

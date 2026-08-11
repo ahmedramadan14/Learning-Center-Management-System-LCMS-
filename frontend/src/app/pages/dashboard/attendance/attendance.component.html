@@ -1,0 +1,440 @@
+<div class="attendance-page">
+
+  <!-- Page Header -->
+  <div class="page-header">
+
+    <div>
+
+      <div class="breadcrumb">
+        Dashboard
+        <span>/</span>
+        Attendance
+      </div>
+
+      <h1>Attendance</h1>
+
+      <p>
+        Monitor and manage student attendance records.
+      </p>
+
+    </div>
+
+  </div>
+
+
+  <!-- Statistics -->
+  <div class="statistics-grid">
+
+    <!-- Total -->
+    <div class="stat-card">
+
+      <div class="stat-content">
+
+        <span class="stat-label">
+          Total Students
+        </span>
+
+        <strong>
+          {{ totalStudents }}
+        </strong>
+
+        <span class="stat-description">
+          Attendance records
+        </span>
+
+      </div>
+
+      <div class="stat-icon blue">
+        👥
+      </div>
+
+    </div>
+
+
+    <!-- Present -->
+    <div class="stat-card">
+
+      <div class="stat-content">
+
+        <span class="stat-label">
+          Present
+        </span>
+
+        <strong>
+          {{ presentCount }}
+        </strong>
+
+        <span class="stat-description">
+          Students present
+        </span>
+
+      </div>
+
+      <div class="stat-icon green">
+        ✓
+      </div>
+
+    </div>
+
+
+    <!-- Absent -->
+    <div class="stat-card">
+
+      <div class="stat-content">
+
+        <span class="stat-label">
+          Absent
+        </span>
+
+        <strong>
+          {{ absentCount }}
+        </strong>
+
+        <span class="stat-description">
+          Students absent
+        </span>
+
+      </div>
+
+      <div class="stat-icon red">
+        !
+      </div>
+
+    </div>
+
+
+    <!-- Late -->
+    <div class="stat-card">
+
+      <div class="stat-content">
+
+        <span class="stat-label">
+          Late
+        </span>
+
+        <strong>
+          {{ lateCount }}
+        </strong>
+
+        <span class="stat-description">
+          Late arrivals
+        </span>
+
+      </div>
+
+      <div class="stat-icon orange">
+        ◷
+      </div>
+
+    </div>
+
+
+    <!-- Excused -->
+    <div class="stat-card">
+
+      <div class="stat-content">
+
+        <span class="stat-label">
+          Excused
+        </span>
+
+        <strong>
+          {{ excusedCount }}
+        </strong>
+
+        <span class="stat-description">
+          Excused absences
+        </span>
+
+      </div>
+
+      <div class="stat-icon purple">
+        ✓
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- Attendance Table Card -->
+  <div class="attendance-card">
+
+    <!-- Header -->
+    <div class="card-header">
+
+      <div>
+
+        <h2>
+          Attendance Records
+        </h2>
+
+        <span>
+          {{ filteredRecords.length }} records found
+        </span>
+
+      </div>
+
+
+      <!-- Filters -->
+      <div class="filters">
+
+        <!-- Date -->
+        <input
+          type="date"
+          [(ngModel)]="selectedDate"
+        />
+
+
+        <!-- Group -->
+        <select [(ngModel)]="selectedGroup">
+
+          <option>
+            All Groups
+          </option>
+
+          <option>
+            Group A
+          </option>
+
+          <option>
+            Group B
+          </option>
+
+          <option>
+            Group C
+          </option>
+
+        </select>
+
+
+        <!-- Status -->
+        <select [(ngModel)]="selectedStatus">
+
+          <option>
+            All Status
+          </option>
+
+          <option>
+            Present
+          </option>
+
+          <option>
+            Absent
+          </option>
+
+          <option>
+            Late
+          </option>
+
+          <option>
+            Excused
+          </option>
+
+        </select>
+
+
+        <!-- Search -->
+        <div class="search-box">
+
+          <span class="search-icon">
+            ⌕
+          </span>
+
+          <input
+            type="text"
+            [(ngModel)]="searchText"
+            placeholder="Search student..."
+          />
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- Table -->
+    <div class="table-container">
+
+      <table>
+
+        <thead>
+
+          <tr>
+
+            <th>
+              Student
+            </th>
+
+            <th>
+              Group
+            </th>
+
+            <th>
+              Date
+            </th>
+
+            <th>
+              Status
+            </th>
+
+            <th>
+              Time
+            </th>
+
+            <th>
+              Actions
+            </th>
+
+          </tr>
+
+        </thead>
+
+
+        <tbody>
+
+          <tr
+            *ngFor="let record of filteredRecords"
+          >
+
+            <!-- Student -->
+            <td>
+
+              <div class="student-info">
+
+                <div class="student-avatar">
+                  {{ record.studentName.charAt(0) }}
+                </div>
+
+                <div>
+
+                  <strong>
+                    {{ record.studentName }}
+                  </strong>
+
+                  <span>
+                    {{ record.studentId }}
+                  </span>
+
+                </div>
+
+              </div>
+
+            </td>
+
+
+            <!-- Group -->
+            <td>
+
+              <span class="group-badge">
+                {{ record.group }}
+              </span>
+
+            </td>
+
+
+            <!-- Date -->
+            <td>
+
+              <span class="date">
+                {{ record.date }}
+              </span>
+
+            </td>
+
+
+            <!-- Status -->
+            <td>
+
+              <span
+                class="status"
+                [ngClass]="{
+                  'present': record.status === 'Present',
+                  'absent': record.status === 'Absent',
+                  'late': record.status === 'Late',
+                  'excused': record.status === 'Excused'
+                }"
+              >
+
+                <span class="status-dot"></span>
+
+                {{ record.status }}
+
+              </span>
+
+            </td>
+
+
+            <!-- Time -->
+            <td>
+
+              <span class="time">
+                {{ record.time }}
+              </span>
+
+            </td>
+
+
+            <!-- Actions -->
+            <td>
+
+              <div class="actions">
+
+                <button
+                  class="action-btn view"
+                  title="View"
+                >
+                  👁
+                </button>
+
+                <button
+                  class="action-btn edit"
+                  title="Edit"
+                >
+                  ✎
+                </button>
+
+              </div>
+
+            </td>
+
+          </tr>
+
+
+          <!-- Empty -->
+          <tr
+            *ngIf="filteredRecords.length === 0"
+          >
+
+            <td colspan="6">
+
+              <div class="empty-state">
+
+                <div class="empty-icon">
+                  🔍
+                </div>
+
+                <h3>
+                  No attendance records found
+                </h3>
+
+                <p>
+                  Try changing your search or filters.
+                </p>
+
+              </div>
+
+            </td>
+
+          </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+</div>

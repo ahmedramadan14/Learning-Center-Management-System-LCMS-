@@ -1,0 +1,290 @@
+<div class="results-page">
+
+  <!-- Page Header -->
+  <div class="page-header">
+
+    <div>
+      <h1>Results</h1>
+
+      <p>
+        Manage and review student examination results
+      </p>
+    </div>
+
+    <button class="primary-btn">
+      <span>+</span>
+      Add Result
+    </button>
+
+  </div>
+
+
+  <!-- Statistics -->
+  <div class="stats-grid">
+
+    <div class="stat-card">
+
+      <div class="stat-icon blue">
+        📊
+      </div>
+
+      <div>
+        <span>Total Results</span>
+        <h2>{{ totalResults }}</h2>
+      </div>
+
+    </div>
+
+
+    <div class="stat-card">
+
+      <div class="stat-icon green">
+        ✓
+      </div>
+
+      <div>
+        <span>Passed</span>
+        <h2>{{ passedResults }}</h2>
+      </div>
+
+    </div>
+
+
+    <div class="stat-card">
+
+      <div class="stat-icon red">
+        ✕
+      </div>
+
+      <div>
+        <span>Failed</span>
+        <h2>{{ failedResults }}</h2>
+      </div>
+
+    </div>
+
+
+    <div class="stat-card">
+
+      <div class="stat-icon purple">
+        %
+      </div>
+
+      <div>
+        <span>Average Marks</span>
+        <h2>{{ averageMarks | number:'1.0-2' }}</h2>
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- Filters -->
+  <div class="filters-card">
+
+    <div class="search-box">
+
+      <span>⌕</span>
+
+      <input
+        type="text"
+        placeholder="Search student or exam..."
+        [(ngModel)]="searchText"
+      >
+
+    </div>
+
+
+    <select [(ngModel)]="selectedStatus">
+
+      <option>All Status</option>
+      <option>Passed</option>
+      <option>Failed</option>
+
+    </select>
+
+  </div>
+
+
+  <!-- Loading -->
+  <div
+    class="state-message"
+    *ngIf="loading"
+  >
+    Loading results...
+  </div>
+
+
+  <!-- Error -->
+  <div
+    class="state-message error"
+    *ngIf="!loading && errorMessage"
+  >
+    {{ errorMessage }}
+  </div>
+
+
+  <!-- Table -->
+  <div
+    class="table-card"
+    *ngIf="!loading && !errorMessage"
+  >
+
+    <div class="table-header">
+
+      <div>
+        <h3>Student Results</h3>
+
+        <p>
+          {{ filteredResults.length }} results found
+        </p>
+      </div>
+
+    </div>
+
+
+    <div class="table-wrapper">
+
+      <table>
+
+        <thead>
+
+          <tr>
+
+            <th>Student</th>
+
+            <th>Student Code</th>
+
+            <th>Exam</th>
+
+            <th>Marks</th>
+
+            <th>Percentage</th>
+
+            <th>Status</th>
+
+            <th>Actions</th>
+
+          </tr>
+
+        </thead>
+
+
+        <tbody>
+
+          <tr
+            *ngFor="let result of filteredResults"
+          >
+
+            <td>
+
+              <div class="student-cell">
+
+                <div class="avatar">
+                  {{ getStudentName(result).charAt(0) }}
+                </div>
+
+                <strong>
+                  {{ getStudentName(result) }}
+                </strong>
+
+              </div>
+
+            </td>
+
+
+            <td>
+              {{ getStudentCode(result) }}
+            </td>
+
+
+            <td>
+              {{ getExamTitle(result) }}
+            </td>
+
+
+            <td>
+
+              <strong>
+                {{ getMarks(result) }}
+              </strong>
+
+              / {{ getTotalMarks(result) }}
+
+            </td>
+
+
+            <td>
+
+              {{ getPercentage(result) | number:'1.0-1' }}%
+
+            </td>
+
+
+            <td>
+
+              <span
+                class="status"
+                [class.passed]="result.isPassed"
+                [class.failed]="!result.isPassed"
+              >
+
+                {{ result.isPassed ? 'Passed' : 'Failed' }}
+
+              </span>
+
+            </td>
+
+
+            <td>
+
+              <div class="actions">
+
+                <button
+                  class="action-btn view"
+                  title="View"
+                >
+                  View
+                </button>
+
+                <button
+                  class="action-btn delete"
+                  title="Delete"
+                  (click)="deleteResult(result)"
+                >
+                  Delete
+                </button>
+
+              </div>
+
+            </td>
+
+          </tr>
+
+
+          <!-- Empty -->
+          <tr
+            *ngIf="filteredResults.length === 0"
+          >
+
+            <td
+              colspan="7"
+              class="empty-state"
+            >
+
+              No results found.
+
+            </td>
+
+          </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+</div>
