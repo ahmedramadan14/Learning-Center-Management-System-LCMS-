@@ -1,6 +1,5 @@
 const mongoose = require("mongoose");
 
-// Removed "waived" from statuses
 const PAYMENT_STATUSES = ["unpaid", "partial", "paid"];
 
 const roundCurrency = (value) =>
@@ -8,11 +7,6 @@ const roundCurrency = (value) =>
 
 const paymentSchema = new mongoose.Schema(
   {
-    subscriptionId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Subscription",
-      default: null,
-    },
     studentId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Student",
@@ -25,13 +19,14 @@ const paymentSchema = new mongoose.Schema(
       required: [true, "groupId is required."],
       index: true,
     },
-    cycleStart: {
+    sessionDate: {
       type: Date,
-      required: [true, "cycleStart is required."],
+      default: Date.now,
+      required: [true, "sessionDate is required."],
     },
-    cycleEnd: {
-      type: Date,
-      required: [true, "cycleEnd is required."],
+    sessionNumber: {
+      type: Number,
+      min: [1, "sessionNumber must be at least 1."],
     },
     amountDue: {
       type: Number,
@@ -66,16 +61,11 @@ const paymentSchema = new mongoose.Schema(
 );
 
 paymentSchema.index(
-  { studentId: 1, groupId: 1, cycleStart: 1, cycleEnd: 1 },
+  { studentId: 1, groupId: 1, sessionDate: 1 },
   { unique: true }
 );
 
-// Auto-calculate remaining + status (without waived logic)
 paymentSchema.pre("validate", function derivePaymentBalance() {
-  if (this.cycleStart && this.cycleEnd && this.cycleEnd <= this.cycleStart) {
-    this.invalidate("cycleEnd", "cycleEnd must be later than cycleStart.");
-  }
-
   if (this.amountDue === undefined || this.amountPaid === undefined) {
     return;
   }
@@ -86,7 +76,10 @@ paymentSchema.pre("validate", function derivePaymentBalance() {
   this.amountPaid = amountPaid;
 
   if (amountPaid > amountDue) {
-    this.invalidate("amountPaid", "amountPaid cannot be greater than amountDue.");
+    this.invalidate(
+      "amountPaid",
+      "amountPaid cannot be greater than amountDue."
+    );
     return;
   }
 
@@ -101,7 +94,8 @@ paymentSchema.pre("validate", function derivePaymentBalance() {
   }
 });
 
-const Payment = mongoose.models.Payment || mongoose.model("Payment", paymentSchema);
+const Payment =
+  mongoose.models.Payment || mongoose.model("Payment", paymentSchema);
 
 module.exports = Payment;
 module.exports.PAYMENT_STATUSES = PAYMENT_STATUSES;

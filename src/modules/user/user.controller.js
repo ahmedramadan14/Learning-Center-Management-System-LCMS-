@@ -14,6 +14,7 @@ const generateToken = (userId) => {
 // CREATE
 const createUser = asyncHandler(async (req, res) => {
   const user = await userService.createUser(req.body);
+
   res.status(201).json({
     success: true,
     message: "User created successfully",
@@ -67,8 +68,10 @@ const updateUser = asyncHandler(async (req, res, next) => {
 });
 
 // DELETE
-const deleteUser = asyncHandler(async (req, res) => {
-  await userService.deleteUser(req.params.id);
+const deleteUser = asyncHandler(async (req, res, next) => {
+  const user = await userService.deleteUser(req.params.id);
+  if (!user) return next(new ApiError("User not found", 404));
+
   res.status(200).json({
     success: true,
     message: "User deleted successfully",
@@ -109,22 +112,18 @@ const deactivateUser = asyncHandler(async (req, res, next) => {
 });
 
 // --------------------------------------------
+// LOGGED USER DATA
+// --------------------------------------------
 
-// @desc    Get Logged user data
-// @route   GET /api/v1/users/getMe
-// @access  Private/Protect
 const getLoggedUserData = asyncHandler(async (req, res, next) => {
   req.params.id = req.user.id || req.user._id;
   next();
 });
 
-// @desc    Update Logged user Password
-// @route   PUT /api/v1/users/updateMyPassword
-// @access  Private/Protect
 const updateLoggedUserPassword = asyncHandler(async (req, res, next) => {
   const { currentPassword, password } = req.body;
 
-  const user = await User.findById(req.user.id || req.user._id).select('+password');
+  const user = await User.findById(req.user.id || req.user._id).select("+password");
   if (!user) return next(new ApiError("User not found", 404));
 
   const isCorrect = await bcrypt.compare(currentPassword, user.password);
@@ -133,19 +132,16 @@ const updateLoggedUserPassword = asyncHandler(async (req, res, next) => {
   }
 
   user.password = await bcrypt.hash(password, 12);
-  user.passwordChangedAt = new Date();
+  user.passwordChangedAt = new Date(Date.now() - 1000);
   await user.save();
 
   const token = generateToken(user._id);
 
   const userObj = user.toObject();
   delete userObj.password;
-  res.status(200).json({ data: userObj, token });
+  res.status(200).json({ success: true, data: userObj, token });
 });
 
-// @desc    Update Logged user data (without password, role)
-// @route   PUT /api/v1/users/updateMe
-// @access  Private/Protect
 const updateLoggedUserData = asyncHandler(async (req, res, next) => {
   const updateData = {};
   if (req.body.name || req.body.username) updateData.name = req.body.name || req.body.username;
@@ -156,13 +152,11 @@ const updateLoggedUserData = asyncHandler(async (req, res, next) => {
     req.user.id || req.user._id,
     updateData,
     { new: true, runValidators: true }
-  );
+  ).select("-password");
 
   if (!updatedUser) return next(new ApiError("User not found", 404));
 
-  const userObj = updatedUser.toObject();
-  delete userObj.password;
-  res.status(200).json({ data: userObj });
+  res.status(200).json({ success: true, data: updatedUser });
 });
 
 module.exports = {

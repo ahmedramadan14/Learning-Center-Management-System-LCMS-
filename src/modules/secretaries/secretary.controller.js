@@ -1,113 +1,65 @@
-const secretarieService = require("../secretaries/secretary.service");
+const asyncHandler = require("../../middlewares/asyncHandler");
+const secretaryService = require("./secretary.service");
+const Teacher = require("../teacher/teacher.model");
+const ApiError = require("../../utils/ApiErrors");
 
-// Create Secretarie
+exports.createSecretary = asyncHandler(async (req, res) => {
+  let teacherId = req.body.teacherId || req.body.teacher;
 
-const createSecretarie = async (req, res) => {
-    try {
-        const createNewSecretarie = await secretarieService.createSecretarie(req.body)
-
-        res.status(201).json({
-            message: "secretarie created successfully",
-            secretarie: createNewSecretarie
-        })
-    } catch (err) {
-        res.status(500).json({
-            message: err.message
-        })
+  if (req.user.role === "teacher" && !teacherId) {
+    const teacherProfile = await Teacher.findOne({ userId: req.user.id || req.user._id });
+    if (!teacherProfile) {
+      throw new ApiError("Teacher profile not found for this user", 404);
     }
-}
+    teacherId = teacherProfile._id;
+  }
 
-// Get All Secretaries
+  if (!teacherId) {
+    throw new ApiError("Teacher ID is required to create a secretary", 400);
+  }
 
-const getAllSecretarie = async (req, res) => {
-    try {
-        const getAllNewSecretaries = await secretarieService.getAllSecretaries()
+  const secretary = await secretaryService.createSecretary({
+    ...req.body,
+    teacherId,
+  });
 
-        res.status(200).json({
-            secretaries: getAllNewSecretaries
-        })
-    } catch (err) {
-        res.status(500).json({
-            message: err.message
-        })
-    }
-}
+  res.status(201).json({
+    success: true,
+    message: "Secretary created successfully",
+    data: secretary,
+  });
+});
 
-// Get One Secretarie
+exports.getAllSecretaries = asyncHandler(async (req, res) => {
+  const secretaries = await secretaryService.getAllSecretaries(req.user);
+  res.status(200).json({
+    success: true,
+    results: secretaries.length,
+    data: secretaries,
+  });
+});
 
-const getOneSecretarie = async (req, res) => {
-    try {
-        const id = req.params.id
-        const getOneNewSecretarie = await secretarieService.getOneSecretarie(id)
+exports.getOneSecretary = asyncHandler(async (req, res) => {
+  const secretary = await secretaryService.getOneSecretary(req.params.id, req.user);
+  res.status(200).json({
+    success: true,
+    data: secretary,
+  });
+});
 
-        if (!getOneNewSecretarie) {
-            return res.status(404).json({
-                message: "secretarie not found"
-            })
-        }
+exports.updateOneSecretary = asyncHandler(async (req, res) => {
+  const secretary = await secretaryService.updateOneSecretary(req.params.id, req.body, req.user);
+  res.status(200).json({
+    success: true,
+    message: "Secretary updated successfully",
+    data: secretary,
+  });
+});
 
-        res.status(200).json({
-            secretarie: getOneNewSecretarie
-        })
-    } catch (err) {
-        res.status(500).json({
-            message: err.message
-        })
-    }
-}
-
-// Delete One Secretarie
-
-const deleteOneSecretarie = async (req, res) => {
-    try {
-        const id = req.params.id
-        const deleteOneNewSecretarie = await secretarieService.deleteOneSecretarie(id)
-
-        if (!deleteOneNewSecretarie) {
-            return res.status(404).json({
-                message: "secretarie not found"
-            })
-        }
-
-        res.status(200).json({
-            message: "secretarie deleted successfully",
-            secretarie: deleteOneNewSecretarie
-        })
-    } catch (err) {
-        res.status(500).json({
-            message: err.message
-        })
-    }
-}
-
-// Update One Secretarie
-
-const updateOneSecretarie = async (req, res) => {
-    try {
-        const id = req.params.id
-        const updateOneNewSecretarie = await secretarieService.updateOneSecretarie(id, req.body)
-
-        if (!updateOneNewSecretarie) {
-            return res.status(404).json({
-                message: "secretarie not found"
-            })
-        }
-
-        res.status(200).json({
-            message: "secretarie updated successfully",
-            secretarie: updateOneNewSecretarie
-        })
-    } catch (err) {
-        res.status(500).json({
-            message: err.message
-        })
-    }
-};
-
-module.exports = {
-    createSecretarie,
-    getAllSecretarie,
-    getOneSecretarie,
-    deleteOneSecretarie,
-    updateOneSecretarie
-}
+exports.deleteOneSecretary = asyncHandler(async (req, res) => {
+  await secretaryService.deleteOneSecretary(req.params.id, req.user);
+  res.status(200).json({
+    success: true,
+    message: "Secretary deleted successfully",
+  });
+});

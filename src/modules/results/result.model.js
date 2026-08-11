@@ -25,7 +25,6 @@ const resultSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// one result per student per exam
 resultSchema.index({ exam: 1, student: 1 }, { unique: true });
 
 module.exports = mongoose.model("Result", resultSchema);

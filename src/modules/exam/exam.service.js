@@ -2,144 +2,127 @@ const Exam = require("./exam.model");
 const Group = require("../group/group.model");
 const Teacher = require("../teacher/teacher.model");
 const Student = require("../student/student.model");
-const ParentStudent = require("../parentStudent/parentStudent.model");
-const Result = require("../results/result.model");
+const Parent = require("../parent/parent.model");
+const Secretary = require("../secretaries/secretary.model"); 
+const ApiError = require("../../utils/ApiErrors");
 
+const getStaffAssociatedTeacherId = async (user) => {
+    if (user.role === "teacher") {
+        const teacher = await Teacher.findOne({ userId: user._id || user.id });
+        if (!teacher) throw new ApiError("Teacher profile not found", 404);
+        return teacher._id;
+    } else if (user.role === "secretary") {
+        const secretary = await Secretary.findOne({ userId: user._id || user.id });
+        if (!secretary || !secretary.teacher) {
+            throw new ApiError("Secretary is not linked to any valid teacher", 400);
+        }
+        return secretary.teacher;
+    }
+    return null;
+};
+
+const verifyExamOwnership = async (examId, user) => {
+    const exam = await Exam.findById(examId);
+    if (!exam) throw new ApiError("Exam not found", 404);
+
+    if (user.role === "admin") return exam;
+
+    const associatedTeacherId = await getStaffAssociatedTeacherId(user);
+    
+    if (!associatedTeacherId || exam.teacher.toString() !== associatedTeacherId.toString()) {
+        throw new ApiError("You are not authorized to access this exam", 403);
+    }
+    
+    return exam;
+};
 
 exports.createExam = async (data, user) => {
-  const group = await Group.findById(data.group);
-  if (!group) {
-    const error = new Error("Group not found");
-    error.statusCode = 404;
-    throw error;
-  }
+    const group = await Group.findById(data.group);
+    if (!group) throw new ApiError("Group not found", 404);
 
-  let teacherId;
-  if (user.role === "teacher") {
-    const teacher = await Teacher.findOne({ userId: user._id || user.id });
-    if (!teacher) {
-      const error = new Error("Teacher profile not found");
-      error.statusCode = 404;
-      throw error;
+    const teacherId = await getStaffAssociatedTeacherId(user);
+
+    if (group.teacherId.toString() !== teacherId.toString()) {
+        throw new ApiError("You cannot create an exam for a group that does not belong to you", 403);
     }
-    teacherId = teacher._id;
-  } else if (user.role === "secretary") {
-    const teacher = await Teacher.findOne({ userId: user.createdBy });
-    if (!teacher) {
-      const error = new Error("Associated Teacher not found for this secretary");
-      error.statusCode = 404;
-      throw error;
+
+    if (data.passingMarks > data.totalMarks) {
+        throw new ApiError("Passing marks cannot exceed total marks", 400);
     }
-    teacherId = teacher._id;
-  } else if (user.role === "admin") {
-    if (!data.teacher) {
-      const error = new Error("Teacher ID is required for admin actions");
-      error.statusCode = 400;
-      throw error;
-    }
-    teacherId = data.teacher;
-  }
 
-  if (group.teacherId.toString() !== teacherId.toString()) {
-    const error = new Error("You can only create exams for your own groups");
-    error.statusCode = 403;
-    throw error;
-  }
-
-  const examDateObj = new Date(data.examDate);
-  examDateObj.setHours(0, 0, 0, 0);
-
-  const existingExam = await Exam.findOne({
-    group: data.group,
-    examDate: examDateObj,
-  });
-
-  if (existingExam) {
-    const error = new Error("This group already has an exam scheduled on this date");
-    error.statusCode = 400;
-    throw error;
-  }
-
-  delete data.status;
-  return Exam.create({ ...data, teacher: teacherId, examDate: examDateObj });
+    return await Exam.create({ ...data, teacher: teacherId });
 };
+
 exports.getAllExams = async (user) => {
-  let filter = {};
+    let filter = {};
 
-  if (user.role === "teacher" || user.role === "secretary") {
-    const teacherUserId = user.role === "teacher" ? (user._id || user.id) : user.createdBy;
-    const teacher = await Teacher.findOne({ userId: teacherUserId });
-    if (!teacher) return [];
+    if (user.role === "teacher" || user.role === "secretary") {
+        const teacherId = await getStaffAssociatedTeacherId(user);
+        if (!teacherId) return [];
+        filter = { teacher: teacherId };
+    } 
+    else if (user.role === "student") {
+        const student = await Student.findOne({ userId: user._id || user.id });
+        if (!student || !student.groups || student.groups.length === 0) return [];
+        filter = { 
+            group: { $in: student.groups },
+            status: "published"
+        };
+    } 
+    else if (user.role === "parent") {
+        const parent = await Parent.findOne({ user: user._id || user.id });
+        if (!parent || !parent.students || parent.students.length === 0) return [];
 
-    filter = { teacher: teacher._id };
-  } else if (user.role === "student") {
-    const student = await Student.findOne({ userId: user._id || user.id });
-    if (!student) return [];
+        const students = await Student.find({ _id: { $in: parent.students } }).select("groups");
+        const allGroupIds = students.flatMap(s => s.groups || []);
+        const uniqueGroupIds = [...new Set(allGroupIds.map(g => g.toString()))];
 
-    filter = { group: { $in: student.groups }, status: "published" };
-  } else if (user.role === "parent") {
-    const parentLinks = await ParentStudent.find({ parentUserId: user._id || user.id }).select("studentId");
-    const studentIds = parentLinks.map((p) => p.studentId);
-    const students = await Student.find({ _id: { $in: studentIds } }).select("groups");
-    
-    const groupIds = students.flatMap((s) => s.groups);
-    filter = { group: { $in: groupIds }, status: "published" };
-  }
+        if (uniqueGroupIds.length === 0) return [];
 
-const exams = await Exam.find(filter)
-    .sort("-createdAt")
-    .populate("group", "groupName")
-    .lean();
+        filter = {
+            group: { $in: uniqueGroupIds },
+            status: "published"
+        };
+    }
 
-  return exams.map((exam) => ({
-    ...exam,
-    examDate: exam.examDate ? exam.examDate.toISOString().split("T")[0] : null,
-  }));
+    return await Exam.find(filter)
+        .populate("group", "groupName")
+        .populate("teacher", "userId")
+        .sort({ examDate: -1 });
 };
 
 exports.getExamById = async (id, user) => {
-  const exam = await Exam.findById(id).populate("group", "groupName").lean();
-  if (!exam) return null;
+    const exam = await Exam.findById(id).populate("group", "groupName");
+    if (!exam) throw new ApiError("Exam not found", 404);
 
-  if (user.role === "student" && exam.status !== "published") {
-    const error = new Error("Access denied");
-    error.statusCode = 403;
-    throw error;
-  }
+    if (user.role === "student" || user.role === "parent") {
+        if (exam.status !== "published") {
+            throw new ApiError("Exam not found", 404);
+        }
+    }
 
-  return exam;
+    return exam;
 };
 
-exports.updateExam = async (id, data) => {
-  delete data.status; 
+exports.updateExam = async (id, updateData, user) => {
+    const exam = await verifyExamOwnership(id, user);
 
-  const existing = await Exam.findById(id);
-  if (!existing) return null;
+    const totalMarks = updateData.totalMarks || exam.totalMarks;
+    const passingMarks = updateData.passingMarks !== undefined ? updateData.passingMarks : exam.passingMarks;
 
-  const totalMarks = data.totalMarks !== undefined ? data.totalMarks : existing.totalMarks;
-  const passingMarks = data.passingMarks !== undefined ? data.passingMarks : existing.passingMarks;
+    if (passingMarks > totalMarks) {
+        throw new ApiError("Passing marks cannot exceed total marks", 400);
+    }
 
-  if (passingMarks > totalMarks) {
-    const error = new Error("Passing marks cannot exceed total marks");
-    error.statusCode = 400;
-    throw error;
-  }
-
-  return Exam.findByIdAndUpdate(id, data, { new: true, runValidators: true }).lean();
-};
-exports.deleteExam = async (id) => {
-  const exam = await Exam.findById(id);
-  if (!exam) return null;
-
-  const hasResults = await Result.exists({ exam: id });
-  if (hasResults) {
-    const error = new Error("Cannot delete exam: results already exist for it");
-    error.statusCode = 400;
-    throw error;
-  }
-
-  return Exam.findByIdAndDelete(id).lean();
+    return await Exam.findByIdAndUpdate(id, updateData, { new: true, runValidators: true });
 };
 
-exports.publishExam = (id) =>
-  Exam.findByIdAndUpdate(id, { status: "published" }, { new: true }).lean();
+exports.deleteExam = async (id, user) => {
+    await verifyExamOwnership(id, user);
+    return await Exam.findByIdAndDelete(id);
+};
+
+exports.publishExam = async (id, user) => {
+    await verifyExamOwnership(id, user);
+    return await Exam.findByIdAndUpdate(id, { status: "published" }, { new: true });
+};

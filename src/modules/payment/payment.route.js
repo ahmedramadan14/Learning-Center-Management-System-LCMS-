@@ -5,10 +5,12 @@ const {
   getOne,
   update,
   record,
+  createByCode,
 } = require("./payment.controller");
 const {
   validatePaymentId,
   validateCreatePayment,
+  validateCreateByCode,
   validateUpdatePayment,
   validateRecordPayment,
   validatePaymentList,
@@ -18,13 +20,12 @@ const authController = require("../auth/auth.controller.js");
 const router = express.Router();
 
 router.use(authController.protect);
-router.use(authController.allowedTo("admin", "secretary"));
 
-router
-  .route("/")
-  .get(validatePaymentList, getAll)
-  .post(validateCreatePayment, create);
+router.get("/", validatePaymentList, getAll);
+router.use(authController.allowedTo("admin", "secretary", "teacher"));
 
+router.post("/", validateCreatePayment, create);
+router.post("/by-code", validateCreateByCode, createByCode);
 router.post("/:id/record", validatePaymentId, validateRecordPayment, record);
 
 router

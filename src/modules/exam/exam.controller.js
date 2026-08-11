@@ -1,74 +1,37 @@
+const asyncHandler = require('../../middlewares/asyncHandler');
+const ApiError = require('../../utils/ApiErrors');
 const examService = require("./exam.service");
 
-exports.createExam = async (req, res, next) => {
-  try {
+exports.createExam = asyncHandler(async (req, res, next) => {
     const exam = await examService.createExam(req.body, req.user);
-    res.status(201).json({ data: exam });
-  } catch (err) {
-    if (err.code === 11000) {
-      return res.status(409).json({ message: "An exam with this data already exists" });
-    }
-    if (err.statusCode) {
-      return res.status(err.statusCode).json({ message: err.message });
-    }
-    next(err);
-  }
-};
+    res.status(201).json({ success: true, message: "Exam Created Successfully", data: exam });
+});
 
-exports.getAllExams = async (req, res, next) => {
-  try {
+exports.getAllExams = asyncHandler(async (req, res, next) => {
     const exams = await examService.getAllExams(req.user);
-    res.status(200).json({ results: exams.length, data: exams });
-  } catch (err) {
-    next(err);
-  }
-};
+    res.status(200).json({ success: true, results: exams.length, data: exams });
+});
 
-exports.getExam = async (req, res, next) => {
-  try {
+exports.getExam = asyncHandler(async (req, res, next) => {
     const exam = await examService.getExamById(req.params.id, req.user);
-    if (!exam) return res.status(404).json({ message: "Exam not found" });
-    res.status(200).json({ data: exam });
-  } catch (err) {
-    if (err.statusCode) {
-      return res.status(err.statusCode).json({ message: err.message });
-    }
-    next(err);
-  }
-};
+    if (!exam) return next(new ApiError("Exam not found", 404));
+    res.status(200).json({ success: true, data: exam });
+});
 
-exports.updateExam = async (req, res, next) => {
-  try {
-    const exam = await examService.updateExam(req.params.id, req.body);
-    if (!exam) return res.status(404).json({ message: "Exam not found" });
-    res.status(200).json({ data: exam });
-  } catch (err) {
-    if (err.code === 11000) {
-      return res.status(409).json({ message: "An exam with this data already exists" });
-    }
-    next(err);
-  }
-};
+exports.updateExam = asyncHandler(async (req, res, next) => {
+    const exam = await examService.updateExam(req.params.id, req.body, req.user);
+    if (!exam) return next(new ApiError("Exam not found", 404));
+    res.status(200).json({ success: true, message: "Exam Updated Successfully", data: exam });
+});
 
-exports.deleteExam = async (req, res, next) => {
-  try {
-    const exam = await examService.deleteExam(req.params.id);
-    if (!exam) return res.status(404).json({ message: "Exam not found" });
-    res.status(204).send();
-  } catch (err) {
-    if (err.statusCode) {
-      return res.status(err.statusCode).json({ message: err.message });
-    }
-    next(err);
-  }
-};
+exports.deleteExam = asyncHandler(async (req, res, next) => {
+    const exam = await examService.deleteExam(req.params.id, req.user);
+    if (!exam) return next(new ApiError("Exam not found", 404));
+    res.status(200).json({ success: true, message: "Exam Deleted Successfully" });
+});
 
-exports.publishExam = async (req, res, next) => {
-  try {
-    const exam = await examService.publishExam(req.params.id);
-    if (!exam) return res.status(404).json({ message: "Exam not found" });
-    res.status(200).json({ data: exam });
-  } catch (err) {
-    next(err);
-  }
-};
+exports.publishExam = asyncHandler(async (req, res, next) => {
+    const exam = await examService.publishExam(req.params.id, req.user);
+    if (!exam) return next(new ApiError("Exam not found", 404));
+    res.status(200).json({ success: true, message: "Exam Published Successfully", data: exam });
+});

@@ -1,19 +1,9 @@
 const asyncHandler = require("../../middlewares/asyncHandler");
-const {
-  createPayment,
-  listPayments,
-  findPaymentById,
-  updatePayment,
-  recordPayment,
-} = require("./payment.service");
+const paymentService = require("./payment.service");
 
-// Actor must always come from the authenticated token — never from the request body
-const getActorId = (req) => req.user._id;
-
-// Create a new payment
 const create = asyncHandler(async (req, res, next) => {
   try {
-    const payment = await createPayment(req.body, getActorId(req));
+    const payment = await paymentService.createPayment(req.body, req.user);
     res.status(201).json({
       status: "success",
       data: { payment },
@@ -22,16 +12,15 @@ const create = asyncHandler(async (req, res, next) => {
     if (err.code === 11000) {
       return res.status(409).json({
         status: "fail",
-        message: "A payment for this student, group, and cycle already exists.",
+        message: "A payment for this student, group, and session date already exists.",
       });
     }
     next(err);
   }
 });
 
-// List all payments with filters and pagination
 const getAll = asyncHandler(async (req, res) => {
-  const result = await listPayments(req.query);
+  const result = await paymentService.listPayments(req.query, req.user);
   res.status(200).json({
     status: "success",
     results: result.payments.length,
@@ -45,19 +34,17 @@ const getAll = asyncHandler(async (req, res) => {
   });
 });
 
-// Get single payment by id
 const getOne = asyncHandler(async (req, res) => {
-  const payment = await findPaymentById(req.params.id);
+  const payment = await paymentService.findPaymentById(req.params.id, req.user);
   res.status(200).json({
     status: "success",
     data: { payment },
   });
 });
 
-// Update payment basic info
 const update = asyncHandler(async (req, res, next) => {
   try {
-    const payment = await updatePayment(req.params.id, req.body);
+    const payment = await paymentService.updatePayment(req.params.id, req.body, req.user);
     res.status(200).json({
       status: "success",
       data: { payment },
@@ -66,24 +53,41 @@ const update = asyncHandler(async (req, res, next) => {
     if (err.code === 11000) {
       return res.status(409).json({
         status: "fail",
-        message: "A payment for this student, group, and cycle already exists.",
+        message: "A payment for this student, group, and session date already exists.",
       });
     }
     next(err);
   }
 });
 
-// Record a payment amount (partial or full)
 const record = asyncHandler(async (req, res) => {
-  const payment = await recordPayment(
+  const payment = await paymentService.recordPayment(
     req.params.id,
     req.body.amount,
-    getActorId(req)
+    req.user
   );
   res.status(200).json({
     status: "success",
     data: { payment },
   });
+});
+
+const createByCode = asyncHandler(async (req, res, next) => {
+  try {
+    const payment = await paymentService.createPaymentByCode(req.body, req.user);
+    res.status(201).json({
+      status: "success",
+      data: { payment },
+    });
+  } catch (err) {
+    if (err.code === 11000) {
+      return res.status(409).json({
+        status: "fail",
+        message: "A payment for this student, group, and session date already exists.",
+      });
+    }
+    next(err);
+  }
 });
 
 module.exports = {
@@ -92,4 +96,5 @@ module.exports = {
   getOne,
   update,
   record,
+  createByCode,
 };

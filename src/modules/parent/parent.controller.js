@@ -1,114 +1,56 @@
-const parentService = require("../parent/parent.service");
+const asyncHandler = require("../../middlewares/asyncHandler");
+const parentService = require("./parent.service");
 
-// Create Parent
-const createParent = async (req, res) => {
-  try {
-    const newParent = await parentService.createParent(req.body);
+exports.createParent = asyncHandler(async (req, res) => {
+  const newParent = await parentService.createParent(req.body);
+  res.status(201).json({
+    success: true,
+    message: "Parent created successfully",
+    data: newParent,
+  });
+});
 
-    res.status(201).json({
-      message: "Parent created successfully",
-      parent: newParent,
-    });
-  } catch (err) {
-    res.status(500).json({
-      message: err.message,
-    });
-  }
-};
+exports.getAllParents = asyncHandler(async (req, res) => {
+  const parents = await parentService.getAllParents();
+  res.status(200).json({
+    success: true,
+    results: parents.length,
+    data: parents,
+  });
+});
 
-// Get All Parents
-const getAllParents = async (req, res) => {
-  try {
-    const parents = await parentService.getAllParents();
+exports.getOneParent = asyncHandler(async (req, res) => {
+  const parent = await parentService.getOneParent(req.params.id, req.user);
+  res.status(200).json({
+    success: true,
+    data: parent,
+  });
+});
 
-    res.status(200).json({
-      parents,
-    });
-  } catch (err) {
-    res.status(500).json({
-      message: err.message,
-    });
-  }
-};
+exports.updateParent = asyncHandler(async (req, res) => {
+  const updatedParent = await parentService.updateParent(req.params.id, req.body, req.user);
+  res.status(200).json({
+    success: true,
+    message: "Parent updated successfully",
+    data: updatedParent,
+  });
+});
 
-// Get Parent By ID
-const getOneParent = async (req, res) => {
-  try {
-    const { id } = req.params;
+exports.deleteParent = asyncHandler(async (req, res) => {
+  await parentService.deleteParent(req.params.id);
+  res.status(200).json({
+    success: true,
+    message: "Parent deleted successfully",
+  });
+});
 
-    const parent = await parentService.getOneParent(id);
+exports.getParentDashboard = asyncHandler(async (req, res) => {
+  const userId = req.user._id || req.user.id;
+  const dashboardData = await parentService.getParentDashboard(userId);
 
-    if (!parent) {
-      return res.status(404).json({
-        message: "Parent not found",
-      });
-    }
-
-    res.status(200).json({
-      parent,
-    });
-  } catch (err) {
-    res.status(500).json({
-      message: err.message,
-    });
-  }
-};
-
-// Update Parent
-const updateParent = async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    const updatedParent = await parentService.updateParent(
-      id,
-      req.body
-    );
-
-    if (!updatedParent) {
-      return res.status(404).json({
-        message: "Parent not found",
-      });
-    }
-
-    res.status(200).json({
-      message: "Parent updated successfully",
-      parent: updatedParent,
-    });
-  } catch (err) {
-    res.status(500).json({
-      message: err.message,
-    });
-  }
-};
-
-// Delete Parent
-const deleteParent = async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    const deletedParent = await parentService.deleteParent(id);
-
-    if (!deletedParent) {
-      return res.status(404).json({
-        message: "Parent not found",
-      });
-    }
-
-    res.status(200).json({
-      message: "Parent deleted successfully",
-      parent: deletedParent,
-    });
-  } catch (err) {
-    res.status(500).json({
-      message: err.message,
-    });
-  }
-};
-
-module.exports = {
-  createParent,
-  getAllParents,
-  getOneParent,
-  updateParent,
-  deleteParent,
-};
+  res.status(200).json({
+    success: true,
+    results: dashboardData.length,
+    data: dashboardData,
+  });
+});

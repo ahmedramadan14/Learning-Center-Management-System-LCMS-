@@ -5,13 +5,12 @@ const parentStudentSchema = new mongoose.Schema(
     parent: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Parent",
-      required: true,
+      required: [true, "Parent ID is required"],
     },
-
     student: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Student",
-      required: true,
+      required: [true, "Student ID is required"],
     },
   },
   {
@@ -19,13 +18,6 @@ const parentStudentSchema = new mongoose.Schema(
   }
 );
 
-parentStudentSchema.index(
-  { parent: 1, student: 1 },
-  { unique: true }
-);
+parentStudentSchema.index({ parent: 1, student: 1 }, { unique: true });
 
-const ParentStudent =
-  mongoose.models.ParentStudent ||
-  mongoose.model("ParentStudent", parentStudentSchema);
-
-module.exports = ParentStudent;
+module.exports = mongoose.models.ParentStudent || mongoose.model("ParentStudent", parentStudentSchema);

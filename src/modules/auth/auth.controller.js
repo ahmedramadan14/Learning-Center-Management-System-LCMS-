@@ -29,6 +29,7 @@ exports.signup = asyncHandler(async (req, res, next) => {
     gender,
     grade,
     parentPhone,
+    teacherId,
   } = req.body;
 
   if (role === 'secretary' || role === 'admin') {
@@ -68,21 +69,33 @@ exports.signup = asyncHandler(async (req, res, next) => {
         { session }
       );
       profile = teacher;
-    } else if (role === 'student') {
-      const studentCode = await generateUniqueStudentCode(session);
+    } else if (role === "student") {
+      let teacherProfileId = null;
+
+      if (teacherId) {
+        const teacher = await Teacher.findById(teacherId).session(session);
+        if (teacher) {
+          teacherProfileId = teacher._id;
+        }
+      }
+
+      const studentCode = await generateUniqueStudentCode();
 
       const [student] = await Student.create(
         [
           {
             userId: user._id,
-            studentCode,
+            studentCode: studentCode,
+            parentPhone,
             gender,
             grade,
-            parentPhone,
+            teacher: teacherProfileId,
+            createdById: req.user ? req.user._id : user._id,
           },
         ],
         { session }
       );
+
       profile = student;
     } else if (role === 'parent') {
       const [parent] = await Parent.create(
@@ -112,14 +125,12 @@ exports.signup = asyncHandler(async (req, res, next) => {
       },
       ...(token && { token }),
     });
-
   } catch (error) {
     await session.abortTransaction();
     session.endSession();
     return next(error);
   }
 });
-
 // @desc    Login
 // @route   POST /api/v1/auth/login
 // @access  Public

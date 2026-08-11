@@ -1,184 +1,173 @@
-const mongoose = require("mongoose");
-const ApiError = require("../../utils/ApiErrors");
-const { PAYMENT_STATUSES } = require("./payment.model");
+const { check, param, query, validationResult } = require('express-validator');
+const ApiError = require('../../utils/ApiErrors');
+const { PAYMENT_STATUSES } = require('./payment.model');
 
-const isValidDate = (value) => !Number.isNaN(new Date(value).getTime());
-
-const isCurrency = (value, minimum = 0) =>
-  typeof value === "number" && Number.isFinite(value) && value >= minimum;
-
-const rejectUnexpectedFields = (body, allowedFields) => {
-  const unexpectedField = Object.keys(body).find(
-    (field) => !allowedFields.includes(field)
-  );
-  return unexpectedField
-    ? new ApiError(`${unexpectedField} cannot be sent to this endpoint.`, 400)
-    : null;
+const handleValidationErrors = (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    const errorMsg = errors.array().map((err) => err.msg).join(', ');
+    return next(new ApiError(errorMsg, 400));
+  }
+  next();
 };
 
-const validateObjectId = (value, fieldName, required = false) => {
-  if (required && (value === undefined || value === null || value === "")) {
-    return new ApiError(`${fieldName} is required.`, 400);
-  }
-  if (
-    value !== undefined &&
-    value !== null &&
-    value !== "" &&
-    !mongoose.isValidObjectId(value)
-  ) {
-    return new ApiError(`${fieldName} must be a valid id.`, 400);
-  }
-  return null;
-};
+const validatePaymentId = [
+  param('id')
+    .isMongoId()
+    .withMessage('Payment id must be a valid id.'),
+  handleValidationErrors,
+];
 
-const validatePaymentId = (req, res, next) => {
-  const error = validateObjectId(req.params.id, "Payment id", true);
-  return error ? next(error) : next();
-};
+const validateCreatePayment = [
+  check('studentId')
+    .notEmpty()
+    .withMessage('studentId is required.')
+    .isMongoId()
+    .withMessage('studentId must be a valid id.'),
 
-const validatePaymentData = (body, requireAllFields) => {
-  const ids = [
-    ["subscriptionId", false],
-    ["studentId", requireAllFields],
-    ["groupId", requireAllFields],
-    ["recordedBy", false],
-  ];
+  check('groupId')
+    .notEmpty()
+    .withMessage('groupId is required.')
+    .isMongoId()
+    .withMessage('groupId must be a valid id.'),
 
-  for (const [field, required] of ids) {
-    const error = validateObjectId(body[field], field, required);
-    if (error) return error;
-  }
+  check('sessionDate')
+    .optional()
+    .isISO8601()
+    .toDate()
+    .withMessage('sessionDate must be a valid date.'),
 
-  if (requireAllFields && !isValidDate(body.cycleStart)) {
-    return new ApiError("cycleStart must be a valid date.", 400);
-  }
-  if (requireAllFields && !isValidDate(body.cycleEnd)) {
-    return new ApiError("cycleEnd must be a valid date.", 400);
-  }
-  if (body.cycleStart !== undefined && !isValidDate(body.cycleStart)) {
-    return new ApiError("cycleStart must be a valid date.", 400);
-  }
-  if (body.cycleEnd !== undefined && !isValidDate(body.cycleEnd)) {
-    return new ApiError("cycleEnd must be a valid date.", 400);
-  }
-  if (body.cycleStart !== undefined && body.cycleEnd !== undefined) {
-    if (new Date(body.cycleEnd) <= new Date(body.cycleStart)) {
-      return new ApiError("cycleEnd must be later than cycleStart.", 400);
-    }
-  }
+  check('sessionNumber')
+    .optional()
+    .isInt({ min: 1 })
+    .withMessage('sessionNumber must be a positive integer.'),
 
-  if (requireAllFields && !isCurrency(body.amountDue)) {
-    return new ApiError("amountDue must be a non-negative number.", 400);
-  }
-  if (body.amountDue !== undefined && !isCurrency(body.amountDue)) {
-    return new ApiError("amountDue must be a non-negative number.", 400);
-  }
-  if (body.amountPaid !== undefined && !isCurrency(body.amountPaid)) {
-    return new ApiError("amountPaid must be a non-negative number.", 400);
-  }
-  if (
-    body.amountDue !== undefined &&
-    body.amountPaid !== undefined &&
-    body.amountPaid > body.amountDue
-  ) {
-    return new ApiError("amountPaid cannot be greater than amountDue.", 400);
-  }
+  check('amountDue')
+    .optional()
+    .isFloat({ min: 0 })
+    .withMessage('amountDue must be a non-negative number.'),
 
-  return null;
-};
+  check('amountPaid')
+    .optional()
+    .isFloat({ min: 0 })
+    .withMessage('amountPaid must be a non-negative number.'),
 
-const validateCreatePayment = (req, res, next) => {
-  const body = req.body || {};
-  const fieldError = rejectUnexpectedFields(body, [
-    "subscriptionId",
-    "studentId",
-    "groupId",
-    "cycleStart",
-    "cycleEnd",
-    "amountDue",
-    "amountPaid",
-    "recordedBy",
-  ]);
+  handleValidationErrors,
+];
 
-  if (fieldError) return next(fieldError);
+const validateCreateByCode = [
+  check('studentCode')
+    .notEmpty()
+    .withMessage('studentCode is required.')
+    .trim(),
 
-  const validationError = validatePaymentData(body, true);
-  return validationError ? next(validationError) : next();
-};
+  check('groupId')
+    .notEmpty()
+    .withMessage('groupId is required.')
+    .isMongoId()
+    .withMessage('groupId must be a valid id.'),
 
-const validateUpdatePayment = (req, res, next) => {
-  const body = req.body || {};
-  const fieldError = rejectUnexpectedFields(body, [
-    "subscriptionId",
-    "cycleStart",
-    "cycleEnd",
-    "amountDue",
-  ]);
+  check('sessionDate')
+    .optional()
+    .isISO8601()
+    .toDate()
+    .withMessage('sessionDate must be a valid date.'),
 
-  if (fieldError) return next(fieldError);
+  check('sessionNumber')
+    .optional()
+    .isInt({ min: 1 })
+    .withMessage('sessionNumber must be a positive integer.'),
 
-  if (Object.keys(body).length === 0) {
-    return next(new ApiError("Provide at least one field to update.", 400));
-  }
+  check('amountDue')
+    .optional()
+    .isFloat({ min: 0 })
+    .withMessage('amountDue must be a non-negative number.'),
 
-  const validationError = validatePaymentData(body, false);
-  return validationError ? next(validationError) : next();
-};
+  check('amountPaid')
+    .optional()
+    .isFloat({ min: 0 })
+    .withMessage('amountPaid must be a non-negative number.'),
 
-const validateRecordPayment = (req, res, next) => {
-  const body = req.body || {};
-  const fieldError = rejectUnexpectedFields(body, ["amount", "recordedBy"]);
+  handleValidationErrors,
+];
 
-  if (fieldError) return next(fieldError);
+const validateUpdatePayment = [
+  param('id')
+    .isMongoId()
+    .withMessage('Payment id must be a valid id.'),
 
-  if (!isCurrency(body.amount, Number.EPSILON)) {
-    return next(new ApiError("amount must be greater than zero.", 400));
-  }
+  check('sessionDate')
+    .optional()
+    .isISO8601()
+    .toDate()
+    .withMessage('sessionDate must be a valid date.'),
 
-  const idError = validateObjectId(body.recordedBy, "recordedBy");
-  return idError ? next(idError) : next();
-};
+  check('sessionNumber')
+    .optional()
+    .isInt({ min: 1 })
+    .withMessage('sessionNumber must be a positive integer.'),
 
-const validatePaymentList = (req, res, next) => {
-  const { page, limit, studentId, groupId, status, cycleStart, cycleEnd } = req.query;
+  check('amountDue')
+    .optional()
+    .isFloat({ min: 0 })
+    .withMessage('amountDue must be a non-negative number.'),
 
-  if (page !== undefined && (!/^\d+$/.test(page) || Number(page) < 1)) {
-    return next(new ApiError("page must be a positive integer.", 400));
-  }
-  if (
-    limit !== undefined &&
-    (!/^\d+$/.test(limit) || Number(limit) < 1 || Number(limit) > 100)
-  ) {
-    return next(new ApiError("limit must be an integer between 1 and 100.", 400));
-  }
+  handleValidationErrors,
+];
 
-  for (const [fieldName, value] of [
-    ["studentId", studentId],
-    ["groupId", groupId],
-  ]) {
-    const idError = validateObjectId(value, fieldName);
-    if (idError) return next(idError);
-  }
+const validateRecordPayment = [
+  param('id')
+    .isMongoId()
+    .withMessage('Payment id must be a valid id.'),
 
-  if (status !== undefined && !PAYMENT_STATUSES.includes(status)) {
-    return next(
-      new ApiError("status must be unpaid, partial, or paid.", 400)
-    );
-  }
+  check('amount')
+    .notEmpty()
+    .withMessage('amount is required.')
+    .isFloat({ gt: 0 })
+    .withMessage('amount must be greater than zero.'),
 
-  if (cycleStart !== undefined && !isValidDate(cycleStart)) {
-    return next(new ApiError("cycleStart must be a valid date.", 400));
-  }
-  if (cycleEnd !== undefined && !isValidDate(cycleEnd)) {
-    return next(new ApiError("cycleEnd must be a valid date.", 400));
-  }
+  handleValidationErrors,
+];
 
-  return next();
-};
+const validatePaymentList = [
+  query('page')
+    .optional()
+    .isInt({ min: 1 })
+    .withMessage('page must be a positive integer.'),
+
+  query('limit')
+    .optional()
+    .isInt({ min: 1, max: 100 })
+    .withMessage('limit must be an integer between 1 and 100.'),
+
+  query('studentId')
+    .optional()
+    .isMongoId()
+    .withMessage('studentId must be a valid id.'),
+
+  query('groupId')
+    .optional()
+    .isMongoId()
+    .withMessage('groupId must be a valid id.'),
+
+  query('status')
+    .optional()
+    .isIn(PAYMENT_STATUSES)
+    .withMessage('status must be unpaid, partial, or paid.'),
+
+  query('sessionDate')
+    .optional()
+    .isISO8601()
+    .toDate()
+    .withMessage('sessionDate must be a valid date.'),
+
+  handleValidationErrors,
+];
 
 module.exports = {
   validatePaymentId,
   validateCreatePayment,
+  validateCreateByCode,
   validateUpdatePayment,
   validateRecordPayment,
   validatePaymentList,

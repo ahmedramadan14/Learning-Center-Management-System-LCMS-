@@ -1,107 +1,124 @@
+const Teacher = require("../teacher/teacher.model");
+const Secretary = require("../secretaries/secretary.model");
 const studentService = require("./student.service");
-const asyncHandler = require('../../middlewares/asyncHandler');
-const ApiError = require('../../utils/ApiErrors');
+const asyncHandler = require("../../middlewares/asyncHandler");
+const ApiError = require("../../utils/ApiErrors");
 
+const getTeacherInfoFromUser = async (user) => {
+  let teacherProfileId = null;
+  let teacherUserId = null;
 
-// @desc    Create a student (with a full login account)
-// @route   POST /api/v1/students
-// @access  Private/Secretary
-const createStudent = asyncHandler(async (req, res) => {
-    const student = await studentService.createStudent({
-        ...req.body,
-        createdById: req.user.id || req.user._id, // secretary/teacher who created this student
-    });
-
-    const studentData = student ? (student.toObject ? student.toObject() : student) : {};
-    if (studentData.userId && studentData.userId.password) {
-        delete studentData.userId.password;
+  if (user.role === "teacher") {
+    const teacher = await Teacher.findOne({ userId: user.id || user._id });
+    if (!teacher) throw new ApiError("Teacher profile not found", 404);
+    teacherProfileId = teacher._id;
+    teacherUserId = user.id || user._id;
+  } else if (user.role === "secretary") {
+    const secretary = await Secretary.findOne({ userId: user.id || user._id }).populate("teacher");
+    if (!secretary || !secretary.teacher) {
+      throw new ApiError("Secretary is not linked to any valid teacher", 400);
     }
+    teacherProfileId = secretary.teacher._id;
+    teacherUserId = secretary.teacher.userId;
+  }
 
-    res.status(201).json({
-        success: true,
-        message: "Student created successfully",
-        data: studentData
-    });
+  return { teacherProfileId, teacherUserId };
+};
+
+const createStudent = asyncHandler(async (req, res) => {
+  let { teacherProfileId, teacherUserId } = await getTeacherInfoFromUser(req.user);
+
+  if (req.user.role === "admin") {
+    if (!req.body.teacherId) throw new ApiError("Teacher ID is required when admin creates a student", 400);
+    const teacher = await Teacher.findById(req.body.teacherId);
+    if (!teacher) throw new ApiError("Teacher not found", 404);
+    teacherProfileId = teacher._id;
+    teacherUserId = teacher.userId;
+  }
+
+  const student = await studentService.createStudent({
+    ...req.body,
+    teacherProfileId,
+    teacherUserId,
+    createdById: req.user.id || req.user._id,
+  });
+
+  res.status(201).json({
+    success: true,
+    message: "Student created successfully and linked to teacher",
+    data: student,
+  });
 });
-
 
 const getStudents = asyncHandler(async (req, res) => {
-    const students = await studentService.getStudents();
-    res.status(200).json({
-        success: true,
-        data: { 
-            count: students.length,
-            students 
-        }
-    });
-});
+  let { teacherProfileId } = await getTeacherInfoFromUser(req.user);
 
-const getStudentById = asyncHandler(async (req, res) => {
-    const id = req.params.id;
-    const student = await studentService.getStudentsById(id);
+  if (req.user.role === "admin" && req.query.teacherId) {
+    teacherProfileId = req.query.teacherId;
+  }
 
-    if (!student) throw new ApiError("Student not found", 404);
+  const students = await studentService.getAllStudents(teacherProfileId, req.query);
 
-    res.status(200).json({
-        success: true,
-        data: { student }
-    });
-});
-
-
-const updateStudent = asyncHandler(async (req, res) => {
-    const { studentCode } = req.params;
-    const data = req.body;
-
-    const forbiddenFields = ["studentCode", "userId", "createdById"];
-    const hasForbidden = forbiddenFields.some(f => data[f] !== undefined);
-    if (hasForbidden) {
-        throw new ApiError(`Cannot update fields: ${forbiddenFields.join(", ")} directly`, 400);
-    }
-
-    const updatedStudent = await studentService.updateStudent(studentCode, data);
-    
-    if (!updatedStudent) throw new ApiError("Student not found", 404);
-
-    res.status(200).json({
-        success: true,
-        message: "Student updated successfully",
-        data: updatedStudent
-    });
-});
-
-const deleteStudent = asyncHandler(async (req, res) => {
-    const { studentCode } = req.params;
-
-    const deletedStudent = await studentService.deleteStudentByCode(studentCode);
-    
-    if (!deletedStudent) throw new ApiError("Student not found", 404);
-
-    res.status(200).json({
-        success: true,
-        message: "Student deactivated successfully",
-        data: deletedStudent
-    });
+  res.status(200).json({
+    success: true,
+    count: students.length,
+    data: students,
+  });
 });
 
 const getStudentByCode = asyncHandler(async (req, res) => {
-const { studentCode } = req.body;
-    const student = await studentService.getStudentByCode(studentCode);
+  const { studentCode } = req.body.studentCode ? req.body : req.params;
+  const { teacherProfileId } = await getTeacherInfoFromUser(req.user);
 
-    if (!student) throw new ApiError("Student not found", 404);
+  const student = await studentService.getStudentByCode(studentCode, teacherProfileId);
 
-    res.status(200).json({
-        success: true,
-        data: { student }
-    });
+  res.status(200).json({
+    success: true,
+    data: student,
+  });
 });
 
+const updateStudent = asyncHandler(async (req, res) => {
+  const { studentCode } = req.params;
+  const { teacherProfileId } = await getTeacherInfoFromUser(req.user);
+
+  const updatedStudent = await studentService.updateStudentByCode(studentCode, req.body, teacherProfileId);
+
+  res.status(200).json({
+    success: true,
+    message: "Student updated successfully",
+    data: updatedStudent,
+  });
+});
+
+const deactivateStudent = asyncHandler(async (req, res) => {
+  const { studentCode } = req.params;
+  const { teacherProfileId } = await getTeacherInfoFromUser(req.user);
+
+  await studentService.deactivateStudentByCode(studentCode, teacherProfileId);
+
+  res.status(200).json({
+    success: true,
+    message: "Student deactivated successfully",
+  });
+});
+
+const getMyCode = asyncHandler(async (req, res, next) => {
+  const studentCode = await studentService.getMyCode(req.user._id || req.user.id);
+
+  res.status(200).json({
+    success: true,
+    data: {
+      studentCode,
+    },
+  });
+});
 
 module.exports = {
-    createStudent,
-    getStudents,
-    getStudentById,
-    getStudentByCode,
-    updateStudent,
-    deleteStudent,
+  createStudent,
+  getStudents,
+  getStudentByCode,
+  updateStudent,
+  deactivateStudent,
+  getMyCode,
 };

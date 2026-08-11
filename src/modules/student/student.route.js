@@ -1,29 +1,36 @@
+// src/modules/student/student.route.js
+
 const express = require("express");
-const studentController = require("./student.controller");
-const authController = require('../auth/auth.controller');
-
 const router = express.Router();
+const studentController = require("./student.controller");
+const { protect, allowedTo } = require("../auth/auth.controller");
+const {
+  createStudentValidation,
+  updateStudentValidation,
+  studentCodeParamValidation,
+} = require("./student.validation");
 
-router.route('/')
-    .post(authController.protect , authController.allowedTo('admin', 'teacher', 'secretary') , studentController.createStudent)
-    .get(authController.protect , authController.allowedTo('admin', 'teacher', 'secretary') , studentController.getStudents);
+router.use(protect);
 
-router.route('/code')
-    .post(
-        authController.protect, 
-        authController.allowedTo('admin', 'teacher', 'secretary'), 
-        studentController.getStudentByCode
-    );
+router.get(
+  "/my-code",
+  allowedTo("student"),
+  studentController.getMyCode
+);
 
-router.route('/:studentCode')
-    .patch(authController.protect, authController.allowedTo('admin', 'teacher', 'secretary'), studentController.updateStudent)
-    .delete(authController.protect, authController.allowedTo('admin', 'teacher', 'secretary'), studentController.deleteStudent);
-    
-router.route('/:id')
-    .get(authController.protect , authController.allowedTo('admin', 'teacher', 'secretary') , studentController.getStudentById)
+router.use(allowedTo("admin", "teacher", "secretary"));
 
+router
+  .route("/")
+  .post(createStudentValidation, studentController.createStudent)
+  .get(studentController.getStudents);
 
+router.post("/code", studentController.getStudentByCode);
 
-
+router
+  .route("/:studentCode")
+  .get(studentController.getStudentByCode)
+  .patch(studentController.updateStudent)
+  .delete(studentController.deactivateStudent);
 
 module.exports = router;
