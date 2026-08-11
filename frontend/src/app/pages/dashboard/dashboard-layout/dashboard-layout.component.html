@@ -1,0 +1,8 @@
+<div class="admin-shell" [class.sidebar-closed]="!sidebarOpen">
+  <app-sidebar [open]="sidebarOpen" (closeRequested)="sidebarOpen = false"></app-sidebar>
+  <button *ngIf="sidebarOpen" class="sidebar-backdrop" type="button" aria-label="Close navigation" (click)="sidebarOpen = false"></button>
+  <section class="admin-main">
+    <app-header (menuToggled)="toggleSidebar()"></app-header>
+    <main class="admin-content"><router-outlet></router-outlet></main>
+  </section>
+</div>

@@ -1,1 +1,25 @@
-<p>settings works!</p>
+<section class="profile-page">
+  <div class="profile-heading">
+    <span><i class="bi bi-person-circle"></i></span>
+    <div><h1>My profile</h1><p>View and update your personal account details.</p></div>
+  </div>
+
+  <section class="profile-card">
+    <div class="profile-summary">
+      <span class="profile-avatar">{{ initials(model.name) }}</span>
+      <div><h2>{{ model.name || 'Your profile' }}</h2><span class="role-badge"><i class="bi bi-person-badge"></i> {{ roleLabel(role) }}</span></div>
+    </div>
+
+    <div class="profile-content">
+      <div class="profile-copy"><h2>Personal information</h2><p>Your name and contact details are visible wherever your account is used in the system.</p><dl><div><dt><i class="bi bi-envelope"></i> Email</dt><dd>{{ model.email || 'Not added yet' }}</dd></div><div><dt><i class="bi bi-telephone"></i> Phone</dt><dd>{{ model.phone || 'Not added yet' }}</dd></div></dl></div>
+      <form (ngSubmit)="save()" #profileForm="ngForm">
+        <label>Full name<input name="name" [(ngModel)]="model.name" required minlength="3" autocomplete="name"></label>
+        <label>Email address<input name="email" type="email" [(ngModel)]="model.email" autocomplete="email"></label>
+        <label>Phone number<input name="phone" type="tel" [(ngModel)]="model.phone" required autocomplete="tel"></label>
+        <p *ngIf="message" class="message success" role="status">{{ message }}</p>
+        <p *ngIf="error" class="message error" role="alert">{{ error }}</p>
+        <button class="save" type="submit" [disabled]="profileForm.invalid || saving"><i class="bi bi-check2"></i> {{ saving ? 'Saving...' : 'Save changes' }}</button>
+      </form>
+    </div>
+  </section>
+</section>

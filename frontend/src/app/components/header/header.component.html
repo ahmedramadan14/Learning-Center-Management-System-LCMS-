@@ -1,0 +1,16 @@
+<header class="topbar">
+  <button type="button" class="menu-button" aria-label="Toggle navigation" (click)="menuToggled.emit()">
+    <i class="bi bi-list"></i>
+  </button>
+
+  <label class="global-search">
+    <i class="bi bi-search"></i>
+    <input type="search" placeholder="Search anything..." aria-label="Search">
+    <kbd>Ctrl /</kbd>
+  </label>
+
+  <a class="profile-link" routerLink="/dashboard/profile" aria-label="Open your profile" *ngIf="auth.user$ | async as user">
+    <span class="user-avatar">{{ initials(user.name) }}</span>
+    <span class="user-info"><strong>{{ user.name }}</strong><small>{{ roleLabel(user.role) }}</small></span>
+  </a>
+</header>

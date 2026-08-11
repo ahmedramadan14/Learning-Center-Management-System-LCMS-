@@ -1,1 +1,5 @@
-<p>sidebar works!</p>
+<aside class="sidebar" [class.is-open]="open">
+  <a class="brand" routerLink="/dashboard" (click)="closeOnMobile()"><span class="brand-mark"><i class="bi bi-mortarboard-fill"></i></span><span>EduCenter</span></a>
+  <nav aria-label="Main navigation"><a *ngFor="let item of navigation" [routerLink]="item.path" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: item.path === '/dashboard' }" (click)="closeOnMobile()"><i class="bi nav-icon" [ngClass]="item.icon"></i>{{ item.label }}</a></nav>
+  <div class="sidebar-bottom"><div class="edition"><span class="edition-badge"><i class="bi bi-stars"></i></span><span><strong>EduCenter</strong><small>Learning management system</small></span></div><button type="button" class="logout" (click)="logout()"><i class="bi bi-box-arrow-left"></i> Logout</button></div>
+</aside>
