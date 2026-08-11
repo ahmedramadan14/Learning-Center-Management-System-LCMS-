@@ -4,8 +4,9 @@
     border-radius: 12px;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-    
+
 }
+
 .payments-header-banner {
     background: #0062ff;
     padding: 15px 25px;
@@ -58,6 +59,7 @@
 .btn--primary:hover {
     background-color: #e6f0ff;
 }
+
 .table-wrapper {
     background: #ffffff;
     border-radius: 12px;
@@ -88,6 +90,7 @@
     color: #212529;
     vertical-align: middle;
 }
+
 .payments-table tbody tr:last-child td {
     border-bottom: none;
 }
@@ -113,9 +116,11 @@
     border: 2px solid #ffffff;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
+
 .text-muted {
     color: #868e96;
 }
+
 .icon-btn {
     background: transparent;
     border: none;
@@ -130,6 +135,7 @@
     color: #0062ff;
     background-color: #e6f0ff;
 }
+
 .badge {
     padding: 6px 12px;
     border-radius: 30px;
@@ -152,6 +158,7 @@
     background-color: #ffebee;
     color: #c62828;
 }
+
 .payments-page__footer {
     display: flex;
     justify-content: space-between;
@@ -213,6 +220,7 @@
     z-index: 1000;
     backdrop-filter: blur(4px);
 }
+
 .modal-card {
     background: white;
     padding: 30px;

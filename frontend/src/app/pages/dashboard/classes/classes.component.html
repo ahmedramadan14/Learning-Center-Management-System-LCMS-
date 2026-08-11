@@ -1,1 +1,96 @@
-<p>classes works!</p>
+<section class="payments-page">
+    <div class="payments-header-banner">
+        <div class="payments-page__header">
+            <h2 class="payments-page__title">Groups</h2>
+            <div class="payments-page__actions">
+                             <button type="button" class="btn btn--primary" (click)="onAddGroupClick()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 5v14M5 12h14" stroke-linecap="round" />
+                    </svg>
+                    Add Group
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <input type="text" placeholder="Search by name..." (input)="onSearch($event)"
+        style="padding: 10px; width: 100%; margin-top: 20px; border-radius: 8px; border: 1px solid #eef2f5;">
+
+    <div class="groups-grid-layout"
+        style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; margin-top: 25px;">
+        <div *ngFor="let group of filteredGroups" class="group-card" (click)="openGroupDetails(group)"
+            style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03); cursor: pointer; border: 1px solid #eef2f5; transition: transform 0.2s;">
+            <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px;">
+                <div
+                    style="width: 45px; height: 45px; background: #f0f8ff; color: #0062ff; display: flex; align-items: center; justify-content: center; border-radius: 10px; font-weight: 700; font-size: 18px;">
+                    {{ group.name.charAt(0) }}
+                </div>
+                <div>
+                    <h3 style="margin: 0; font-size: 16px; color: #212529; font-weight: 700;">{{ group.name }}</h3>
+                    <span style="font-size: 13px; color: #868e96;">{{ group.gradelevel }}</span>
+                </div>
+            </div>
+
+            <div
+                style="display: flex; flex-direction: column; gap: 8px; border-top: 1px solid #eef2f5; padding-top: 12px; font-size: 14px; color: #495057;">
+                <div>👧 <strong>{{ group.studentsCount }}</strong> Students</div>
+                <div>📅 <strong>{{ group.schedule }}</strong></div>
+                <div>👨‍🏫 <strong>{{ group.teacher }}</strong></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="modal-overlay" *ngIf="isModalOpen">
+    <div class="modal-card">
+        <h3>New Group</h3>
+
+        <div class="form-group">
+            <label>Group Name</label>
+            <input type="text" [(ngModel)]="newGroup.name" placeholder="Enter group name">
+        </div>
+
+        <div class="form-group">
+            <label>Grade Level</label>
+            <input type="text" [(ngModel)]="newGroup.gradelevel" placeholder="Enter grade level">
+        </div>
+
+        <div class="form-group">
+            <label>Students Count</label>
+            <input type="number" [(ngModel)]="newGroup.studentsCount" placeholder="Enter students count">
+        </div>
+
+        <div class="form-group">
+            <label>Schedule</label>
+            <input type="text" [(ngModel)]="newGroup.schedule" placeholder="Enter schedule">
+        </div>
+
+        <div class="form-group">
+            <label>Teacher</label>
+            <input type="text" [(ngModel)]="newGroup.teacher" placeholder="Enter teacher name">
+        </div>
+
+        <div class="modal-actions">
+            <button type="button" class="btn btn--ghost-dark" (click)="closeModal()">Cancel</button>
+            <button type="button" class="btn btn--primary" (click)="saveGroup()"
+                style="background-color: #0062ff; color: white;">Save Group</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" *ngIf="isDetailsModalOpen && selectedGroup">
+    <div class="modal-card">
+        <h3>Group Details</h3>
+        <div style="margin: 20px 0; display: flex; flex-direction: column; gap: 12px; font-size: 14px; color: #495057;">
+            <div><strong>Group Name:</strong> {{ selectedGroup.name }}</div>
+            <div><strong>Grade Level:</strong> {{ selectedGroup.gradelevel }}</div>
+            <div><strong>Students Count:</strong> {{ selectedGroup.studentsCount }}</div>
+            <div><strong>Schedule:</strong> {{ selectedGroup.schedule }}</div>
+            <div><strong>Teacher:</strong> {{ selectedGroup.teacher }}</div>
+        </div>
+        <div class="modal-actions">
+            <button type="button" class="btn btn--primary" (click)="closeDetailsModal()"
+                style="background-color: #0062ff; color: white;">Close</button>
+        </div>
+    </div>
+</div>
