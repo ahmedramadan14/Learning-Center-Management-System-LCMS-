@@ -21,6 +21,7 @@ const scheduleRoutes = require("./modules/schedule/schedule.route.js");
 const examRoutes = require("./modules/exam/exam.route.js");
 const resultRoutes = require("./modules/results/result.route.js");
 
+
 const app = express();
 
 // Global Middlewares
@@ -53,6 +54,7 @@ app.use("/api/v1/groups", groupRoutes);
 app.use("/api/v1/schedules", scheduleRoutes);
 app.use("/api/v1/exams", examRoutes);
 app.use("/api/v1/results", resultRoutes);
+
 
 // 404 Handler
 app.use((req, res, next) => {

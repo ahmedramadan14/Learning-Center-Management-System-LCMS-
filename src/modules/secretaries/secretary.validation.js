@@ -1,70 +1,79 @@
-const { body, param } = require("express-validator")
+const { body, param, validationResult } = require("express-validator");
+const ApiError = require("../../utils/ApiErrors");
 
-// Create Secretarie Validation
+const handleValidationErrors = (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    const errorMsg = errors.array().map((err) => err.msg).join(", ");
+    return next(new ApiError(errorMsg, 400));
+  }
+  next();
+};
 
-const createSecretarieValidation = [
-    body("userId")
-        .notEmpty()
-        .withMessage("userId is required")
-        .bail()
-        .isMongoId()
-        .withMessage("Invalid userId"),
+exports.createSecretaryValidation = [
+  body("name")
+    .notEmpty()
+    .withMessage("Name is required")
+    .trim(),
+  body("email")
+    .notEmpty()
+    .withMessage("Email is required")
+    .isEmail()
+    .withMessage("Invalid email address")
+    .normalizeEmail(),
+  body("password")
+    .notEmpty()
+    .withMessage("Password is required")
+    .isLength({ min: 6 })
+    .withMessage("Password must be at least 6 characters"),
+  body("phone")
+    .optional()
+    .isMobilePhone("ar-EG")
+    .withMessage("Invalid Egyptian phone number format"),
+  body("department")
+    .optional()
+    .isString()
+    .withMessage("department must be a string"),
+  body("permissions")
+    .optional()
+    .isArray()
+    .withMessage("permissions must be an array"),
+  handleValidationErrors,
+];
 
-    body("department")
-        .notEmpty()
-        .withMessage("department is required")
-        .bail()
-        .isString()
-        .withMessage("department must be a string"),
+exports.getOneSecretaryValidation = [
+  param("id").isMongoId().withMessage("Invalid secretary id"),
+  handleValidationErrors,
+];
 
-    body("permission")
-        .optional()
-        .isArray()
-        .withMessage("permission must be an array")
-]
+exports.deleteOneSecretaryValidation = [
+  param("id").isMongoId().withMessage("Invalid secretary id"),
+  handleValidationErrors,
+];
 
-// Get One Secretarie Validation
-
-const getOneSecretarieValidation = [
-    param("id")
-        .isMongoId()
-        .withMessage("Invalid secretarie id")
-]
-
-// Delete One Secretarie Validation
-
-const deleteOneSecretarieValidation = [
-    param("id")
-        .isMongoId()
-        .withMessage("Invalid secretarie id")
-]
-
-// Update Secretarie Validation
-
-const updateSecretarieValidation = [
-    param("id")
-        .isMongoId()
-        .withMessage("Invalid secretarie id"),
-
-    body("userId")
-        .optional()
-        .isMongoId()
-        .withMessage("Invalid userId"),
-
-    body("department")
-        .optional()
-        .isString()
-        .withMessage("department must be a string"),
-
-    body("permission")
-        .optional()
-        .isArray()
-        .withMessage("permission must be an array")
-]
-
-module.exports = {
-    createSecretarieValidation,
-    getOneSecretarieValidation,
-    deleteOneSecretarieValidation,
-    updateSecretarieValidation
-}
+exports.updateSecretaryValidation = [
+  param("id").isMongoId().withMessage("Invalid secretary id"),
+  body("name")
+    .optional()
+    .isString()
+    .withMessage("Name must be a string")
+    .trim(),
+  body("email")
+    .optional()
+    .isEmail()
+    .withMessage("Invalid email address")
+    .normalizeEmail(),
+  body("phone")
+    .optional()
+    .isMobilePhone("ar-EG")
+    .withMessage("Invalid Egyptian phone number format"),
+  body("department")
+    .optional()
+    .isString()
+    .withMessage("department must be a string"),
+  body("permissions")
+    .optional()
+    .isArray()
+    .withMessage("permissions must be an array"),
+  handleValidationErrors,
+];

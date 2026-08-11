@@ -7,13 +7,38 @@ const router = express.Router();
 
 router.use(authController.protect);
 
-router.post('/create', authController.allowedTo("admin", "secretary", "teacher"), valid.ValidationCAttend, fun.createattendance);
-router.put('/update/:id', authController.allowedTo("admin", "secretary", "teacher"), valid.ValidationUAttend, fun.updateattendance);
+router.post(
+    '/create',
+    authController.allowedTo("admin", "secretary", "teacher"),
+    valid.ValidationCAttend,
+    fun.createattendance
+);
 
-router.get('/allattendance', authController.allowedTo("admin", "teacher", "secretary", "student", "parent"), fun.getallattendance);
+router.put(
+    '/update/:id',
+    authController.allowedTo("admin", "secretary", "teacher"),
+    valid.ValidationUAttend,
+    fun.updateattendance
+);
 
-router.get('/student/:studentCode', authController.allowedTo("admin", "teacher", "secretary", "student", "parent"), fun.getattendancebyid);
+router.get(
+    '/allattendance',
+    authController.allowedTo("admin", "teacher", "secretary", "student", "parent"),
+    fun.getallattendance
+);
 
-router.delete('/:id', authController.allowedTo("admin", "secretary", "teacher"), fun.deleteAttendance);
+router.get(
+    '/student/:studentCode',
+    authController.allowedTo("admin", "teacher", "secretary", "student", "parent"),
+    valid.ValidationStudentCode,
+    fun.getattendancebyid
+);
+
+router.delete(
+    '/:id',
+    authController.allowedTo("admin", "secretary", "teacher"),
+    valid.ValidationMongoId,
+    fun.deleteAttendance
+);
 
 module.exports = router;

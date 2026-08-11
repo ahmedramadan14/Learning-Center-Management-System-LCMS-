@@ -1,76 +1,63 @@
+const asyncHandler = require("../../middlewares/asyncHandler");
 const resultService = require("./result.service");
 
-exports.createResult = async (req, res, next) => {
-  try {
-    const result = await resultService.createResult(req.body, req.user);
-    res.status(201).json({ data: result });
-  } catch (err) {
-    if (err.statusCode) {
-      return res.status(err.statusCode).json({ message: err.message });
-    }
-    next(err);
-  }
-};
+exports.createResult = asyncHandler(async (req, res) => {
+  const result = await resultService.createResult(req.body, req.user);
+  res.status(201).json({
+    success: true,
+    message: "Result created successfully",
+    data: result,
+  });
+});
 
-exports.getAllResults = async (req, res, next) => {
-  try {
-    const results = await resultService.getAllResults(req.user);
-    res.status(200).json({ results: results.length, data: results });
-  } catch (err) {
-    next(err);
-  }
-};
+exports.getAllResults = asyncHandler(async (req, res) => {
+  const results = await resultService.getAllResults(req.user);
+  res.status(200).json({
+    success: true,
+    results: results.length,
+    data: results,
+  });
+});
 
-exports.getStudentResults = async (req, res, next) => {
-  try {
-    const results = await resultService.getResultsByStudentCode(req.params.studentCode, req.user);
-    res.status(200).json({ results: results.length, data: results });
-  } catch (err) {
-    if (err.statusCode) {
-      return res.status(err.statusCode).json({ message: err.message });
-    }
-    next(err);
-  }
-};
+exports.getStudentResults = asyncHandler(async (req, res) => {
+  const results = await resultService.getResultsByStudentCode(req.params.studentCode, req.user);
+  res.status(200).json({
+    success: true,
+    results: results.length,
+    data: results,
+  });
+});
 
-exports.getResult = async (req, res, next) => {
-  try {
-    const result = await resultService.getResultById(req.params.id);
-    if (!result) return res.status(404).json({ message: "Result not found" });
-    res.status(200).json({ data: result });
-  } catch (err) {
-    next(err);
-  }
-};
+exports.getResult = asyncHandler(async (req, res) => {
+  const result = await resultService.getResultById(req.params.id, req.user);
+  res.status(200).json({
+    success: true,
+    data: result,
+  });
+});
 
-exports.updateResult = async (req, res, next) => {
-  try {
-    const result = await resultService.updateResult(req.params.id, req.body);
-    if (!result) return res.status(404).json({ message: "Result not found" });
-    res.status(200).json({ data: result });
-  } catch (err) {
-    if (err.statusCode) {
-      return res.status(err.statusCode).json({ message: err.message });
-    }
-    next(err);
-  }
-};
+exports.updateResult = asyncHandler(async (req, res) => {
+  const result = await resultService.updateResult(req.params.id, req.body, req.user);
+  res.status(200).json({
+    success: true,
+    message: "Result updated successfully",
+    data: result,
+  });
+});
 
-exports.deleteResult = async (req, res, next) => {
-  try {
-    const result = await resultService.deleteResult(req.params.id);
-    if (!result) return res.status(404).json({ message: "Result not found" });
-    res.status(204).send();
-  } catch (err) {
-    next(err);
-  }
-};
+exports.deleteResult = asyncHandler(async (req, res) => {
+  await resultService.deleteResult(req.params.id, req.user);
+  res.status(200).json({
+    success: true,
+    message: "Result deleted successfully",
+  });
+});
 
-exports.examResults = async (req, res, next) => {
-  try {
-    const results = await resultService.getResultsByExam(req.params.examId);
-    res.status(200).json({ results: results.length, data: results });
-  } catch (err) {
-    next(err);
-  }
-};
+exports.examResults = asyncHandler(async (req, res) => {
+  const results = await resultService.getResultsByExam(req.params.examId, req.user);
+  res.status(200).json({
+    success: true,
+    results: results.length,
+    data: results,
+  });
+});

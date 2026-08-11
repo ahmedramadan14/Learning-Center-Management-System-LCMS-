@@ -1,63 +1,74 @@
-const attendanceModel = require("./attendance.model");
+const { check, param, validationResult } = require('express-validator');
+const ApiError = require('../../utils/ApiErrors');
 
-
-
-const ValidationCAttend = async (req,res,next)=>{
-
-    try{
-        // const { studendId, groupId, status, sessionId, method ,date}=req.body
-        //   if(!studendId || !groupId || !status || !sessionId || !date){
-        //     return res.status(400).json("Please Enter All Fields")
-        //   }
-        // if (status != "Present" && status!= "Absent" && status!="Late" && status!= "Excused"){
-        //     return res.status(400).json("Invalid Status")
-        // }
-        // if(isNaN(Date.parse(date))){
-        //     return res.status(400).json("Invalid Date")   
-        // }
-         next();
+const handleValidationErrors = (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        const errorMsg = errors.array().map(err => err.msg).join(', ');
+        return next(new ApiError(errorMsg, 400));
     }
+    next();
+};
 
-    catch(err){
-        return res.status(404).json("error");
-    }
-}
-const ValidationUAttend = async(req, res, next) => {
+const ValidationCAttend = [
+    check('studentCode')
+        .notEmpty().withMessage('Student code is required'),
+        
+    check('groupId')
+        .notEmpty().withMessage('GroupId is required')
+        .isMongoId().withMessage('Invalid groupId format'),
+        
+    check('status')
+        .notEmpty().withMessage('Status is required')
+        .isIn(["Present", "Absent", "Late", "Excused"]).withMessage('Invalid status value'),
+        
+    check('date')
+        .optional()
+        .isISO8601().toDate().withMessage('Invalid Date format'),
+        
+    check('method')
+        .optional()
+        .isIn(["Manual", "QR", "NFC", "Barcode"]).withMessage('Invalid method value'),
+        
+    handleValidationErrors
+];
 
-    try {
-        // const { studendId, status} = req.body
-        // if (!studendId || !status) {
-        //     return res.status(400).json("Please Enter All Fields")
-        // }
-        // if (status != "Present" && status != "Absent" && status != "Late" && status != "Excused") {
-        //     return res.status(400).json("Invalid Status")
-        // }
-        next();
-    }
+const ValidationUAttend = [
+    param('id')
+        .isMongoId().withMessage('Invalid Attendance ID'),
+        
+    check('status')
+        .optional()
+        .isIn(["Present", "Absent", "Late", "Excused"]).withMessage('Invalid status value'),
+        
+    check('date')
+        .optional()
+        .isISO8601().toDate().withMessage('Invalid Date format'),
+        
+    check('method')
+        .optional()
+        .isIn(["Manual", "QR", "NFC", "Barcode"]).withMessage('Invalid method value'),
+        
+    handleValidationErrors
+];
 
-    catch (err) {
-        return res.status(404).json("error");
-    }
-}
+const ValidationMongoId = [
+    param('id')
+        .isMongoId().withMessage('Invalid record ID'),
+        
+    handleValidationErrors
+];
 
-const ValidationId = async(req, res, next) => {
+const ValidationStudentCode = [
+    param('studentCode')
+        .notEmpty().withMessage('Student code is required'),
+        
+    handleValidationErrors
+];
 
-    try {
-        // const { studentId } = req.body
-        // if (!studentId) {
-        //     return res.status(400).json("Please Enter studentId")
-        // }
-        // const attend = await attendanceModel.findOne({ studentId: studentId });
-        // if(!attend){
-        //     return res.status(400).json("Invalid studentId")
-
-        // }
-        next();
-    }
-
-    catch (err) {
-        return res.status(404).json("error");
-    }
-}
-
-module.exports = { ValidationCAttend, ValidationUAttend, ValidationId }
+module.exports = { 
+    ValidationCAttend, 
+    ValidationUAttend, 
+    ValidationMongoId, 
+    ValidationStudentCode 
+};

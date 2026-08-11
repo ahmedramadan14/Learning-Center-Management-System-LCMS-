@@ -1,29 +1,55 @@
-const express = require("express")
-const router = express.Router()
-
+const express = require("express");
+const router = express.Router();
+const parentController = require("./parent.controller");
 const {
-    createParent,
-    getAllParents,
-    getOneParent,
-    deleteParent,
-    updateParent
-} = require("../parent/parent.controller.js")
+  createParentValidation,
+  getOneParentValidation,
+  deleteOneParentValidation,
+  updateParentValidation,
+} = require("./parent.validation");
+const authController = require("../auth/auth.controller.js");
+const validatorMiddleware = require("../../middlewares/validatorMiddleware");
 
-const {
+router.use(authController.protect);
+
+router.get(
+  "/dashboard",
+  authController.allowedTo("parent"),
+  parentController.getParentDashboard
+);
+
+router
+  .route("/")
+  .post(
+    authController.allowedTo("admin", "secretary"),
     createParentValidation,
+    validatorMiddleware,
+    parentController.createParent
+  )
+  .get(
+    authController.allowedTo("admin", "secretary"),
+    parentController.getAllParents
+  );
+
+router
+  .route("/:id")
+  .get(
+    authController.allowedTo("admin", "secretary", "parent"),
     getOneParentValidation,
+    validatorMiddleware,
+    parentController.getOneParent
+  )
+  .put(
+    authController.allowedTo("admin", "secretary", "parent"),
+    updateParentValidation,
+    validatorMiddleware,
+    parentController.updateParent
+  )
+  .delete(
+    authController.allowedTo("admin", "secretary"),
     deleteOneParentValidation,
-    updateParentValidation
-} = require("../parent/parent.validation.js")
+    validatorMiddleware,
+    parentController.deleteParent
+  );
 
-const authController = require("../auth/auth.controller.js")
-
-router.use(authController.protect)
-
-router.post("/", authController.allowedTo("admin", "secretary"), createParentValidation, createParent)
-router.get("/", authController.allowedTo("admin", "secretary"), getAllParents)
-router.get("/:id", getOneParentValidation, getOneParent)
-router.delete("/:id", authController.allowedTo("admin", "secretary"), deleteOneParentValidation, deleteParent)
-router.put("/:id", authController.allowedTo("admin", "secretary"), updateParentValidation, updateParent)
-
-module.exports = router
+module.exports = router;

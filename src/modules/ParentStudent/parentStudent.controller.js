@@ -1,164 +1,72 @@
-const parentStudentService = require("../ParentStudent/parentStudent.service");
+const asyncHandler = require("../../middlewares/asyncHandler");
+const parentStudentService = require("./parentStudent.service");
 
-// Create Parent-Student relation
-const createParentStudent = async (req, res) => {
-  try {
-    const newParentStudent =
-      await parentStudentService.createParentStudent(req.body);
+exports.createParentStudent = asyncHandler(async (req, res) => {
+  const newParentStudent = await parentStudentService.createParentStudent(req.body);
+  res.status(201).json({
+    success: true,
+    message: "Parent linked to student successfully",
+    data: newParentStudent,
+  });
+});
 
-    res.status(201).json({
-      message: "Parent linked to student successfully",
-      parentStudent: newParentStudent,
-    });
-  } catch (err) {
-    res.status(500).json({
-      message: err.message,
-    });
-  }
-};
+exports.getAllParentStudents = asyncHandler(async (req, res) => {
+  const parentStudents = await parentStudentService.getAllParentStudents();
+  res.status(200).json({
+    success: true,
+    results: parentStudents.length,
+    data: parentStudents,
+  });
+});
 
-// Get all relations
-const getAllParentStudents = async (req, res) => {
-  try {
-    const parentStudents =
-      await parentStudentService.getAllParentStudents();
+exports.getOneParentStudent = asyncHandler(async (req, res) => {
+  const parentStudent = await parentStudentService.getOneParentStudent(req.params.id);
+  res.status(200).json({
+    success: true,
+    data: parentStudent,
+  });
+});
 
-    res.status(200).json({
-      parentStudents,
-    });
-  } catch (err) {
-    res.status(500).json({
-      message: err.message,
-    });
-  }
-};
+exports.getParentStudents = asyncHandler(async (req, res) => {
+  const students = await parentStudentService.getParentStudents(req.params.parentId);
+  res.status(200).json({
+    success: true,
+    results: students.length,
+    data: students,
+  });
+});
 
-// Get relation by ID
-const getOneParentStudent = async (req, res) => {
-  try {
-    const { id } = req.params;
+exports.getStudentParents = asyncHandler(async (req, res) => {
+  const parents = await parentStudentService.getStudentParents(req.params.studentId);
+  res.status(200).json({
+    success: true,
+    results: parents.length,
+    data: parents,
+  });
+});
 
-    const parentStudent =
-      await parentStudentService.getOneParentStudent(id);
+exports.deleteParentStudent = asyncHandler(async (req, res) => {
+  await parentStudentService.deleteParentStudent(req.params.id);
+  res.status(200).json({
+    success: true,
+    message: "Student unlinked from parent successfully",
+  });
+});
 
-    if (!parentStudent) {
-      return res.status(404).json({
-        message: "Parent-student relation not found",
-      });
-    }
+exports.linkChildByCode = asyncHandler(async (req, res) => {
+  const parentStudent = await parentStudentService.linkChildByCode(req.user, req.body.studentCode);
+  res.status(201).json({
+    success: true,
+    message: "Child linked successfully",
+    data: parentStudent,
+  });
+});
 
-    res.status(200).json({
-      parentStudent,
-    });
-  } catch (err) {
-    res.status(500).json({
-      message: err.message,
-    });
-  }
-};
-
-// Get all students of a parent
-const getParentStudents = async (req, res) => {
-  try {
-    const { parentId } = req.params;
-
-    const students =
-      await parentStudentService.getParentStudents(parentId);
-
-    res.status(200).json({
-      students,
-    });
-  } catch (err) {
-    res.status(500).json({
-      message: err.message,
-    });
-  }
-};
-
-// Get all parents of a student
-const getStudentParents = async (req, res) => {
-  try {
-    const { studentId } = req.params;
-
-    const parents =
-      await parentStudentService.getStudentParents(studentId);
-
-    res.status(200).json({
-      parents,
-    });
-  } catch (err) {
-    res.status(500).json({
-      message: err.message,
-    });
-  }
-};
-
-// Delete relation
-const deleteParentStudent = async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    const deletedParentStudent =
-      await parentStudentService.deleteParentStudent(id);
-
-    if (!deletedParentStudent) {
-      return res.status(404).json({
-        message: "Parent-student relation not found",
-      });
-    }
-
-    res.status(200).json({
-      message: "Student unlinked from parent successfully",
-      parentStudent: deletedParentStudent,
-    });
-  } catch (err) {
-    res.status(500).json({
-      message: err.message,
-    });
-  }
-};
-
-const linkChildByCode = async (req, res) => {
-  try {
-    const { studentCode } = req.body;
-
-    const parentStudent = await parentStudentService.linkChildByCode(
-      req.user._id,
-      studentCode
-    );
-
-    res.status(201).json({
-      message: "Child linked successfully",
-      parentStudent,
-    });
-  } catch (err) {
-    res.status(err.statusCode || 500).json({
-      message: err.message,
-    });
-  }
-};
-
-const getMyChildren = async (req, res) => {
-  try {
-    const students = await parentStudentService.getMyChildren(req.user._id);
-
-    res.status(200).json({
-      students,
-    });
-  } catch (err) {
-    res.status(err.statusCode || 500).json({
-      message: err.message,
-    });
-  }
-};
-
-module.exports = {
-  createParentStudent,
-  getAllParentStudents,
-  getOneParentStudent,
-  getParentStudents,
-  getStudentParents,
-  deleteParentStudent,
-  linkChildByCode,
-  getMyChildren,
-};
+exports.getMyChildren = asyncHandler(async (req, res) => {
+  const students = await parentStudentService.getMyChildren(req.user);
+  res.status(200).json({
+    success: true,
+    results: students.length,
+    data: students,
+  });
+});
