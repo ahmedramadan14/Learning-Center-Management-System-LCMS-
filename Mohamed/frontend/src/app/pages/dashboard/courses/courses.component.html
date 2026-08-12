@@ -1,0 +1,668 @@
+<section class="courses-page">
+
+  <!-- ==================== Header ==================== -->
+
+  <div class="courses-header-banner">
+    <div class="courses-page__header">
+
+      <div>
+        <h2 class="courses-page__title">Courses</h2>
+
+        <p class="courses-page__subtitle">
+          Manage and monitor all courses in your learning center.
+        </p>
+      </div>
+
+      <div class="courses-page__actions">
+        <button
+          type="button"
+          class="btn btn--primary"
+          (click)="onAddCourseClick()"
+        >
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path
+              d="M12 5v14M5 12h14"
+              stroke-linecap="round"
+            ></path>
+          </svg>
+
+          Add Course
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- ==================== Statistics ==================== -->
+
+  <div class="stats-grid">
+
+    <!-- Total Courses -->
+    <div class="stat-card">
+
+      <div class="stat-icon stat-icon--blue">
+        <i class="fa-solid fa-book"></i>
+      </div>
+
+      <div class="stat-content">
+        <span class="stat-title">Total Courses</span>
+        <strong>{{ courses.length }}</strong>
+        <span class="stat-description">All courses</span>
+      </div>
+
+    </div>
+
+
+    <!-- Active Courses -->
+    <div class="stat-card">
+
+      <div class="stat-icon stat-icon--green">
+        <i class="fa-solid fa-circle-check"></i>
+      </div>
+
+      <div class="stat-content">
+        <span class="stat-title">Active Courses</span>
+        <strong>{{ activeCoursesCount }}</strong>
+        <span class="stat-description">Currently active</span>
+      </div>
+
+    </div>
+
+
+    <!-- Inactive Courses -->
+    <div class="stat-card">
+
+      <div class="stat-icon stat-icon--orange">
+        <i class="fa-solid fa-clock"></i>
+      </div>
+
+      <div class="stat-content">
+        <span class="stat-title">Inactive Courses</span>
+        <strong>{{ inactiveCoursesCount }}</strong>
+        <span class="stat-description">Currently inactive</span>
+      </div>
+
+    </div>
+
+
+    <!-- New Courses -->
+    <div class="stat-card">
+
+      <div class="stat-icon stat-icon--purple">
+        <i class="fa-solid fa-book-medical"></i>
+      </div>
+
+      <div class="stat-content">
+        <span class="stat-title">New Courses</span>
+        <strong>{{ newCoursesCount }}</strong>
+        <span class="stat-description">This month</span>
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- ==================== Courses List ==================== -->
+
+  <div class="courses-card">
+
+    <!-- Card Header -->
+
+    <div class="courses-card__header">
+
+      <div>
+        <h3>Courses List</h3>
+
+        <p>
+          {{ filteredCourses.length }} courses found
+        </p>
+      </div>
+
+
+      <!-- Filters -->
+
+      <div class="courses-filters">
+
+        <!-- Category Filter -->
+
+        <select
+          [(ngModel)]="selectedCategory"
+          (change)="applyFilters()"
+        >
+
+          <option value="">
+            All Categories
+          </option>
+
+          <option
+            *ngFor="let category of categories"
+            [value]="category"
+          >
+            {{ category }}
+          </option>
+
+        </select>
+
+
+        <!-- Status Filter -->
+
+        <select
+          [(ngModel)]="selectedStatus"
+          (change)="applyFilters()"
+        >
+
+          <option value="">
+            All Status
+          </option>
+
+          <option value="Active">
+            Active
+          </option>
+
+          <option value="Inactive">
+            Inactive
+          </option>
+
+        </select>
+
+
+        <!-- Search -->
+
+        <div class="search-box">
+
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+
+            <circle
+              cx="11"
+              cy="11"
+              r="8"
+            ></circle>
+
+            <path
+              d="m21 21-4.3-4.3"
+            ></path>
+
+          </svg>
+
+          <input
+            type="text"
+            placeholder="Search courses..."
+            [(ngModel)]="searchValue"
+            (input)="applyFilters()"
+          />
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- ==================== Courses Table ==================== -->
+
+    <div class="table-wrapper">
+
+      <table class="courses-table">
+
+        <thead>
+
+          <tr>
+            <th>COURSE</th>
+            <th>INSTRUCTOR</th>
+            <th>CATEGORY</th>
+            <th>STUDENTS</th>
+            <th>DURATION</th>
+            <th>STATUS</th>
+            <th>ACTIONS</th>
+          </tr>
+
+        </thead>
+
+
+        <tbody>
+
+          <!-- Course Rows -->
+
+          <tr
+            *ngFor="let course of filteredCourses"
+          >
+
+            <!-- Course -->
+
+            <td>
+
+              <div class="course-cell">
+
+                <div class="course-avatar">
+                  {{ getInitials(course.name) }}
+                </div>
+
+                <div class="course-info">
+
+                  <strong>
+                    {{ course.name }}
+                  </strong>
+
+                  <span>
+                    {{ course.level }}
+                  </span>
+
+                </div>
+
+              </div>
+
+            </td>
+
+
+            <!-- Instructor -->
+
+            <td>
+
+              <span class="text-muted">
+                {{ course.instructor }}
+              </span>
+
+            </td>
+
+
+            <!-- Category -->
+
+            <td>
+
+              <span class="category-badge">
+                {{ course.category }}
+              </span>
+
+            </td>
+
+
+            <!-- Students -->
+
+            <td>
+              {{ course.studentsCount }}
+            </td>
+
+
+            <!-- Duration -->
+
+            <td>
+              {{ course.duration }}
+            </td>
+
+
+            <!-- Status -->
+
+            <td>
+
+              <span
+                class="status-badge"
+                [class.status-badge--active]="course.status === 'Active'"
+                [class.status-badge--inactive]="course.status === 'Inactive'"
+              >
+
+                <span></span>
+
+                {{ course.status }}
+
+              </span>
+
+            </td>
+
+
+            <!-- Actions -->
+
+            <td>
+
+              <div class="actions">
+
+                <!-- View -->
+
+                <button
+                  type="button"
+                  title="View"
+                  (click)="viewCourse(course)"
+                >
+                  <i class="fa-regular fa-eye"></i>
+                </button>
+
+
+                <!-- Edit -->
+
+                <button
+                  type="button"
+                  title="Edit"
+                  (click)="editCourse(course)"
+                >
+                  <i class="fa-solid fa-pen"></i>
+                </button>
+
+
+                <!-- Delete -->
+
+                <button
+                  type="button"
+                  title="Delete"
+                  (click)="deleteCourse(course)"
+                >
+                  <i class="fa-regular fa-trash-can"></i>
+                </button>
+
+              </div>
+
+            </td>
+
+          </tr>
+
+
+          <!-- ==================== Empty State ==================== -->
+
+          <tr
+            *ngIf="filteredCourses.length === 0"
+          >
+
+            <td
+              colspan="7"
+              class="empty-state"
+            >
+
+              <div class="empty-state__icon">
+                <i class="fa-solid fa-book"></i>
+              </div>
+
+              <strong>
+                No courses found
+              </strong>
+
+              <span>
+                Try changing your search or filters.
+              </span>
+
+            </td>
+
+          </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- ========================================================= -->
+<!-- Add / Edit Course Modal -->
+<!-- ========================================================= -->
+
+<div
+  class="modal-overlay"
+  *ngIf="isModalOpen"
+>
+
+  <div class="modal-card">
+
+    <h3>
+      {{ isEditMode ? 'Edit Course' : 'New Course' }}
+    </h3>
+
+
+    <!-- Course Name -->
+
+    <div class="form-group">
+
+      <label>Course Name</label>
+
+      <input
+        type="text"
+        [(ngModel)]="newCourse.name"
+        placeholder="Enter course name"
+      />
+
+    </div>
+
+
+    <!-- Instructor -->
+
+    <div class="form-group">
+
+      <label>Instructor</label>
+
+      <input
+        type="text"
+        [(ngModel)]="newCourse.instructor"
+        placeholder="Enter instructor name"
+      />
+
+    </div>
+
+
+    <!-- Category -->
+
+    <div class="form-group">
+
+      <label>Category</label>
+
+      <select
+        [(ngModel)]="newCourse.category"
+      >
+
+        <option value="">
+          Select category
+        </option>
+
+        <option
+          *ngFor="let category of categories"
+          [value]="category"
+        >
+          {{ category }}
+        </option>
+
+      </select>
+
+    </div>
+
+
+    <!-- Level -->
+
+    <div class="form-group">
+
+      <label>Level</label>
+
+      <select
+        [(ngModel)]="newCourse.level"
+      >
+
+        <option value="">
+          Select level
+        </option>
+
+        <option value="Beginner">
+          Beginner
+        </option>
+
+        <option value="Intermediate">
+          Intermediate
+        </option>
+
+        <option value="Advanced">
+          Advanced
+        </option>
+
+      </select>
+
+    </div>
+
+
+    <!-- Students Count -->
+
+    <div class="form-group">
+
+      <label>Students</label>
+
+      <input
+        type="number"
+        min="0"
+        [(ngModel)]="newCourse.studentsCount"
+        placeholder="Enter number of students"
+      />
+
+    </div>
+
+
+    <!-- Duration -->
+
+    <div class="form-group">
+
+      <label>Duration</label>
+
+      <input
+        type="text"
+        [(ngModel)]="newCourse.duration"
+        placeholder="Example: 12 Weeks"
+      />
+
+    </div>
+
+
+    <!-- Status -->
+
+    <div class="form-group">
+
+      <label>Status</label>
+
+      <select
+        [(ngModel)]="newCourse.status"
+      >
+
+        <option value="Active">
+          Active
+        </option>
+
+        <option value="Inactive">
+          Inactive
+        </option>
+
+      </select>
+
+    </div>
+
+
+    <!-- Modal Actions -->
+
+    <div class="modal-actions">
+
+      <button
+        type="button"
+        class="btn btn--ghost-dark"
+        (click)="closeModal()"
+      >
+        Cancel
+      </button>
+
+
+      <button
+        type="button"
+        class="btn btn--primary modal-save-btn"
+        (click)="saveCourse()"
+      >
+        {{ isEditMode ? 'Update Course' : 'Save Course' }}
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- ========================================================= -->
+<!-- Course Details Modal -->
+<!-- ========================================================= -->
+
+<div
+  class="modal-overlay"
+  *ngIf="isDetailsModalOpen && selectedCourse"
+>
+
+  <div class="modal-card">
+
+    <h3>
+      Course Details
+    </h3>
+
+
+    <div class="course-details">
+
+      <div>
+        <strong>Course Name:</strong>
+        {{ selectedCourse.name }}
+      </div>
+
+      <div>
+        <strong>Instructor:</strong>
+        {{ selectedCourse.instructor }}
+      </div>
+
+      <div>
+        <strong>Category:</strong>
+        {{ selectedCourse.category }}
+      </div>
+
+      <div>
+        <strong>Level:</strong>
+        {{ selectedCourse.level }}
+      </div>
+
+      <div>
+        <strong>Students:</strong>
+        {{ selectedCourse.studentsCount }}
+      </div>
+
+      <div>
+        <strong>Duration:</strong>
+        {{ selectedCourse.duration }}
+      </div>
+
+      <div>
+        <strong>Status:</strong>
+        {{ selectedCourse.status }}
+      </div>
+
+    </div>
+
+
+    <!-- Modal Actions -->
+
+    <div class="modal-actions">
+
+      <button
+        type="button"
+        class="btn btn--primary modal-save-btn"
+        (click)="closeDetailsModal()"
+      >
+        Close
+      </button>
+
+    </div>
+
+  </div>
+
+</div>

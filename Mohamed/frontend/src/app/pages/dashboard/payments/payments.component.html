@@ -1,0 +1,123 @@
+<section class="payments-page">
+
+    <div class="payments-header-banner">
+        <div class="payments-page__header">
+            <h2 class="payments-page__title">Payments </h2>
+
+            <div class="payments-page__actions">
+                <button type="button" class="btn btn--ghost" (click)="onFilterClick()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M4 6h16M7 12h10M10 18h4" stroke-linecap="round" />
+                    </svg>
+                    Filter
+                </button>
+
+                <button type="button" class="btn btn--primary" (click)="onRecordPaymentClick()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 5v14M5 12h14" stroke-linecap="round" />
+                    </svg>
+                    Record Payment
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="table-wrapper">
+        <table class="payments-table">
+            <thead>
+                <tr>
+                    <th>Student</th>
+                    <th>Group</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th>Due Date</th>
+                    <th>Payment Date</th>
+                    <th class="text-right">Actions</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <tr *ngFor="let payment of payments">
+
+                    <td class="student-cell-wrapper">
+                        <div class="student-cell">
+                            <img [src]="payment.avatarUrl" [alt]="payment.studentName" class="avatar" />
+                            <span>{{ payment.studentName }}</span>
+                        </div>
+                    </td>
+                    <td class="text-muted">{{ payment.group }}</td>
+                    <td>{{ payment.amount | number }} EGP</td>
+                    <td>
+                        <span [class]="statusClass(payment.status)">{{ payment.status }}</span>
+                    </td>
+                    <td class="text-muted">{{ payment.dueDate }}</td>
+                    <td class="text-muted">{{ payment.paymentDate ?? '–' }}</td>
+                    <td class="text-right">
+                        <button type="button" class="icon-btn" (click)="onDownloadClick(payment)">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M12 3v12m0 0l-4-4m4 4l4-4M4 19h16" stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                            </svg>
+                        </button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+
+    <div class="payments_page">
+
+        <nav class="pagination" aria-label="Payments pagination">
+            <button type="button" class="pagination__btn" [disabled]="currentPage === 1"
+                (click)="goToPage(currentPage - 1)">
+                &lt;
+            </button>
+            <span class="text-muted pagination-info">
+                {{ currentPage }} / {{ totalPages }}
+            </span>
+
+            <button type="button" class="pagination__btn" [disabled]="currentPage === totalPages"
+                (click)="goToPage(currentPage + 1)">
+                &gt;
+            </button>
+        </nav>
+    </div>
+</section>
+
+
+<div class="modal-overlay" *ngIf="isModalOpen">
+    <div class="modal-card">
+        <h3>Record New Payment</h3>
+
+        <div class="form-group">
+            <label>Student Name</label>
+            <input type="text" [(ngModel)]="newPayment.studentName" placeholder="Enter student name">
+        </div>
+
+        <div class="form-group">
+            <label>Group </label>
+            <input type="text" [(ngModel)]="newPayment.group" placeholder="Enter student Group">
+        </div>
+
+        <div class="form-group">
+            <label>Amount (EGP)</label>
+            <input type="number" [(ngModel)]="newPayment.amount" placeholder="Enter amount">
+        </div>
+
+        <div class="form-group">
+            <label>Status</label>
+            <select [(ngModel)]="newPayment.status">
+                <option value="Paid">Paid</option>
+                <option value="Pending">Pending</option>
+                <option value="Overdue">Overdue</option>
+            </select>
+        </div>
+
+        <div class="modal-actions">
+            <button type="button" class="btn btn--ghost-dark" (click)="closeModal()">Cancel</button>
+            <button type="button" class="btn btn--primary" (click)="savePayment()">Save Payment</button>
+        </div>
+    </div>
+</div>

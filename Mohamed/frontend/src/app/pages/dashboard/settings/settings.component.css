@@ -1,0 +1,508 @@
+  css
+/* ========================================
+SETTINGS PAGE
+======================================== */
+
+.settings-page {
+  padding: 25px;
+
+  background-color: var(--background-color);
+
+  border-radius: var(--radius-large);
+
+  min-height: calc(100vh - 50px);
+}
+
+
+/* ========================================
+HEADER
+======================================== */
+
+.settings-header-banner {
+  background: var(--primary-color);
+
+  padding: 18px 25px;
+
+  border-radius: var(--radius-large);
+
+  margin-bottom: 25px;
+
+  box-shadow:
+    0 4px 12px rgba(37, 99, 235, 0.12);
+}
+
+
+.settings-page__header {
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  gap: 20px;
+}
+
+
+.settings-page__title {
+  margin: 0 0 4px;
+
+  color: var(--white);
+
+  font-size: 24px;
+
+  font-weight: 700;
+}
+
+
+.settings-page__subtitle {
+  margin: 0;
+
+  color: rgba(255, 255, 255, 0.85);
+
+  font-size: 13px;
+}
+
+
+/* ========================================
+SETTINGS CARD
+======================================== */
+
+.settings-card {
+  max-width: 900px;
+
+  margin: 0 auto;
+
+  background: var(--white);
+
+  border: 1px solid var(--border-color);
+
+  border-radius: var(--radius-large);
+
+  overflow: hidden;
+
+  box-shadow:
+    0 2px 8px rgba(15, 23, 42, 0.03);
+}
+
+
+/* ========================================
+SETTINGS SECTION
+======================================== */
+
+.settings-section {
+  padding: 25px;
+
+  border-bottom:
+    1px solid var(--border-color);
+}
+
+
+.settings-section:last-of-type {
+  border-bottom: none;
+}
+
+
+/* ========================================
+SECTION HEADER
+======================================== */
+
+.settings-section__header {
+  display: flex;
+
+  align-items: center;
+
+  gap: 14px;
+
+  margin-bottom: 22px;
+}
+
+
+.settings-section__icon {
+  width: 44px;
+
+  height: 44px;
+
+  flex-shrink: 0;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  border-radius: 10px;
+
+  font-size: 17px;
+}
+
+
+.settings-section__icon--blue {
+  background: #eff6ff;
+
+  color: var(--primary-color);
+}
+
+
+.settings-section__icon--purple {
+  background: #f5f3ff;
+
+  color: #7c3aed;
+}
+
+
+.settings-section__header h3 {
+  margin: 0 0 4px;
+
+  color: var(--text-color);
+
+  font-size: 17px;
+
+  font-weight: 700;
+}
+
+
+.settings-section__header p {
+  margin: 0;
+
+  color: var(--text-light);
+
+  font-size: 12px;
+}
+
+
+/* ========================================
+SETTING ITEM
+======================================== */
+
+.setting-item {
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  gap: 20px;
+
+  padding: 17px;
+
+  background: var(--background-color);
+
+  border: 1px solid var(--border-color);
+
+  border-radius: 10px;
+}
+
+
+.setting-item__info {
+  flex: 1;
+}
+
+
+.setting-item__title {
+  display: flex;
+
+  align-items: center;
+
+  gap: 8px;
+
+  color: var(--text-color);
+
+  font-size: 14px;
+
+  font-weight: 600;
+}
+
+
+.setting-item__title i {
+  color: var(--primary-color);
+
+  width: 18px;
+
+  text-align: center;
+}
+
+
+.setting-item__info p {
+  margin: 6px 0 0;
+
+  color: var(--text-light);
+
+  font-size: 12px;
+}
+
+
+/* ========================================
+TOGGLE SWITCH
+======================================== */
+
+.switch {
+  position: relative;
+
+  width: 48px;
+
+  height: 26px;
+
+  flex-shrink: 0;
+
+  cursor: pointer;
+}
+
+
+.switch input {
+  opacity: 0;
+
+  width: 0;
+
+  height: 0;
+}
+
+
+.slider {
+  position: absolute;
+
+  inset: 0;
+
+  background: #cbd5e1;
+
+  border-radius: 999px;
+
+  transition: 0.25s ease;
+}
+
+
+.slider::before {
+  content: "";
+
+  position: absolute;
+
+  width: 20px;
+
+  height: 20px;
+
+  left: 3px;
+
+  top: 3px;
+
+  background: var(--white);
+
+  border-radius: 50%;
+
+  box-shadow:
+    0 2px 4px rgba(15, 23, 42, 0.15);
+
+  transition: 0.25s ease;
+}
+
+
+.switch input:checked + .slider {
+  background: var(--primary-color);
+}
+
+
+.switch input:checked + .slider::before {
+  transform: translateX(22px);
+}
+
+
+/* ========================================
+LANGUAGE SELECT
+======================================== */
+
+.language-select {
+  min-width: 180px;
+}
+
+
+.language-select select {
+  width: 100%;
+
+  padding: 10px 12px;
+
+  background: var(--white);
+
+  color: var(--text-color);
+
+  border: 1px solid var(--border-color);
+
+  border-radius: 8px;
+
+  font-size: 13px;
+
+  outline: none;
+
+  cursor: pointer;
+}
+
+
+.language-select select:focus {
+  border-color: var(--primary-color);
+
+  box-shadow:
+    0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+
+/* ========================================
+FOOTER
+======================================== */
+
+.settings-footer {
+  padding: 18px 25px;
+
+  background: var(--background-color);
+
+  border-top:
+    1px solid var(--border-color);
+}
+
+
+.current-settings {
+  display: flex;
+
+  align-items: center;
+
+  gap: 8px;
+
+  color: var(--text-light);
+
+  font-size: 12px;
+}
+
+
+.current-settings i {
+  color: var(--success-color);
+
+  font-size: 14px;
+}
+
+
+/* ========================================
+DARK MODE
+======================================== */
+
+/*
+  Put this section in your GLOBAL styles.css
+  if you want dark mode to affect every
+  Angular component.
+*/
+
+body.dark-mode {
+  --background-color: #0f172a;
+
+  --white: #1e293b;
+
+  --text-color: #f1f5f9;
+
+  --text-light: #94a3b8;
+
+  --border-color: #334155;
+
+  --primary-color: #3b82f6;
+
+  --primary-dark: #2563eb;
+
+  --success-color: #22c55e;
+}
+
+
+body.dark-mode {
+  background-color: #0f172a;
+
+  color: #f1f5f9;
+}
+
+
+body.dark-mode .settings-header-banner {
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+
+body.dark-mode .settings-card {
+  box-shadow:
+    0 5px 20px rgba(0, 0, 0, 0.2);
+}
+
+
+body.dark-mode .settings-section__icon--blue {
+  background: #172554;
+
+  color: #60a5fa;
+}
+
+
+body.dark-mode .settings-section__icon--purple {
+  background: #2e1065;
+
+  color: #a78bfa;
+}
+
+
+body.dark-mode .setting-item {
+  background: #0f172a;
+}
+
+
+body.dark-mode .language-select select {
+  background: #1e293b;
+
+  color: #f1f5f9;
+}
+
+
+body.dark-mode .settings-footer {
+  background: #0f172a;
+}
+
+
+/* ========================================
+RESPONSIVE
+======================================== */
+
+@media (max-width: 750px) {
+
+  .settings-page {
+    padding: 18px;
+  }
+
+
+  .settings-page__header {
+    align-items: flex-start;
+
+    flex-direction: column;
+  }
+
+
+  .settings-card {
+    width: 100%;
+  }
+
+
+  .settings-section {
+    padding: 18px;
+  }
+
+
+  .setting-item {
+    align-items: flex-start;
+
+    flex-direction: column;
+  }
+
+
+  .switch {
+    align-self: flex-end;
+  }
+
+
+  .language-select {
+    width: 100%;
+  }
+
+
+  .settings-footer {
+    padding: 18px;
+  }
+
+}
+
