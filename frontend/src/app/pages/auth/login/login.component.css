@@ -286,6 +286,12 @@
     text-decoration: underline;
 }
 
+.form-error {
+    margin-top: 12px;
+    color: #b91c1c;
+    font-size: 13px;
+}
+
 @media (max-width: 860px) {
     .login-container {
         flex-direction: column;

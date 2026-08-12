@@ -17,6 +17,8 @@ import { PaymentsComponent } from './pages/dashboard/payments/payments.component
 import { SettingsComponent } from './pages/dashboard/settings/settings.component';
 import { ResultsComponent } from './pages/dashboard/results/results.component';
 import { ScheduleComponent } from './pages/dashboard/schedule/schedule.component';
+import { ManagementPageComponent } from './pages/dashboard/management-page/management-page.component';
+import { AuthGuard } from './services/auth/auth.guard';
 const routes: Routes = [
   {
     path: '',
@@ -36,6 +38,7 @@ const routes: Routes = [
   {
     path: 'dashboard',
     component: DashboardLayoutComponent,
+    canActivate: [AuthGuard],
     children: [
       {
         path: '',
@@ -43,47 +46,58 @@ const routes: Routes = [
       },
       {
         path: 'students',
-        component: StudentsComponent
+        component: ManagementPageComponent,
+        data: { resource: 'students' }
       },
       {
         path: 'teachers',
-        component: TeachersComponent
+        component: ManagementPageComponent,
+        data: { resource: 'teachers' }
       },
       {
         path: 'courses',
-        component: CoursesComponent
+        component: ManagementPageComponent,
+        data: { resource: 'courses' }
       },
       {
         path: 'classes',
-        component: ClassesComponent
+        component: ManagementPageComponent,
+        data: { resource: 'classes' }
       },
       {
         path: 'schedule',
-        component: ScheduleComponent
+        component: ManagementPageComponent,
+        data: { resource: 'schedule' }
       },
       {
         path: 'parents',
-        component: ParentsComponent
+        component: ManagementPageComponent,
+        data: { resource: 'parents' }
       },
       {
         path: 'secretaries',
-        component: SecretariesComponent
+        component: ManagementPageComponent,
+        data: { resource: 'secretaries' }
       },
       {
         path: 'attendance',
-        component: AttendanceComponent
+        component: ManagementPageComponent,
+        data: { resource: 'attendance' }
       },
       {
         path: 'exams',
-        component: ExamsComponent
+        component: ManagementPageComponent,
+        data: { resource: 'exams' }
       },
       {
         path: 'payments',
-        component: PaymentsComponent
+        component: ManagementPageComponent,
+        data: { resource: 'payments' }
       },
       {
         path: 'results',
-        component: ResultsComponent
+        component: ManagementPageComponent,
+        data: { resource: 'results' }
       },
       {
         path: 'settings',

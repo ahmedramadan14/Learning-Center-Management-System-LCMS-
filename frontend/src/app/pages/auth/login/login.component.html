@@ -42,10 +42,10 @@
 
                 <form (ngSubmit)="onSubmit()" #loginForm="ngForm">
                     <div class="form-group">
-                        <label for="email">Email</label>
+                        <label for="phone">Phone</label>
                         <div class="input-with-icon">
-                            <i class="fa-regular fa-envelope"></i>
-                            <input type="email" id="email" name="email" ngModel required placeholder="you@gmail.com">
+                            <i class="fa-solid fa-phone"></i>
+                            <input type="tel" id="phone" name="phone" [(ngModel)]="credentials.phone" required placeholder="01012345678">
                         </div>
                     </div>
 
@@ -57,7 +57,7 @@
                         <div class="input-with-icon">
                             <i class="fa-regular fa-lock"></i>
 
-                            <input [type]="showPassword ? 'text' : 'password'" id="password" name="password" ngModel
+                            <input [type]="showPassword ? 'text' : 'password'" id="password" name="password" [(ngModel)]="credentials.password"
                                 required placeholder="Enter your password">
 
                             <i class="fa-regular toggle-password" [ngClass]="showPassword ? 'fa-eye' : 'fa-eye-slash'"
@@ -73,9 +73,11 @@
                         </label>
                     </div>
 
-                    <button type="submit" class="btn btn-primary" [disabled]="!loginForm.valid">
-                        Sign in
+                    <button type="submit" class="btn btn-primary" [disabled]="!loginForm.valid || loading">
+                        {{ loading ? 'Signing in...' : 'Sign in' }}
                     </button>
+
+                    <p class="form-error" *ngIf="error">{{ error }}</p>
 
                     <div class="signup-link">
                         New to LCMS? <a href="/register">Create an account</a>

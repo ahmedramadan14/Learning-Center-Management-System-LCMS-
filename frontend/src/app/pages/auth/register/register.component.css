@@ -176,6 +176,19 @@
   padding: 10px 20px;
 }
 
+.form-feedback {
+  margin-top: 12px;
+  font-size: 13px;
+}
+
+.form-feedback--error {
+  color: #b91c1c;
+}
+
+.form-feedback--success {
+  color: #15803d;
+}
+
 .login-link {
   margin-top: 15px;
   text-align: center;

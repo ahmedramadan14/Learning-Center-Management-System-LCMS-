@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 
 @Component({
   selector: 'app-sidebar',
@@ -6,6 +6,8 @@ import { Component } from '@angular/core';
   styleUrls: ['./sidebar.component.css']
 })
 export class SidebarComponent {
+  @Input() open = true;
+  @Output() closeRequested = new EventEmitter<void>();
 
   menuItems = [
     { label: 'Dashboard', icon: '⌂', route: '/dashboard' },
