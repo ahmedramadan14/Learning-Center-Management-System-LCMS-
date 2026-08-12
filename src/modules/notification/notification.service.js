@@ -76,58 +76,22 @@ const listNotifications = async (query) => {
 
 const updateNotification = async (id, data) => {
   const notification = await findNotificationById(id);
-  const previousNotification = notification.toObject();
 
-  Object.assign(
-    notification,
-    pick(data, ["title", "body", "type", "targetRole", "targetUserIds"])
-  );
+  Object.assign(notification, pick(data, ["title", "body", "type", "targetRole", "targetUserIds"]));
   await notification.save();
 
-  // Return both so the controller can broadcast the update
-  return { notification, previousNotification };
+  return notification;
 };
 
 const deleteNotification = async (id) => {
   const notification = await findNotificationById(id);
-  const deletedNotification = notification.toObject();
-
   await notification.deleteOne();
-
-  // Return the deleted doc so the controller can broadcast the deletion
-  return deletedNotification;
 };
-const recordPaymentByCode = async (
-  studentCode,
-  groupId,
-  amount,
-  recordedBy
-) => {
-  const student = await Student.findOne({ studentCode });
 
-  if (!student) {
-    throw new ApiError("Student not found.", 404);
-  }
-
-  const payment = await Payment.findOne({
-    studentId: student._id,
-    groupId,
-  });
-
-  if (!payment) {
-    throw new ApiError(
-      "Payment not found for this student and group.",
-      404
-    );
-  }
-
-  return recordPayment(payment._id, amount, recordedBy);
-};
 module.exports = {
   createNotification,
   listNotifications,
   findNotificationById,
   updateNotification,
   deleteNotification,
-  recordPaymentByCode,
 };

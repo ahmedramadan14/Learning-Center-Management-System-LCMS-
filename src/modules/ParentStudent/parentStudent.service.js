@@ -1,4 +1,4 @@
-const ParentStudent = require("./parentStudent.model"); // 🌟 إصلاح اسم الملف (Lower CamelCase)
+const ParentStudent = require("./parentStudent.model"); 
 const Parent = require("../parent/parent.model");
 const Student = require("../student/student.model");
 const ApiError = require("../../utils/ApiErrors");

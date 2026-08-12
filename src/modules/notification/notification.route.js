@@ -1,4 +1,3 @@
-const authController = require("../auth/auth.controller");
 const express = require("express");
 
 const {
@@ -17,12 +16,7 @@ const {
 
 const router = express.Router();
 
-router.route("/").get(validateNotificationList, getAll).post(
-  authController.protect,
-  authController.allowedTo("admin", "secretary", "teacher"),
-  validateCreateNotification,
-  create
-);
+router.route("/").get(validateNotificationList, getAll).post(validateCreateNotification, create);
 
 router
   .route("/:id")

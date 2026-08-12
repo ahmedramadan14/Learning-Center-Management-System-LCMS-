@@ -1,25 +1,18 @@
-const http = require("http");
-const mongoose = require("mongoose");
+const path = require("path");
 const dotenv = require("dotenv");
 
-const { initializeSocket } = require("./socket");
+dotenv.config({ path: path.join(__dirname, "../.env") });
 
-dotenv.config();
-
+const mongoose = require("mongoose");
 const app = require("./app");
-const httpServer = http.createServer(app);
 
 // console.log(process.env.MONGO_URI);
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => {
     console.log("MongoDB Connected");
-
     const PORT = process.env.PORT || 3000;
-
-    initializeSocket(httpServer);
-
-    httpServer.listen(PORT, () => {
+    app.listen(PORT, () => {
       console.log(`Server is running on port ${PORT}`);
     });
   })

@@ -1,10 +1,5 @@
 const asyncHandler = require("../../middlewares/asyncHandler");
 const {
-  emitNotificationCreated,
-  emitNotificationUpdated,
-  emitNotificationDeleted,
-} = require("../../socket");
-const {
   createNotification,
   listNotifications,
   findNotificationById,
@@ -16,7 +11,6 @@ const getActorId = (req) => req.user?._id || req.body.createdBy;
 
 const create = asyncHandler(async (req, res) => {
   const notification = await createNotification(req.body, getActorId(req));
-  emitNotificationCreated(notification);
 
   res.status(201).json({
     status: "success",
@@ -50,8 +44,7 @@ const getOne = asyncHandler(async (req, res) => {
 });
 
 const update = asyncHandler(async (req, res) => {
-  const { notification, previousNotification } = await updateNotification(req.params.id, req.body);
-  emitNotificationUpdated(notification, previousNotification);
+  const notification = await updateNotification(req.params.id, req.body);
 
   res.status(200).json({
     status: "success",
@@ -60,8 +53,7 @@ const update = asyncHandler(async (req, res) => {
 });
 
 const remove = asyncHandler(async (req, res) => {
-  const notification = await deleteNotification(req.params.id);
-  emitNotificationDeleted(notification);
+  await deleteNotification(req.params.id);
 
   res.status(204).send();
 });
