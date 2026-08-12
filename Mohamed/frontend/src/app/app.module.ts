@@ -55,7 +55,7 @@ import { ScheduleComponent } from './pages/dashboard/schedule/schedule.component
     CommonModule,
     AppRoutingModule,
     HttpClientModule,
-    LoginComponent // 👈 اترك LoginComponent هنا لأنه Standalone
+    LoginComponent 
   ],
   providers: [],
   bootstrap: [AppComponent]
