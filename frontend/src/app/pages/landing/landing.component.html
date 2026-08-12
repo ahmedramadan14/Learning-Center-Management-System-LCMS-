@@ -1,1 +1,1012 @@
-<p>landing works!</p>
+<div class="landing-page">
+
+  <!-- ================= NAVBAR ================= -->
+
+  <header class="navbar" [class.scrolled]="isScrolled">
+
+    <div class="container nav-container">
+
+      <a href="#home" class="brand" (click)="closeMenu()">
+
+        <img
+          src="assets/lcms-logo.jpg"
+          alt="LCMS Logo"
+        >
+
+        <div class="brand-text">
+          <strong>LCMS</strong>
+          <span>Learning Center Management System</span>
+        </div>
+
+      </a>
+
+
+      <button
+        class="menu-button"
+        type="button"
+        aria-label="Open menu"
+        (click)="toggleMenu()"
+      >
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+
+
+      <nav class="navigation" [class.open]="menuOpen">
+
+        <a href="#home" (click)="closeMenu()">Home</a>
+
+        <a href="#features" (click)="closeMenu()">Features</a>
+
+        <a href="#how-it-works" (click)="closeMenu()">
+          How It Works
+        </a>
+
+        <a href="#about" (click)="closeMenu()">About</a>
+
+        <a href="#contact" (click)="closeMenu()">Contact</a>
+
+        <div class="nav-buttons">
+
+          <a
+            routerLink="/login"
+            class="login-link"
+          >
+            Login
+          </a>
+
+          <a
+            routerLink="/register"
+            class="primary-button nav-register"
+          >
+            Get Started
+          </a>
+
+        </div>
+
+      </nav>
+
+    </div>
+
+  </header>
+
+
+  <!-- ================= HERO ================= -->
+
+  <section id="home" class="hero">
+
+    <div class="container hero-container">
+
+
+      <!-- HERO CONTENT -->
+
+      <div class="hero-content">
+
+        <div class="hero-label">
+
+          <span class="status-dot"></span>
+
+          Smart management for modern learning centers
+
+        </div>
+
+
+        <h1>
+
+          Manage your
+          <span>learning center.</span>
+
+          <br>
+
+          Empower every
+          <span>student.</span>
+
+        </h1>
+
+
+        <p class="hero-description">
+
+          LCMS brings students, teachers, parents and
+          administrators together in one clear and connected
+          platform for managing your entire learning center.
+
+        </p>
+
+
+        <div class="hero-actions">
+
+          <a
+            routerLink="/register"
+            class="primary-button hero-button"
+          >
+            Get Started
+
+            <span>→</span>
+          </a>
+
+
+          <a
+            href="#features"
+            class="secondary-button"
+          >
+            Explore Features
+          </a>
+
+        </div>
+
+
+        <div class="hero-points">
+
+          <span>
+            <b>✓</b>
+            Students
+          </span>
+
+          <span>
+            <b>✓</b>
+            Attendance
+          </span>
+
+          <span>
+            <b>✓</b>
+            Exams
+          </span>
+
+          <span>
+            <b>✓</b>
+            Payments
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <!-- HERO VISUAL -->
+
+      <div class="hero-visual">
+
+
+        <!-- Decorative background -->
+
+        <div class="visual-glow"></div>
+
+        <div class="visual-circle circle-one"></div>
+
+        <div class="visual-circle circle-two"></div>
+
+
+        <!-- MAIN LCMS CARD -->
+
+        <div class="system-card">
+
+
+          <!-- Card Header -->
+
+          <div class="system-header">
+
+            <div class="system-brand">
+
+              <div class="system-logo">
+
+                <img
+                  src="assets/lcms-logo.jpg"
+                  alt="LCMS"
+                >
+
+              </div>
+
+              <div>
+
+                <strong>LCMS</strong>
+
+                <small>
+                  Learning Center
+                </small>
+
+              </div>
+
+            </div>
+
+
+            <div class="system-status">
+
+              <span></span>
+
+              Live
+
+            </div>
+
+          </div>
+
+
+          <!-- Welcome -->
+
+          <div class="system-welcome">
+
+            <div>
+
+              <small>
+                OVERVIEW
+              </small>
+
+              <h3>
+                Welcome back
+              </h3>
+
+            </div>
+
+            <div class="date-pill">
+              Today
+            </div>
+
+          </div>
+
+
+          <!-- Stats -->
+
+          <div class="mini-stats">
+
+
+            <div class="mini-stat">
+
+              <div class="stat-icon students-icon">
+                S
+              </div>
+
+              <div>
+
+                <strong>1,284</strong>
+
+                <span>
+                  Students
+                </span>
+
+              </div>
+
+            </div>
+
+
+            <div class="mini-stat">
+
+              <div class="stat-icon attendance-icon">
+                ✓
+              </div>
+
+              <div>
+
+                <strong>92%</strong>
+
+                <span>
+                  Attendance
+                </span>
+
+              </div>
+
+            </div>
+
+
+            <div class="mini-stat">
+
+              <div class="stat-icon classes-icon">
+                C
+              </div>
+
+              <div>
+
+                <strong>64</strong>
+
+                <span>
+                  Classes
+                </span>
+
+              </div>
+
+            </div>
+
+
+            <div class="mini-stat">
+
+              <div class="stat-icon payment-icon">
+                $
+              </div>
+
+              <div>
+
+                <strong>$42K</strong>
+
+                <span>
+                  Payments
+                </span>
+
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <!-- Chart -->
+
+          <div class="chart-card">
+
+            <div class="chart-header">
+
+              <div>
+
+                <strong>
+                  Student activity
+                </strong>
+
+                <span>
+                  Last 7 months
+                </span>
+
+              </div>
+
+              <span class="growth">
+                +12.8%
+              </span>
+
+            </div>
+
+
+            <div class="chart">
+
+              <div class="chart-grid">
+
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+
+              </div>
+
+
+              <div class="bars">
+
+                <i style="height: 40%"></i>
+
+                <i style="height: 52%"></i>
+
+                <i style="height: 45%"></i>
+
+                <i style="height: 68%"></i>
+
+                <i style="height: 61%"></i>
+
+                <i style="height: 78%"></i>
+
+                <i style="height: 88%"></i>
+
+              </div>
+
+            </div>
+
+
+            <div class="months">
+
+              <span>Jan</span>
+              <span>Feb</span>
+              <span>Mar</span>
+              <span>Apr</span>
+              <span>May</span>
+              <span>Jun</span>
+              <span>Jul</span>
+
+            </div>
+
+          </div>
+
+
+          <!-- Bottom Activity -->
+
+          <div class="activity-row">
+
+            <div class="activity-title">
+
+              <span class="activity-check">
+                ✓
+              </span>
+
+              <div>
+
+                <strong>
+                  Attendance updated
+                </strong>
+
+                <small>
+                  24 students marked today
+                </small>
+
+              </div>
+
+            </div>
+
+
+            <span class="activity-time">
+              09:42 AM
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <!-- Floating Student Card -->
+
+        <div class="floating-card floating-students">
+
+          <div class="floating-icon">
+            +
+          </div>
+
+          <div>
+
+            <strong>
+              +128
+            </strong>
+
+            <span>
+              New students
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <!-- Floating Attendance Card -->
+
+        <div class="floating-card floating-attendance">
+
+          <div class="floating-icon check">
+            ✓
+          </div>
+
+          <div>
+
+            <strong>
+              92%
+            </strong>
+
+            <span>
+              Attendance rate
+            </span>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- ================= TRUST / STATS ================= -->
+
+  <section class="stats-section">
+
+    <div class="container stats-container">
+
+      <div class="stat-item">
+
+        <strong>
+          1,200+
+        </strong>
+
+        <span>
+          Students Managed
+        </span>
+
+      </div>
+
+
+      <div class="stat-item">
+
+        <strong>
+          80+
+        </strong>
+
+        <span>
+          Teachers
+        </span>
+
+      </div>
+
+
+      <div class="stat-item">
+
+        <strong>
+          64
+        </strong>
+
+        <span>
+          Classes & Groups
+        </span>
+
+      </div>
+
+
+      <div class="stat-item">
+
+        <strong>
+          95%
+        </strong>
+
+        <span>
+          Student Success
+        </span>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- ================= FEATURES ================= -->
+
+  <section id="features" class="section features-section">
+
+    <div class="container">
+
+
+      <div class="section-heading">
+
+        <span class="section-label">
+          EVERYTHING YOU NEED
+        </span>
+
+        <h2>
+          One system for your
+          <span>entire center.</span>
+        </h2>
+
+        <p>
+          From student registration to attendance,
+          exams and payments, LCMS keeps your
+          daily operations organized and connected.
+        </p>
+
+      </div>
+
+
+      <div class="features-grid">
+
+        <article
+          class="feature-card"
+          *ngFor="let feature of features"
+        >
+
+          <div class="feature-top">
+
+            <span class="feature-number">
+              {{ feature.icon }}
+            </span>
+
+            <span class="feature-arrow">
+              ↗
+            </span>
+
+          </div>
+
+
+          <h3>
+            {{ feature.title }}
+          </h3>
+
+
+          <p>
+            {{ feature.text }}
+          </p>
+
+
+          <div class="feature-line"></div>
+
+        </article>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- ================= HOW IT WORKS ================= -->
+
+  <section
+    id="how-it-works"
+    class="section how-section"
+  >
+
+    <div class="container">
+
+
+      <div class="section-heading">
+
+        <span class="section-label">
+          HOW IT WORKS
+        </span>
+
+        <h2>
+          Simple to start.
+          <span>Powerful every day.</span>
+        </h2>
+
+        <p>
+          Set up your center once, then manage
+          everything from one connected platform.
+        </p>
+
+      </div>
+
+
+      <div class="steps-container">
+
+        <article
+          class="step-card"
+          *ngFor="let step of steps"
+        >
+
+          <div class="step-number">
+
+            {{ step.number }}
+
+          </div>
+
+
+          <div class="step-content">
+
+            <h3>
+              {{ step.title }}
+            </h3>
+
+            <p>
+              {{ step.text }}
+            </p>
+
+          </div>
+
+        </article>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- ================= ABOUT ================= -->
+
+  <section id="about" class="section about-section">
+
+    <div class="container about-container">
+
+
+      <div class="about-content">
+
+        <span class="section-label">
+          WHY LCMS
+        </span>
+
+
+        <h2>
+          Less complexity.
+          <br>
+          More control.
+        </h2>
+
+
+        <p>
+          Learning centers have many moving parts.
+          Students, teachers, classes, attendance,
+          exams, payments and communication all need
+          to work together.
+        </p>
+
+
+        <p>
+          LCMS gives every role the information and
+          tools they need while keeping the entire
+          center connected through one system.
+        </p>
+
+
+        <div class="about-checks">
+
+          <div>
+
+            <span>✓</span>
+
+            <strong>
+              Built for every role
+            </strong>
+
+          </div>
+
+
+          <div>
+
+            <span>✓</span>
+
+            <strong>
+              Clear daily workflow
+            </strong>
+
+          </div>
+
+
+          <div>
+
+            <span>✓</span>
+
+            <strong>
+              Centralized information
+            </strong>
+
+          </div>
+
+
+          <div>
+
+            <span>✓</span>
+
+            <strong>
+              Ready to grow with your center
+            </strong>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- ABOUT VISUAL -->
+
+      <div class="about-visual">
+
+
+        <div class="about-orbit orbit-one"></div>
+
+        <div class="about-orbit orbit-two"></div>
+
+
+        <div class="about-logo">
+
+          <img
+            src="assets/lcms-logo.jpg"
+            alt="LCMS Logo"
+          >
+
+        </div>
+
+
+        <div class="about-badge badge-top">
+
+          <span class="badge-icon">
+            ✓
+          </span>
+
+          <div>
+
+            <strong>
+              Attendance
+            </strong>
+
+            <small>
+              92% today
+            </small>
+
+          </div>
+
+        </div>
+
+
+        <div class="about-badge badge-bottom">
+
+          <span class="badge-icon">
+            $
+          </span>
+
+          <div>
+
+            <strong>
+              Payments
+            </strong>
+
+            <small>
+              24 processed
+            </small>
+
+          </div>
+
+        </div>
+
+
+        <div class="about-badge badge-right">
+
+          <span class="badge-icon">
+            S
+          </span>
+
+          <div>
+
+            <strong>
+              Students
+            </strong>
+
+            <small>
+              1,284 active
+            </small>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- ================= CTA ================= -->
+
+  <section class="cta-section">
+
+    <div class="container cta-container">
+
+      <div>
+
+        <span class="cta-label">
+          READY TO GET STARTED?
+        </span>
+
+        <h2>
+          Build a smarter learning center
+          with LCMS.
+        </h2>
+
+        <p>
+          Bring your students, teachers and daily
+          operations together in one platform.
+        </p>
+
+      </div>
+
+
+      <a
+        routerLink="/register"
+        class="white-button"
+      >
+        Create Your Account
+
+        <span>→</span>
+      </a>
+
+    </div>
+
+  </section>
+
+
+  <!-- ================= FOOTER ================= -->
+
+  <footer id="contact">
+
+    <div class="container footer-container">
+
+
+      <div class="footer-brand">
+
+        <a href="#home" class="brand">
+
+          <img
+            src="assets/lcms-logo.jpg"
+            alt="LCMS"
+          >
+
+          <div class="brand-text">
+
+            <strong>
+              LCMS
+            </strong>
+
+            <span>
+              Learning Center Management System
+            </span>
+
+          </div>
+
+        </a>
+
+
+        <p>
+          A connected management platform designed
+          to help learning centers operate better,
+          communicate clearly, and grow confidently.
+        </p>
+
+      </div>
+
+
+      <div class="footer-column">
+
+        <h4>
+          Product
+        </h4>
+
+        <a href="#features">
+          Features
+        </a>
+
+        <a href="#how-it-works">
+          How It Works
+        </a>
+
+        <a routerLink="/register">
+          Get Started
+        </a>
+
+      </div>
+
+
+      <div class="footer-column">
+
+        <h4>
+          Company
+        </h4>
+
+        <a href="#about">
+          About
+        </a>
+
+        <a href="#contact">
+          Contact
+        </a>
+
+        <a href="#home">
+          Home
+        </a>
+
+      </div>
+
+
+      <div class="footer-column">
+
+        <h4>
+          Account
+        </h4>
+
+        <a routerLink="/login">
+          Login
+        </a>
+
+        <a routerLink="/register">
+          Register
+        </a>
+
+      </div>
+
+    </div>
+
+
+    <div class="container footer-bottom">
+
+      <span>
+        © 2026 LCMS. All rights reserved.
+      </span>
+
+      <span>
+        Learning Center Management System
+      </span>
+
+    </div>
+
+  </footer>
+
+</div>

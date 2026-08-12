@@ -1,28 +1,26 @@
 .login-page {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-    padding: 40px 20px;
-    align-items: center;
-    justify-content: center;
+  height: 95vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .login-container {
-    display: flex;
-    width: 100%;
-    max-width: 1180px;
-    background: var(--white);
-    border-radius: 24px;
-    box-shadow: 0 20px 60px rgba(14, 165, 233, 0.16);
-    overflow: hidden;
-    min-height: 640px;
+  width: 100%;
+  max-width: 1200px;
+  display: grid;
+  grid-template-columns: 1fr 1.1fr;
+  background-color: var(--white);
+  border: 2px solid var(--primary-color);
+  border-radius: var(--radius-large);
+  overflow: hidden;
 }
 
 .login-welcome-panel {
     flex: 1.1;
     position: relative;
     padding: 40px 40px 0;
-    background: linear-gradient(160deg, #2563eb 0%, #34b3f7 50%, #0da1f0 100%);
+    background: var(--primary-color);
     color: var(--white);
     display: flex;
     flex-direction: column;
@@ -288,9 +286,6 @@
     text-decoration: underline;
 }
 
-.form-error { margin: -6px 0 14px; color: #c91d45; font-size: 12px; background: #fff1f3; padding: 8px 10px; border-radius: 6px; }
-.toggle-password { border: 0; background: transparent; }
-
 @media (max-width: 860px) {
     .login-container {
         flex-direction: column;
@@ -310,16 +305,19 @@
     }
 }
 
-@media (max-width: 520px) {
-    .login-page { padding: 0; align-items: stretch; justify-content: flex-start; }
-    .login-container { min-height: 100vh; border-radius: 0; box-shadow: none; }
-    .login-welcome-panel { padding: 25px 20px 0; }
-    .brand-logo-img { width: min(100%, 320px); height: 130px; }
-    .hero-text h1 { font-size: 20px; margin-bottom: 15px; }
-    .quick-icons { margin-bottom: 13px; }
-    .icon-box { padding: 7px 10px; }
-    .illustration-wrap img { max-width: 240px; }
-    .login-form-panel { padding: 32px 20px; }
-    .welcome-heading { margin-bottom: 23px; }
-    .form-options { align-items: flex-start; gap: 12px; flex-direction: column; }
+
+
+.brand-section .brand-logo-img {
+  width: 120px;
+  height: 120px;
+  border: 3px solid var(--primary-color);
+  border-radius: 50%;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background-color: var(--white);
+  object-fit: cover;
 }
+

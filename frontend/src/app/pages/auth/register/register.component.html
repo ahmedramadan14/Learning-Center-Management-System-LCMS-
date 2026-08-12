@@ -1,38 +1,231 @@
 <div class="register-page">
-  <section class="register-info">
-    <div class="brand"><div class="brand-icon"><i class="bi bi-mortarboard-fill"></i></div><span>Edu<span>Center</span></span></div>
-    <div class="info-content">
-      <span class="badge">LEARNING CENTER MANAGEMENT</span>
-      <h1>Everything your <span>learning center</span> needs.</h1>
-      <p>Manage students, Teachers, parents, classes, attendance, exams, payments, and more from one simple platform.</p>
-      <div class="features">
-        <div class="feature"><div class="feature-icon"><i class="bi bi-check-lg"></i></div><div><h4>Easy to use</h4><p>Simple and intuitive for everyone.</p></div></div>
-        <div class="feature"><div class="feature-icon"><i class="bi bi-check-lg"></i></div><div><h4>Everything in one place</h4><p>Manage your entire center effortlessly.</p></div></div>
-        <div class="feature"><div class="feature-icon"><i class="bi bi-check-lg"></i></div><div><h4>Secure and reliable</h4><p>Your data is protected and always available.</p></div></div>
-      </div>
-    </div>
-    <p class="copyright">Copyright 2026 EduCenter. All rights reserved.</p>
-  </section>
+  <div class="register-container">
 
-  <section class="register-form-container">
-    <div class="register-form">
-      <div class="form-header"><h2>Create your account</h2><p>Get started with EduCenter today.</p></div>
-      <form (ngSubmit)="onSubmit(registerForm)" #registerForm="ngForm">
-        <div class="form-group"><label for="name">Full name</label><input id="name" type="text" name="name" ngModel required minlength="3" placeholder="Jane Doe"></div>
-        <div class="form-group"><label for="phone">Phone number</label><input id="phone" type="tel" name="phone" ngModel required placeholder="01xxxxxxxxx"></div>
-        <div class="form-group"><label for="email">Email address <small>(optional)</small></label><input id="email" type="email" name="email" ngModel placeholder="you@example.com"></div>
-        <div class="form-group"><label for="password">Password</label><input id="password" type="password" name="password" ngModel required minlength="6" placeholder="At least 6 characters"><span class="input-help">Must be at least 6 characters.</span></div>
-        <div class="form-group"><label for="role">I am a</label><select id="role" name="role" ngModel required #role="ngModel"><option value="">Select your role</option><option value="student">Student</option><option value="teacher">Teacher</option><option value="parent">Parent</option></select></div>
-        <div class="student-fields" *ngIf="role.value === 'student'">
-          <div class="form-group"><label for="gender">Gender</label><select id="gender" name="gender" ngModel required><option value="">Select gender</option><option value="male">Male</option><option value="female">Female</option></select></div>
-          <div class="form-group"><label for="grade">Grade / level</label><input id="grade" name="grade" ngModel required placeholder="Level 1"></div>
-          <div class="form-group"><label for="parentPhone">Parent phone</label><input id="parentPhone" name="parentPhone" ngModel required placeholder="01xxxxxxxxx"></div>
+    <div class="register-info">
+      <div class="register-info-content">
+                <div class="image">
+          <img src="../../../../assets/lcms-logo.jpg">
         </div>
-        <p *ngIf="errorMessage" class="register-error">{{ errorMessage }}</p>
-        <div class="terms"><input id="terms" type="checkbox" name="terms" ngModel required><label for="terms">I agree to the <a href="/">Terms of Service</a> and <a href="/">Privacy Policy</a>.</label></div>
-        <button type="submit" class="btn register-button" [disabled]="registerForm.invalid || submitting">{{ submitting ? 'Creating account...' : 'Create account' }}</button>
-      </form>
-      <div class="login-link"><p>Already have an account? <a routerLink="/login">Sign in</a></p></div>
+        <h1>
+          Everything your learning
+          center needs, in one
+          connected system.
+        </h1>
+        <ul>
+          <li>
+            <span>✓</span>
+            One platform for students, teachers, parents & staff
+          </li>
+          <li>
+            <span>✓</span>
+            Role-based dashboards with the right access for everyone
+          </li>
+          <li>
+            <span>✓</span>
+            Attendance, exams, results and payments in one place
+          </li>
+        </ul>
+      </div>
+
     </div>
-  </section>
+
+    <div class="register-form-container">
+
+
+      <div class="approval-message">
+
+        <div class="approval-icon">
+          ⓘ
+        </div>
+
+        <div>
+
+          <strong>
+            Account approval may be required
+          </strong>
+
+          <p>
+            Teacher and parent accounts are reviewed by an
+            administrator before full access is granted.
+          </p>
+
+        </div>
+
+      </div>
+
+
+
+      <form>
+
+
+
+
+        <div class="form-group">
+
+          <label for="fullName">
+            Full name
+          </label>
+
+          <input
+            type="text"
+            id="fullName"
+            name="fullName"
+            placeholder="Jane Doe"
+          >
+
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="email">
+              Email
+            </label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              placeholder="you@example.com"
+            >
+
+          </div>
+
+
+          <div class="form-group">
+
+            <label for="phone">
+              Phone
+            </label>
+
+            <input
+              type="tel"
+              id="phone"
+              name="phone"
+              placeholder="+0201222222930"
+            >
+
+          </div>
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label for="role">
+            I am a
+          </label>
+
+          <select
+            id="role"
+            name="role"
+          >
+
+            <option value="" selected disabled>
+              Select your role
+            </option>
+
+            <option value="student">
+              Student
+            </option>
+
+            <option value="teacher">
+              Teacher
+            </option>
+
+            <option value="parent">
+              Parent
+            </option>
+
+            <option value="secretary">
+              Secretary
+            </option>
+
+          </select>
+
+        </div>
+
+
+
+        <div class="form-group">
+
+          <label for="password">
+            Password
+          </label>
+
+          <input
+            type="password"
+            id="password"
+            name="password"
+            placeholder="At least 8 characters"
+          >
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label for="confirmPassword">
+            Confirm password
+          </label>
+
+          <input
+            type="password"
+            id="confirmPassword"
+            name="confirmPassword"
+            placeholder="Re-enter your password"
+          >
+
+        </div>
+
+
+        <div class="terms">
+
+          <input
+            type="checkbox"
+            id="terms"
+            name="terms"
+          >
+
+          <label for="terms">
+
+            I agree to the
+
+            <a href="#">
+              Terms & Conditions
+            </a>
+
+            and
+
+            <a href="#">
+              Privacy Policy
+            </a>.
+
+          </label>
+
+        </div>
+
+
+        <button
+          type="submit"
+          class="btn register-button"
+        >
+
+          Register
+        </button>
+
+      </form>
+
+      <p class="login-link">
+
+        Already have an account?
+
+        <a href="/login">
+          Login
+        </a>
+
+      </p>
+
+    </div>
+
+  </div>
+
 </div>

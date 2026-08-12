@@ -1,1 +1,521 @@
-<p>students works!</p>
+<section class="students-page">
+
+  <!-- ==================== Header ==================== -->
+  <div class="students-header-banner">
+    <div class="students-page__header">
+
+      <div>
+        <h2 class="students-page__title">Students</h2>
+
+        <p class="students-page__subtitle">
+          Manage and monitor all students in your learning center.
+        </p>
+      </div>
+
+      <div class="students-page__actions">
+        <button
+          type="button"
+          class="btn btn--primary"
+          (click)="onAddStudentClick()"
+        >
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path
+              d="M12 5v14M5 12h14"
+              stroke-linecap="round"
+            ></path>
+          </svg>
+
+          Add Student
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- ==================== Statistics ==================== -->
+  <div class="stats-grid">
+
+    <!-- Total Students -->
+    <div class="stat-card">
+      <div class="stat-icon stat-icon--blue">
+        <i class="fa-solid fa-user-graduate"></i>
+      </div>
+
+      <div class="stat-content">
+        <span class="stat-title">Total Students</span>
+        <strong>{{ students.length }}</strong>
+        <span class="stat-description">All students</span>
+      </div>
+    </div>
+
+
+    <!-- Active Students -->
+    <div class="stat-card">
+      <div class="stat-icon stat-icon--green">
+        <i class="fa-solid fa-user-check"></i>
+      </div>
+
+      <div class="stat-content">
+        <span class="stat-title">Active Students</span>
+        <strong>{{ activeStudentsCount }}</strong>
+        <span class="stat-description">Currently active</span>
+      </div>
+    </div>
+
+
+    <!-- Inactive Students -->
+    <div class="stat-card">
+      <div class="stat-icon stat-icon--orange">
+        <i class="fa-solid fa-user-clock"></i>
+      </div>
+
+      <div class="stat-content">
+        <span class="stat-title">Inactive Students</span>
+        <strong>{{ inactiveStudentsCount }}</strong>
+        <span class="stat-description">Currently inactive</span>
+      </div>
+    </div>
+
+
+    <!-- New Students -->
+    <div class="stat-card">
+      <div class="stat-icon stat-icon--purple">
+        <i class="fa-solid fa-user-plus"></i>
+      </div>
+
+      <div class="stat-content">
+        <span class="stat-title">New Students</span>
+        <strong>{{ newStudentsCount }}</strong>
+        <span class="stat-description">This month</span>
+      </div>
+    </div>
+
+  </div>
+
+
+  <!-- ==================== Students List ==================== -->
+  <div class="students-card">
+
+    <!-- Card Header -->
+    <div class="students-card__header">
+
+      <div>
+        <h3>Students List</h3>
+        <p>{{ filteredStudents.length }} students found</p>
+      </div>
+
+
+      <!-- Filters -->
+      <div class="students-filters">
+
+        <!-- Group Filter -->
+        <select
+          [(ngModel)]="selectedGroup"
+          (change)="applyFilters()"
+        >
+          <option value="">All Groups</option>
+
+          <option
+            *ngFor="let group of groups"
+            [value]="group"
+          >
+            {{ group }}
+          </option>
+        </select>
+
+
+        <!-- Status Filter -->
+        <select
+          [(ngModel)]="selectedStatus"
+          (change)="applyFilters()"
+        >
+          <option value="">All Status</option>
+          <option value="Active">Active</option>
+          <option value="Inactive">Inactive</option>
+        </select>
+
+
+        <!-- Search -->
+        <div class="search-box">
+
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <circle
+              cx="11"
+              cy="11"
+              r="8"
+            ></circle>
+
+            <path
+              d="m21 21-4.3-4.3"
+            ></path>
+          </svg>
+
+          <input
+            type="text"
+            placeholder="Search students..."
+            [(ngModel)]="searchValue"
+            (input)="applyFilters()"
+          />
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- ==================== Students Table ==================== -->
+    <div class="table-wrapper">
+
+      <table class="students-table">
+
+        <thead>
+          <tr>
+            <th>STUDENT</th>
+            <th>EMAIL</th>
+            <th>GROUP</th>
+            <th>PHONE</th>
+            <th>STATUS</th>
+            <th>ACTIONS</th>
+          </tr>
+        </thead>
+
+
+        <tbody>
+
+          <!-- Student Rows -->
+          <tr
+            *ngFor="let student of filteredStudents"
+          >
+
+            <!-- Student -->
+            <td>
+
+              <div class="student-cell">
+
+                <div class="student-avatar">
+                  {{ getInitials(student.name) }}
+                </div>
+
+                <div class="student-info">
+                  <strong>{{ student.name }}</strong>
+                  <span>Student</span>
+                </div>
+
+              </div>
+
+            </td>
+
+
+            <!-- Email -->
+            <td>
+              <span class="text-muted">
+                {{ student.email }}
+              </span>
+            </td>
+
+
+            <!-- Group -->
+            <td>
+              <span class="group-badge">
+                {{ student.group }}
+              </span>
+            </td>
+
+
+            <!-- Phone -->
+            <td>
+              {{ student.phone }}
+            </td>
+
+
+            <!-- Status -->
+            <td>
+
+              <span
+                class="status-badge"
+                [class.status-badge--active]="student.status === 'Active'"
+                [class.status-badge--inactive]="student.status === 'Inactive'"
+              >
+                <span></span>
+                {{ student.status }}
+              </span>
+
+            </td>
+
+
+            <!-- Actions -->
+            <td>
+
+              <div class="actions">
+
+                <!-- View -->
+                <button
+                  type="button"
+                  title="View"
+                  (click)="viewStudent(student)"
+                >
+                  <i class="fa-regular fa-eye"></i>
+                </button>
+
+
+                <!-- Edit -->
+                <button
+                  type="button"
+                  title="Edit"
+                  (click)="editStudent(student)"
+                >
+                  <i class="fa-solid fa-pen"></i>
+                </button>
+
+
+                <!-- Delete -->
+                <button
+                  type="button"
+                  title="Delete"
+                  (click)="deleteStudent(student)"
+                >
+                  <i class="fa-regular fa-trash-can"></i>
+                </button>
+
+              </div>
+
+            </td>
+
+          </tr>
+
+
+          <!-- ==================== Empty State ==================== -->
+          <tr *ngIf="filteredStudents.length === 0">
+
+            <td
+              colspan="6"
+              class="empty-state"
+            >
+
+              <div class="empty-state__icon">
+                <i class="fa-solid fa-user-graduate"></i>
+              </div>
+
+              <strong>No students found</strong>
+
+              <span>
+                Try changing your search or filters.
+              </span>
+
+            </td>
+
+          </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- ========================================================= -->
+<!-- Add Student Modal -->
+<!-- ========================================================= -->
+
+<div
+  class="modal-overlay"
+  *ngIf="isModalOpen"
+>
+
+  <div class="modal-card">
+
+    <h3>New Student</h3>
+
+
+    <!-- Student Name -->
+    <div class="form-group">
+
+      <label>Student Name</label>
+
+      <input
+        type="text"
+        [(ngModel)]="newStudent.name"
+        placeholder="Enter student name"
+      />
+
+    </div>
+
+
+    <!-- Email -->
+    <div class="form-group">
+
+      <label>Email</label>
+
+      <input
+        type="email"
+        [(ngModel)]="newStudent.email"
+        placeholder="Enter email"
+      />
+
+    </div>
+
+
+    <!-- Group -->
+    <div class="form-group">
+
+      <label>Group</label>
+
+      <select [(ngModel)]="newStudent.group">
+
+        <option value="">
+          Select group
+        </option>
+
+        <option
+          *ngFor="let group of groups"
+          [value]="group"
+        >
+          {{ group }}
+        </option>
+
+      </select>
+
+    </div>
+
+
+    <!-- Phone -->
+    <div class="form-group">
+
+      <label>Phone</label>
+
+      <input
+        type="text"
+        [(ngModel)]="newStudent.phone"
+        placeholder="Enter phone number"
+      />
+
+    </div>
+
+
+    <!-- Status -->
+    <div class="form-group">
+
+      <label>Status</label>
+
+      <select [(ngModel)]="newStudent.status">
+
+        <option value="Active">
+          Active
+        </option>
+
+        <option value="Inactive">
+          Inactive
+        </option>
+
+      </select>
+
+    </div>
+
+
+    <!-- Modal Actions -->
+    <div class="modal-actions">
+
+      <button
+        type="button"
+        class="btn btn--ghost-dark"
+        (click)="closeModal()"
+      >
+        Cancel
+      </button>
+
+
+      <button
+        type="button"
+        class="btn btn--primary modal-save-btn"
+        (click)="saveStudent()"
+      >
+        Save Student
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- ========================================================= -->
+<!-- Student Details Modal -->
+<!-- ========================================================= -->
+
+<div
+  class="modal-overlay"
+  *ngIf="isDetailsModalOpen && selectedStudent"
+>
+
+  <div class="modal-card">
+
+    <h3>Student Details</h3>
+
+
+    <div class="student-details">
+
+      <div>
+        <strong>Student Name:</strong>
+        {{ selectedStudent.name }}
+      </div>
+
+      <div>
+        <strong>Email:</strong>
+        {{ selectedStudent.email }}
+      </div>
+
+      <div>
+        <strong>Group:</strong>
+        {{ selectedStudent.group }}
+      </div>
+
+      <div>
+        <strong>Phone:</strong>
+        {{ selectedStudent.phone }}
+      </div>
+
+      <div>
+        <strong>Status:</strong>
+        {{ selectedStudent.status }}
+      </div>
+
+    </div>
+
+
+    <!-- Modal Actions -->
+    <div class="modal-actions">
+
+      <button
+        type="button"
+        class="btn btn--primary modal-save-btn"
+        (click)="closeDetailsModal()"
+      >
+        Close
+      </button>
+
+    </div>
+
+  </div>
+
+</div>

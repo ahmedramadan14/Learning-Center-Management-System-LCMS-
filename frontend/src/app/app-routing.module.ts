@@ -1,34 +1,109 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { LoginComponent } from './pages/auth/login/login.component';
 import { RegisterComponent } from './pages/auth/register/register.component';
-import { DashboardLayoutComponent } from './pages/dashboard/dashboard-layout/dashboard-layout.component';
+import { LoginComponent } from './pages/auth/login/login.component';
+import { LandingComponent } from './pages/landing/landing.component';
+import { DashboardLayoutComponent } from './components/dashboard-layout/dashboard-layout.component';
 import { DashboardHomeComponent } from './pages/dashboard/dashboard-home/dashboard-home.component';
-import { ManagementPageComponent } from './pages/dashboard/management-page/management-page.component';
+import { StudentsComponent } from './pages/dashboard/students/students.component';
+import { TeachersComponent } from './pages/dashboard/teachers/teachers.component';
+import { CoursesComponent } from './pages/dashboard/courses/courses.component';
+import { ClassesComponent } from './pages/dashboard/classes/classes.component';
+import { ParentsComponent } from './pages/dashboard/parents/parents.component';
+import { SecretariesComponent } from './pages/dashboard/secretaries/secretaries.component';
+import { AttendanceComponent } from './pages/dashboard/attendance/attendance.component';
+import { ExamsComponent } from './pages/dashboard/exams/exams.component';
+import { PaymentsComponent } from './pages/dashboard/payments/payments.component';
 import { SettingsComponent } from './pages/dashboard/settings/settings.component';
-import { AuthGuard } from './services/auth/auth.guard';
-
+import { ResultsComponent } from './pages/dashboard/results/results.component';
+import { ScheduleComponent } from './pages/dashboard/schedule/schedule.component';
 const routes: Routes = [
-  { path: 'login', component: LoginComponent },
-  { path: 'register', component: RegisterComponent },
   {
-    path: 'dashboard', component: DashboardLayoutComponent, canActivate: [AuthGuard], children: [
-      { path: '', component: DashboardHomeComponent, pathMatch: 'full' },
-      { path: 'students', component: ManagementPageComponent, data: { resource: 'students' } },
-      { path: 'teachers', component: ManagementPageComponent, data: { resource: 'teachers' } },
-      { path: 'courses', component: ManagementPageComponent, data: { resource: 'courses' } },
-      { path: 'classes', component: ManagementPageComponent, data: { resource: 'classes' } },
-      { path: 'exams', component: ManagementPageComponent, data: { resource: 'exams' } },
-      { path: 'attendance', component: ManagementPageComponent, data: { resource: 'attendance' } },
-      { path: 'payments', component: ManagementPageComponent, data: { resource: 'payments' } },
-      { path: 'messages', component: ManagementPageComponent, data: { resource: 'messages' } },
-      { path: 'profile', component: SettingsComponent },
-      { path: 'settings', redirectTo: 'profile', pathMatch: 'full' }
+    path: '',
+    component: LandingComponent
+  },
+
+  {
+    path: 'login',
+    component : LoginComponent
+  },
+
+  {
+    path: 'register',
+    component: RegisterComponent
+  },
+
+  {
+    path: 'dashboard',
+    component: DashboardLayoutComponent,
+    children: [
+      {
+        path: '',
+        component: DashboardHomeComponent
+      },
+      {
+        path: 'students',
+        component: StudentsComponent
+      },
+      {
+        path: 'teachers',
+        component: TeachersComponent
+      },
+      {
+        path: 'courses',
+        component: CoursesComponent
+      },
+      {
+        path: 'classes',
+        component: ClassesComponent
+      },
+      {
+        path: 'schedule',
+        component: ScheduleComponent
+      },
+      {
+        path: 'parents',
+        component: ParentsComponent
+      },
+      {
+        path: 'secretaries',
+        component: SecretariesComponent
+      },
+      {
+        path: 'attendance',
+        component: AttendanceComponent
+      },
+      {
+        path: 'exams',
+        component: ExamsComponent
+      },
+      {
+        path: 'payments',
+        component: PaymentsComponent
+      },
+      {
+        path: 'results',
+        component: ResultsComponent
+      },
+      {
+        path: 'settings',
+        component: SettingsComponent
+      }
     ]
   },
-  { path: '', pathMatch: 'full', redirectTo: 'login' },
-  { path: '**', redirectTo: 'login' }
+
+  {
+    path: '**',
+    redirectTo: ''
+  }
 ];
 
-@NgModule({ imports: [RouterModule.forRoot(routes)], exports: [RouterModule] })
-export class AppRoutingModule { }
+@NgModule({
+  imports: [
+    RouterModule.forRoot(routes)
+  ],
+  exports: [
+    RouterModule
+  ]
+})
+export class AppRoutingModule {}

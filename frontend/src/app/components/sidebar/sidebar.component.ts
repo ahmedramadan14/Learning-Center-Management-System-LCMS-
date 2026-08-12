@@ -1,24 +1,32 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { Router } from '@angular/router';
-import { AuthService } from '../../services/auth/auth.service';
+import { Component } from '@angular/core';
 
-@Component({ selector: 'app-sidebar', templateUrl: './sidebar.component.html', styleUrls: ['./sidebar.component.css'] })
+@Component({
+  selector: 'app-sidebar',
+  templateUrl: './sidebar.component.html',
+  styleUrls: ['./sidebar.component.css']
+})
 export class SidebarComponent {
-  @Input() open = true;
-  @Output() closeRequested = new EventEmitter<void>();
-  readonly navigation = [
-    { label: 'Dashboard', icon: 'bi-grid-1x2', path: '/dashboard' },
-    { label: 'Students', icon: 'bi-people', path: '/dashboard/students' },
-    { label: 'Teachers', icon: 'bi-person-workspace', path: '/dashboard/teachers' },
-    { label: 'Courses', icon: 'bi-journal-bookmark', path: '/dashboard/courses' },
-    { label: 'Classes', icon: 'bi-easel2', path: '/dashboard/classes' },
-    { label: 'Exams', icon: 'bi-clipboard2-check', path: '/dashboard/exams' },
-    { label: 'Attendance', icon: 'bi-calendar2-check', path: '/dashboard/attendance' },
-    { label: 'Payments', icon: 'bi-credit-card', path: '/dashboard/payments' },
-    { label: 'Messages', icon: 'bi-chat-left-text', path: '/dashboard/messages' },
-    { label: 'Profile', icon: 'bi-person-circle', path: '/dashboard/profile' }
+
+  menuItems = [
+    { label: 'Dashboard', icon: '⌂', route: '/dashboard' },
+    { label: 'Students', icon: '♙', route: '/dashboard/students' },
+    { label: 'Teachers', icon: '♟', route: '/dashboard/teachers' },
+    { label: 'Parents', icon: '♧', route: '/dashboard/parents' },
+    { label: 'Classes', icon: '▦', route: '/dashboard/classes' },
+    { label: 'Schedule', icon: '📅', route: '/dashboard/schedule' },
+    { label: 'Courses', icon: '▤', route: '/dashboard/courses' },
+    { label: 'Attendance', icon: '✓', route: '/dashboard/attendance' },
+    { label: 'Exams', icon: '▣', route: '/dashboard/exams' },
+    { label: 'Results', icon: '📊', route: '/dashboard/results' },
+    { label: 'Payments', icon: '$', route: '/dashboard/payments' }
   ];
-  constructor(private readonly auth: AuthService, private readonly router: Router) {}
-  logout(): void { this.auth.logout().subscribe({ next: () => this.router.navigate(['/login']), error: () => { this.auth.clearSession(); this.router.navigate(['/login']); } }); }
-  closeOnMobile(): void { if (window.innerWidth <= 920) this.closeRequested.emit(); }
+
+  administrationItems = [
+    { label: 'Secretaries', icon: '♙', route: '/dashboard/secretaries' }
+  ];
+
+  systemItems = [
+    { label: 'Settings', icon: '⚙', route: '/dashboard/settings' }
+  ];
+
 }

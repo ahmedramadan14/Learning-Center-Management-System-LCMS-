@@ -1,1 +1,834 @@
-<p>parents works!</p>
+<section class="parents-page">
+
+  <!-- ========================================================= -->
+  <!-- Header -->
+  <!-- ========================================================= -->
+
+  <div class="parents-header-banner">
+
+    <div class="parents-page__header">
+
+      <div>
+        <h2 class="parents-page__title">
+          Parents
+        </h2>
+
+        <p class="parents-page__subtitle">
+          Manage and monitor all parents in your learning center.
+        </p>
+      </div>
+
+      <div class="parents-page__actions">
+
+        <button
+          type="button"
+          class="btn btn--primary"
+          (click)="onAddParentClick()"
+        >
+
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path
+              d="M12 5v14M5 12h14"
+              stroke-linecap="round"
+            ></path>
+          </svg>
+
+          Add Parent
+
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- ========================================================= -->
+  <!-- Error -->
+  <!-- ========================================================= -->
+
+  <div
+    class="error-message"
+    *ngIf="errorMessage"
+  >
+
+    <span>
+      {{ errorMessage }}
+    </span>
+
+    <button
+      type="button"
+      (click)="loadParents()"
+    >
+      Retry
+    </button>
+
+  </div>
+
+
+  <!-- ========================================================= -->
+  <!-- Statistics -->
+  <!-- ========================================================= -->
+
+  <div class="stats-grid">
+
+    <!-- Total Parents -->
+
+    <div class="stat-card">
+
+      <div class="stat-icon stat-icon--blue">
+        <i class="fa-solid fa-users"></i>
+      </div>
+
+      <div class="stat-content">
+
+        <span class="stat-title">
+          Total Parents
+        </span>
+
+        <strong>
+          {{ totalParents }}
+        </strong>
+
+        <span class="stat-description">
+          Registered parents
+        </span>
+
+      </div>
+
+    </div>
+
+
+    <!-- Active Parents -->
+
+    <div class="stat-card">
+
+      <div class="stat-icon stat-icon--green">
+        <i class="fa-solid fa-user-check"></i>
+      </div>
+
+      <div class="stat-content">
+
+        <span class="stat-title">
+          Active Parents
+        </span>
+
+        <strong>
+          {{ activeParents }}
+        </strong>
+
+        <span class="stat-description">
+          Active accounts
+        </span>
+
+      </div>
+
+    </div>
+
+
+    <!-- Inactive Parents -->
+
+    <div class="stat-card">
+
+      <div class="stat-icon stat-icon--orange">
+        <i class="fa-solid fa-user-clock"></i>
+      </div>
+
+      <div class="stat-content">
+
+        <span class="stat-title">
+          Inactive Parents
+        </span>
+
+        <strong>
+          {{ inactiveParents }}
+        </strong>
+
+        <span class="stat-description">
+          Inactive accounts
+        </span>
+
+      </div>
+
+    </div>
+
+
+    <!-- Male Parents -->
+
+    <div class="stat-card">
+
+      <div class="stat-icon stat-icon--purple">
+        <i class="fa-solid fa-user"></i>
+      </div>
+
+      <div class="stat-content">
+
+        <span class="stat-title">
+          Male Parents
+        </span>
+
+        <strong>
+          {{ maleParents }}
+        </strong>
+
+        <span class="stat-description">
+          Male parents
+        </span>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- ========================================================= -->
+  <!-- Parents List -->
+  <!-- ========================================================= -->
+
+  <div class="parents-card">
+
+    <!-- Card Header -->
+
+    <div class="parents-card__header">
+
+      <div>
+
+        <h3>
+          Parents List
+        </h3>
+
+        <p>
+          {{ filteredParents.length }} parents found
+        </p>
+
+      </div>
+
+
+      <!-- Filters -->
+
+      <div class="parents-filters">
+
+        <!-- Gender -->
+
+        <select
+          [(ngModel)]="selectedGender"
+          (change)="applyFilters()"
+        >
+
+          <option value="All Gender">
+            All Gender
+          </option>
+
+          <option value="male">
+            Male
+          </option>
+
+          <option value="female">
+            Female
+          </option>
+
+        </select>
+
+
+        <!-- Status -->
+
+        <select
+          [(ngModel)]="selectedStatus"
+          (change)="applyFilters()"
+        >
+
+          <option value="All Status">
+            All Status
+          </option>
+
+          <option value="Active">
+            Active
+          </option>
+
+          <option value="Inactive">
+            Inactive
+          </option>
+
+        </select>
+
+
+        <!-- Search -->
+
+        <div class="search-box">
+
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+
+            <circle
+              cx="11"
+              cy="11"
+              r="8"
+            ></circle>
+
+            <path
+              d="m21 21-4.3-4.3"
+            ></path>
+
+          </svg>
+
+          <input
+            type="text"
+            placeholder="Search parents..."
+            [(ngModel)]="searchText"
+            (input)="applyFilters()"
+          />
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- ======================================================= -->
+    <!-- Loading -->
+    <!-- ======================================================= -->
+
+    <div
+      class="loading-state"
+      *ngIf="loading"
+    >
+
+      <div class="loader"></div>
+
+      <p>
+        Loading parents...
+      </p>
+
+    </div>
+
+
+    <!-- ======================================================= -->
+    <!-- Table -->
+    <!-- ======================================================= -->
+
+    <div
+      class="table-wrapper"
+      *ngIf="!loading"
+    >
+
+      <table class="parents-table">
+
+        <thead>
+
+          <tr>
+
+            <th>PARENT</th>
+
+            <th>EMAIL</th>
+
+            <th>GENDER</th>
+
+            <th>PHONE</th>
+
+            <th>STATUS</th>
+
+            <th>ACTIONS</th>
+
+          </tr>
+
+        </thead>
+
+
+        <tbody>
+
+          <!-- ================================================= -->
+          <!-- Parent Row -->
+          <!-- ================================================= -->
+
+          <tr
+            *ngFor="let parent of filteredParents"
+          >
+
+            <!-- Parent -->
+
+            <td>
+
+              <div class="parent-cell">
+
+                <div class="parent-avatar">
+
+                  {{
+                    getParentInitials(
+                      getParentName(parent)
+                    )
+                  }}
+
+                </div>
+
+                <div class="parent-info">
+
+                  <strong>
+                    {{ getParentName(parent) }}
+                  </strong>
+
+                  <span>
+                    Parent
+                  </span>
+
+                </div>
+
+              </div>
+
+            </td>
+
+
+            <!-- Email -->
+
+            <td>
+
+              <span class="text-muted">
+                {{ getParentEmail(parent) }}
+              </span>
+
+            </td>
+
+
+            <!-- Gender -->
+
+            <td>
+
+              <span class="gender-badge">
+
+                {{
+                  parent.gender
+                    ? (parent.gender | titlecase)
+                    : '-'
+                }}
+
+              </span>
+
+            </td>
+
+
+            <!-- Phone -->
+
+            <td>
+              {{ getParentPhone(parent) }}
+            </td>
+
+
+            <!-- Status -->
+
+            <td>
+
+              <span
+                class="status-badge"
+
+                [class.status-badge--active]="
+                  parent.user?.isActive === true
+                "
+
+                [class.status-badge--inactive]="
+                  parent.user?.isActive === false
+                "
+              >
+
+                <span></span>
+
+                {{ getParentStatus(parent) }}
+
+              </span>
+
+            </td>
+
+
+            <!-- Actions -->
+
+            <td>
+
+              <div class="actions">
+
+                <!-- View -->
+
+                <button
+                  type="button"
+                  title="View"
+                  (click)="viewParent(parent)"
+                >
+
+                  <i class="fa-regular fa-eye"></i>
+
+                </button>
+
+
+                <!-- Edit -->
+
+                <button
+                  type="button"
+                  title="Edit"
+                  (click)="editParent(parent)"
+                >
+
+                  <i class="fa-solid fa-pen"></i>
+
+                </button>
+
+
+                <!-- Delete -->
+
+                <button
+                  type="button"
+                  title="Delete"
+                  class="delete"
+
+                  (click)="deleteParent(parent)"
+                >
+
+                  <i class="fa-regular fa-trash-can"></i>
+
+                </button>
+
+              </div>
+
+            </td>
+
+          </tr>
+
+
+          <!-- ================================================= -->
+          <!-- Empty State -->
+          <!-- ================================================= -->
+
+          <tr
+            *ngIf="filteredParents.length === 0"
+          >
+
+            <td
+              colspan="6"
+              class="empty-state"
+            >
+
+              <div class="empty-state__icon">
+
+                <i class="fa-solid fa-user-group"></i>
+
+              </div>
+
+              <strong>
+                No parents found
+              </strong>
+
+              <span>
+                Try changing your search or filters.
+              </span>
+
+            </td>
+
+          </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- ========================================================= -->
+<!-- Add / Edit Parent Modal -->
+<!-- ========================================================= -->
+
+<div
+  class="modal-overlay"
+  *ngIf="isModalOpen"
+>
+
+  <div class="modal-card">
+
+    <h3>
+      {{ isEditMode ? 'Edit Parent' : 'New Parent' }}
+    </h3>
+
+
+    <!-- Parent Name -->
+
+    <div class="form-group">
+
+      <label>
+        Parent Name
+      </label>
+
+      <input
+        type="text"
+        [(ngModel)]="newParent.name"
+        placeholder="Enter parent name"
+      />
+
+    </div>
+
+
+    <!-- Email -->
+
+    <div class="form-group">
+
+      <label>
+        Email
+      </label>
+
+      <input
+        type="email"
+        [(ngModel)]="newParent.email"
+        placeholder="Enter email"
+      />
+
+    </div>
+
+
+    <!-- Phone -->
+
+    <div class="form-group">
+
+      <label>
+        Phone
+      </label>
+
+      <input
+        type="text"
+        [(ngModel)]="newParent.phone"
+        placeholder="Enter phone number"
+      />
+
+    </div>
+
+
+    <!-- Gender -->
+
+    <div class="form-group">
+
+      <label>
+        Gender
+      </label>
+
+      <select
+        [(ngModel)]="newParent.gender"
+      >
+
+        <option value="">
+          Select gender
+        </option>
+
+        <option value="male">
+          Male
+        </option>
+
+        <option value="female">
+          Female
+        </option>
+
+      </select>
+
+    </div>
+
+
+    <!-- Status -->
+
+    <div class="form-group">
+
+      <label>
+        Status
+      </label>
+
+      <select
+        [(ngModel)]="newParent.status"
+      >
+
+        <option value="Active">
+          Active
+        </option>
+
+        <option value="Inactive">
+          Inactive
+        </option>
+
+      </select>
+
+    </div>
+
+
+    <!-- Modal Actions -->
+
+    <div class="modal-actions">
+
+      <button
+        type="button"
+        class="btn btn--ghost-dark"
+        (click)="closeModal()"
+      >
+        Cancel
+      </button>
+
+      <button
+        type="button"
+        class="btn modal-save-btn"
+        (click)="saveParent()"
+      >
+        {{ isEditMode ? 'Update Parent' : 'Save Parent' }}
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- ========================================================= -->
+<!-- Parent Details Modal -->
+<!-- ========================================================= -->
+
+<div
+  class="modal-overlay"
+  *ngIf="isDetailsModalOpen && selectedParent"
+>
+
+  <div class="modal-card">
+
+    <h3>
+      Parent Details
+    </h3>
+
+
+    <div class="parent-details">
+
+      <!-- Avatar -->
+
+      <div class="details-avatar">
+
+        {{
+          getParentInitials(
+            getParentName(selectedParent)
+          )
+        }}
+
+      </div>
+
+
+      <div class="details-name">
+
+        <strong>
+          {{ getParentName(selectedParent) }}
+        </strong>
+
+        <span>
+          Parent
+        </span>
+
+      </div>
+
+
+      <div class="details-divider"></div>
+
+
+      <div class="detail-row">
+
+        <strong>
+          Email
+        </strong>
+
+        <span>
+          {{ getParentEmail(selectedParent) }}
+        </span>
+
+      </div>
+
+
+      <div class="detail-row">
+
+        <strong>
+          Phone
+        </strong>
+
+        <span>
+          {{ getParentPhone(selectedParent) }}
+        </span>
+
+      </div>
+
+
+      <div class="detail-row">
+
+        <strong>
+          Gender
+        </strong>
+
+        <span>
+          {{
+            selectedParent.gender
+              ? (selectedParent.gender | titlecase)
+              : '-'
+          }}
+        </span>
+
+      </div>
+
+
+      <div class="detail-row">
+
+        <strong>
+          Status
+        </strong>
+
+        <span
+          class="status-badge"
+
+          [class.status-badge--active]="
+            selectedParent.user?.isActive === true
+          "
+
+          [class.status-badge--inactive]="
+            selectedParent.user?.isActive === false
+          "
+        >
+
+          <span></span>
+
+          {{ getParentStatus(selectedParent) }}
+
+        </span>
+
+      </div>
+
+    </div>
+
+
+    <!-- Modal Actions -->
+
+    <div class="modal-actions">
+
+      <button
+        type="button"
+        class="btn modal-save-btn"
+        (click)="closeDetailsModal()"
+      >
+        Close
+      </button>
+
+    </div>
+
+  </div>
+
+</div>

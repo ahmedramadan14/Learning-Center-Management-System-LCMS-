@@ -31,8 +31,7 @@ body {
   color: var(--text-color);
   background-color: var(--background-color);
   line-height: 1.5;
-  padding: 0;
-  overflow-x: hidden;
+  padding: 30px;
 }
 
 
@@ -264,13 +263,6 @@ img {
   display: block;
 }
 
-@media (max-width: 600px) {
-  h1 { font-size: 28px; }
-  h2 { font-size: 24px; }
-  h3 { font-size: 21px; }
-  input, select, textarea { font-size: 16px; }
-}
-
 
 ul,
 ol {
@@ -287,4 +279,75 @@ ol {
 
 .text-danger {
   color: var(--danger-color);
+}
+
+/* DARK MODE ONLY */
+
+body.dark-mode {
+  --background-color: #0f172a;
+  --white: #1e293b;
+  --text-color: #f1f5f9;
+  --text-light: #94a3b8;
+  --border-color: #334155;
+}
+
+
+
+/* =========================================================
+   ARABIC / RTL
+   ========================================================= */
+
+html[dir="rtl"] {
+  direction: rtl;
+}
+
+
+html[dir="rtl"] body {
+  direction: rtl;
+}
+
+
+/* Tables */
+
+html[dir="rtl"] th,
+html[dir="rtl"] td {
+  text-align: right;
+}
+
+
+/* Search icon */
+
+html[dir="rtl"] .search-box svg {
+  left: auto;
+  right: 12px;
+}
+
+
+html[dir="rtl"] .search-box input {
+  padding-left: 12px;
+  padding-right: 36px;
+}
+
+
+/* Flex layouts */
+
+html[dir="rtl"] .student-cell,
+html[dir="rtl"] .secretary-cell {
+  direction: rtl;
+}
+
+
+/* Actions */
+
+html[dir="rtl"] .actions {
+  direction: ltr;
+}
+
+
+/* Lists */
+
+html[dir="rtl"] ul,
+html[dir="rtl"] ol {
+  padding-left: 0;
+  padding-right: 20px;
 }

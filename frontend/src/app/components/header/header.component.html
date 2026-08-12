@@ -1,16 +1,51 @@
-<header class="topbar">
-  <button type="button" class="menu-button" aria-label="Toggle navigation" (click)="menuToggled.emit()">
-    <i class="bi bi-list"></i>
-  </button>
+<header class="header">
 
-  <label class="global-search">
-    <i class="bi bi-search"></i>
-    <input type="search" placeholder="Search anything..." aria-label="Search">
-    <kbd>Ctrl /</kbd>
-  </label>
+  <!-- Left Side -->
+  <div class="header-left">
 
-  <a class="profile-link" routerLink="/dashboard/profile" aria-label="Open your profile" *ngIf="auth.user$ | async as user">
-    <span class="user-avatar">{{ initials(user.name) }}</span>
-    <span class="user-info"><strong>{{ user.name }}</strong><small>{{ roleLabel(user.role) }}</small></span>
-  </a>
+    <button class="menu-button">
+      ☰
+    </button>
+
+    <div class="search-box">
+      <span class="search-icon">⌕</span>
+
+      <input
+        type="text"
+        [(ngModel)]="searchText"
+        placeholder="Search anything..."
+      />
+
+      <span class="search-shortcut">
+        Ctrl + K
+      </span>
+    </div>
+
+  </div>
+
+  <!-- Right Side -->
+  <div class="header-right">
+
+    <button class="notification-button">
+      ♧
+      <span class="notification-badge">5</span>
+    </button>
+
+    <div class="user-profile">
+
+      <div class="user-avatar">
+        AA
+      </div>
+
+      <div class="user-info">
+        <span class="user-name">{{ userName }}</span>
+        <span class="user-role">{{ userRole }}</span>
+      </div>
+
+      <span class="dropdown-arrow">⌄</span>
+
+    </div>
+
+  </div>
+
 </header>

@@ -1,1 +1,609 @@
-<p>attendance works!</p>
+<section class="attendance-page">
+
+  <!-- ==================== Header ==================== -->
+
+  <div class="attendance-header-banner">
+    <div class="attendance-page__header">
+
+      <div>
+        <h2 class="attendance-page__title">Attendance</h2>
+
+        <p class="attendance-page__subtitle">
+          Monitor and manage student attendance records.
+        </p>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- ==================== Statistics ==================== -->
+
+  <div class="stats-grid">
+
+    <!-- Total Students -->
+    <div class="stat-card">
+
+      <div class="stat-icon stat-icon--blue">
+        <i class="fa-solid fa-users"></i>
+      </div>
+
+      <div class="stat-content">
+        <span class="stat-title">Total Students</span>
+        <strong>{{ totalStudents }}</strong>
+        <span class="stat-description">Attendance records</span>
+      </div>
+
+    </div>
+
+
+    <!-- Present -->
+    <div class="stat-card">
+
+      <div class="stat-icon stat-icon--green">
+        <i class="fa-solid fa-user-check"></i>
+      </div>
+
+      <div class="stat-content">
+        <span class="stat-title">Present</span>
+        <strong>{{ presentCount }}</strong>
+        <span class="stat-description">Students present</span>
+      </div>
+
+    </div>
+
+
+    <!-- Absent -->
+    <div class="stat-card">
+
+      <div class="stat-icon stat-icon--red">
+        <i class="fa-solid fa-user-xmark"></i>
+      </div>
+
+      <div class="stat-content">
+        <span class="stat-title">Absent</span>
+        <strong>{{ absentCount }}</strong>
+        <span class="stat-description">Students absent</span>
+      </div>
+
+    </div>
+
+
+    <!-- Late -->
+    <div class="stat-card">
+
+      <div class="stat-icon stat-icon--orange">
+        <i class="fa-solid fa-clock"></i>
+      </div>
+
+      <div class="stat-content">
+        <span class="stat-title">Late</span>
+        <strong>{{ lateCount }}</strong>
+        <span class="stat-description">Late arrivals</span>
+      </div>
+
+    </div>
+
+
+    <!-- Excused -->
+    <div class="stat-card">
+
+      <div class="stat-icon stat-icon--purple">
+        <i class="fa-solid fa-circle-check"></i>
+      </div>
+
+      <div class="stat-content">
+        <span class="stat-title">Excused</span>
+        <strong>{{ excusedCount }}</strong>
+        <span class="stat-description">Excused absences</span>
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- ==================== Attendance List ==================== -->
+
+  <div class="attendance-card">
+
+    <!-- Card Header -->
+
+    <div class="attendance-card__header">
+
+      <div>
+        <h3>Attendance Records</h3>
+
+        <p>
+          {{ filteredRecords.length }} records found
+        </p>
+      </div>
+
+
+      <!-- Filters -->
+
+      <div class="attendance-filters">
+
+        <!-- Date -->
+
+        <input
+          type="date"
+          [(ngModel)]="selectedDate"
+        />
+
+
+        <!-- Group -->
+
+        <select
+          [(ngModel)]="selectedGroup"
+        >
+
+          <option value="All Groups">
+            All Groups
+          </option>
+
+          <option
+            *ngFor="let group of groups"
+            [value]="group"
+          >
+            {{ group }}
+          </option>
+
+        </select>
+
+
+        <!-- Status -->
+
+        <select
+          [(ngModel)]="selectedStatus"
+        >
+
+          <option value="All Status">
+            All Status
+          </option>
+
+          <option value="Present">
+            Present
+          </option>
+
+          <option value="Absent">
+            Absent
+          </option>
+
+          <option value="Late">
+            Late
+          </option>
+
+          <option value="Excused">
+            Excused
+          </option>
+
+        </select>
+
+
+        <!-- Search -->
+
+        <div class="search-box">
+
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+
+            <circle
+              cx="11"
+              cy="11"
+              r="8"
+            ></circle>
+
+            <path
+              d="m21 21-4.3-4.3"
+            ></path>
+
+          </svg>
+
+          <input
+            type="text"
+            [(ngModel)]="searchText"
+            placeholder="Search students..."
+          />
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- ==================== Table ==================== -->
+
+    <div class="table-wrapper">
+
+      <table class="attendance-table">
+
+        <thead>
+
+          <tr>
+            <th>STUDENT</th>
+            <th>GROUP</th>
+            <th>DATE</th>
+            <th>STATUS</th>
+            <th>TIME</th>
+            <th>ACTIONS</th>
+          </tr>
+
+        </thead>
+
+
+        <tbody>
+
+          <!-- Attendance Rows -->
+
+          <tr
+            *ngFor="let record of filteredRecords"
+          >
+
+            <!-- Student -->
+
+            <td>
+
+              <div class="student-cell">
+
+                <div class="student-avatar">
+                  {{ getInitials(record.studentName) }}
+                </div>
+
+                <div class="student-info">
+
+                  <strong>
+                    {{ record.studentName }}
+                  </strong>
+
+                  <span>
+                    {{ record.studentId }}
+                  </span>
+
+                </div>
+
+              </div>
+
+            </td>
+
+
+            <!-- Group -->
+
+            <td>
+
+              <span class="group-badge">
+                {{ record.group }}
+              </span>
+
+            </td>
+
+
+            <!-- Date -->
+
+            <td>
+              <span class="text-muted">
+                {{ record.date }}
+              </span>
+            </td>
+
+
+            <!-- Status -->
+
+            <td>
+
+              <span
+                class="status-badge"
+
+                [class.status-badge--present]="
+                  record.status === 'Present'
+                "
+
+                [class.status-badge--absent]="
+                  record.status === 'Absent'
+                "
+
+                [class.status-badge--late]="
+                  record.status === 'Late'
+                "
+
+                [class.status-badge--excused]="
+                  record.status === 'Excused'
+                "
+              >
+
+                <span></span>
+
+                {{ record.status }}
+
+              </span>
+
+            </td>
+
+
+            <!-- Time -->
+
+            <td>
+              <span class="text-muted">
+                {{ record.time }}
+              </span>
+            </td>
+
+
+            <!-- Actions -->
+
+            <td>
+
+              <div class="actions">
+
+                <!-- View -->
+
+                <button
+                  type="button"
+                  title="View"
+                  (click)="viewAttendance(record)"
+                >
+                  <i class="fa-regular fa-eye"></i>
+                </button>
+
+
+                <!-- Edit -->
+
+                <button
+                  type="button"
+                  title="Edit"
+                  (click)="editAttendance(record)"
+                >
+                  <i class="fa-solid fa-pen"></i>
+                </button>
+
+              </div>
+
+            </td>
+
+          </tr>
+
+
+          <!-- ==================== Empty State ==================== -->
+
+          <tr
+            *ngIf="filteredRecords.length === 0"
+          >
+
+            <td
+              colspan="6"
+              class="empty-state"
+            >
+
+              <div class="empty-state__icon">
+                <i class="fa-solid fa-calendar-xmark"></i>
+              </div>
+
+              <strong>
+                No attendance records found
+              </strong>
+
+              <span>
+                Try changing your search or filters.
+              </span>
+
+            </td>
+
+          </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- ========================================================= -->
+<!-- Edit Attendance Modal -->
+<!-- ========================================================= -->
+
+<div
+  class="modal-overlay"
+  *ngIf="isModalOpen && selectedRecord"
+>
+
+  <div class="modal-card">
+
+    <h3>
+      Edit Attendance
+    </h3>
+
+
+    <!-- Student -->
+
+    <div class="form-group">
+
+      <label>Student</label>
+
+      <input
+        type="text"
+        [value]="selectedRecord.studentName"
+        disabled
+      />
+
+    </div>
+
+
+    <!-- Group -->
+
+    <div class="form-group">
+
+      <label>Group</label>
+
+      <input
+        type="text"
+        [value]="selectedRecord.group"
+        disabled
+      />
+
+    </div>
+
+
+    <!-- Date -->
+
+    <div class="form-group">
+
+      <label>Date</label>
+
+      <input
+        type="date"
+        [(ngModel)]="selectedRecord.date"
+      />
+
+    </div>
+
+
+    <!-- Status -->
+
+    <div class="form-group">
+
+      <label>Status</label>
+
+      <select
+        [(ngModel)]="selectedRecord.status"
+      >
+
+        <option value="Present">
+          Present
+        </option>
+
+        <option value="Absent">
+          Absent
+        </option>
+
+        <option value="Late">
+          Late
+        </option>
+
+        <option value="Excused">
+          Excused
+        </option>
+
+      </select>
+
+    </div>
+
+
+    <!-- Time -->
+
+    <div class="form-group">
+
+      <label>Time</label>
+
+      <input
+        type="text"
+        [(ngModel)]="selectedRecord.time"
+        placeholder="Example: 08:15 AM"
+      />
+
+    </div>
+
+
+    <!-- Modal Actions -->
+
+    <div class="modal-actions">
+
+      <button
+        type="button"
+        class="btn btn--ghost-dark"
+        (click)="closeModal()"
+      >
+        Cancel
+      </button>
+
+      <button
+        type="button"
+        class="btn btn--primary modal-save-btn"
+        (click)="saveAttendance()"
+      >
+        Save Attendance
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- ========================================================= -->
+<!-- Attendance Details Modal -->
+<!-- ========================================================= -->
+
+<div
+  class="modal-overlay"
+  *ngIf="isDetailsModalOpen && selectedRecord"
+>
+
+  <div class="modal-card">
+
+    <h3>
+      Attendance Details
+    </h3>
+
+
+    <div class="attendance-details">
+
+      <div>
+        <strong>Student:</strong>
+        {{ selectedRecord.studentName }}
+      </div>
+
+      <div>
+        <strong>Student ID:</strong>
+        {{ selectedRecord.studentId }}
+      </div>
+
+      <div>
+        <strong>Group:</strong>
+        {{ selectedRecord.group }}
+      </div>
+
+      <div>
+        <strong>Date:</strong>
+        {{ selectedRecord.date }}
+      </div>
+
+      <div>
+        <strong>Status:</strong>
+        {{ selectedRecord.status }}
+      </div>
+
+      <div>
+        <strong>Time:</strong>
+        {{ selectedRecord.time }}
+      </div>
+
+    </div>
+
+
+    <div class="modal-actions">
+
+      <button
+        type="button"
+        class="btn btn--primary modal-save-btn"
+        (click)="closeDetailsModal()"
+      >
+        Close
+      </button>
+
+    </div>
+
+  </div>
+
+</div>

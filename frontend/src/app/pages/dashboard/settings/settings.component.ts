@@ -1,42 +1,169 @@
+
 import { Component, OnInit } from '@angular/core';
-import { ApiService } from '../../../services/api/api.service';
-import { AuthService, AuthUser } from '../../../services/auth/auth.service';
 
-interface UserResponse { data: Partial<AuthUser>; }
-
-@Component({ selector: 'app-settings', templateUrl: './settings.component.html', styleUrls: ['./settings.component.css'] })
+@Component({
+  selector: 'app-settings',
+  templateUrl: './settings.component.html',
+  styleUrls: ['./settings.component.css']
+})
 export class SettingsComponent implements OnInit {
-  model = { name: '', email: '', phone: '' };
-  role = '';
-  saving = false;
-  message = '';
-  error = '';
 
-  constructor(private readonly api: ApiService, readonly auth: AuthService) {}
+  // =========================================================
+  // Settings
+  // =========================================================
+
+  isDarkMode: boolean = false;
+
+  selectedLanguage: string = 'en';
+
+
+  // =========================================================
+  // Lifecycle
+  // =========================================================
+
   ngOnInit(): void {
-    const user = this.auth.currentUser;
-    if (user) this.setUser(user);
-    this.api.get<UserResponse>('/users/getMe').subscribe({ next: (response) => this.setUser(response.data) });
-  }
-  save(): void {
-    this.saving = true; this.error = ''; this.message = '';
-    this.api.put<UserResponse>('/users/updateMe', this.model).subscribe({
-      next: (response) => { this.saving = false; this.setUser(response.data); this.message = 'Profile saved successfully.'; },
-      error: (error: { error?: { message?: string } }) => { this.saving = false; this.error = error.error?.message || 'Could not update your profile.'; }
-    });
+
+    this.loadSettings();
+
   }
 
-  initials(name: string): string {
-    return (name || 'User').split(' ').map((part) => part[0]).join('').slice(0, 2).toUpperCase();
+
+  // =========================================================
+  // Load Settings
+  // =========================================================
+
+  loadSettings(): void {
+
+    const savedTheme =
+      localStorage.getItem('theme');
+
+    this.isDarkMode =
+      savedTheme === 'dark';
+
+
+    const savedLanguage =
+      localStorage.getItem('language');
+
+    if (
+      savedLanguage === 'ar' ||
+      savedLanguage === 'en'
+    ) {
+
+      this.selectedLanguage =
+        savedLanguage;
+
+    } else {
+
+      this.selectedLanguage = 'en';
+
+    }
+
+
+    this.applyTheme();
+
+    this.applyLanguage();
+
   }
 
-  roleLabel(role: string): string {
-    return role ? role.charAt(0).toUpperCase() + role.slice(1) : 'User';
+
+  // =========================================================
+  // Toggle Dark Mode
+  // =========================================================
+
+  toggleDarkMode(): void {
+
+    this.applyTheme();
+
   }
 
-  private setUser(user: Partial<AuthUser>): void {
-    this.model = { name: user.name || this.model.name, email: user.email || '', phone: user.phone || this.model.phone };
-    this.role = user.role || this.role;
-    this.auth.updateCurrentUser(user);
+
+  // =========================================================
+  // Apply Theme
+  // =========================================================
+
+  applyTheme(): void {
+
+    const body =
+      document.body;
+
+
+    if (this.isDarkMode) {
+
+      body.classList.add('dark-mode');
+
+      localStorage.setItem(
+        'theme',
+        'dark'
+      );
+
+    } else {
+
+      body.classList.remove('dark-mode');
+
+      localStorage.setItem(
+        'theme',
+        'light'
+      );
+
+    }
+
   }
+
+
+  // =========================================================
+  // Change Language
+  // =========================================================
+
+  changeLanguage(): void {
+
+    localStorage.setItem(
+      'language',
+      this.selectedLanguage
+    );
+
+
+    this.applyLanguage();
+
+  }
+
+
+  // =========================================================
+  // Apply Language
+  // =========================================================
+
+  applyLanguage(): void {
+
+    const html =
+      document.documentElement;
+
+
+    if (this.selectedLanguage === 'ar') {
+
+      html.setAttribute(
+        'lang',
+        'ar'
+      );
+
+      html.setAttribute(
+        'dir',
+        'rtl'
+      );
+
+    } else {
+
+      html.setAttribute(
+        'lang',
+        'en'
+      );
+
+      html.setAttribute(
+        'dir',
+        'ltr'
+      );
+
+    }
+
+  }
+
 }
+
