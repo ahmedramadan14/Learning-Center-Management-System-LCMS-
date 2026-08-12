@@ -1,7 +1,7 @@
 const express = require("express");
-const router = express.Router();
 const resultController = require("./result.controller");
-const validate = require("../../middlewares/validate");
+const authController = require("../auth/auth.controller.js");
+const validatorMiddleware = require("../../middlewares/validatorMiddleware");
 const {
   createResultRules,
   updateResultRules,
@@ -10,17 +10,58 @@ const {
   studentCodeParamRule,
 } = require("./result.validation");
 
-router.route("/")
-  .get(resultController.getAllResults)
-  .post(createResultRules, validate, resultController.createResult);
+const router = express.Router();
 
-// specific routes MUST come before /:id, or "student"/"exam" get swallowed as an :id param
-router.get("/student/:studentCode", studentCodeParamRule, validate, resultController.getStudentResults);
-router.get("/exam/:examId", examIdParamRule, validate, resultController.examResults);
+router.use(authController.protect);
 
-router.route("/:id")
-  .get(idParamRule, validate, resultController.getResult)
-  .put([...idParamRule, ...updateResultRules], validate, resultController.updateResult)
-  .delete(idParamRule, validate, resultController.deleteResult);
+router
+  .route("/")
+  .get(
+    authController.allowedTo("admin", "secretary", "teacher", "student", "parent"),
+    resultController.getAllResults
+  )
+  .post(
+    authController.allowedTo("admin", "secretary", "teacher"),
+    createResultRules,
+    validatorMiddleware,
+    resultController.createResult
+  );
+
+router.get(
+  "/student/:studentCode",
+  authController.allowedTo("admin", "secretary", "teacher", "student", "parent"),
+  studentCodeParamRule,
+  validatorMiddleware,
+  resultController.getStudentResults
+);
+
+router.get(
+  "/exam/:examId",
+  authController.allowedTo("admin", "secretary", "teacher"),
+  examIdParamRule,
+  validatorMiddleware,
+  resultController.examResults
+);
+
+router
+  .route("/:id")
+  .get(
+    authController.allowedTo("admin", "secretary", "teacher", "student", "parent"),
+    idParamRule,
+    validatorMiddleware,
+    resultController.getResult
+  )
+  .put(
+    authController.allowedTo("admin", "secretary", "teacher"),
+    updateResultRules,
+    validatorMiddleware,
+    resultController.updateResult
+  )
+  .delete(
+    authController.allowedTo("admin", "teacher", "secretary"),
+    idParamRule,
+    validatorMiddleware,
+    resultController.deleteResult
+  );
 
 module.exports = router;

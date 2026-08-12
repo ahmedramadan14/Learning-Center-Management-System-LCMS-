@@ -1,0 +1,27 @@
+<header class="top-header">
+  <div class="header-left">
+    <!-- اللوجو أو زر الـ Sidebar القديم -->
+    <button class="sidebar-toggle-btn" (click)="toggleSidebar()">
+      <i class="fas fa-bars"></i>
+    </button>
+    <span class="page-title">{{ pageTitle }}</span>
+  </div>
+
+  <div class="header-right">
+    <!-- التعديل المطلوب: عرض بيانات المستخدم مع الحفاظ على التنسيق القديم -->
+    <div class="user-profile" *ngIf="currentUser">
+      <div class="avatar">
+        {{ currentUser.name ? currentUser.name[0] : 'U' }}
+      </div>
+      <div class="user-info">
+        <span class="user-name">{{ currentUser.name }}</span>
+        <span class="user-role">{{ currentUser.role }}</span>
+      </div>
+    </div>
+
+    <!-- زر تسجيل الخروج أو الإشعارات لو كان موجود محلياً -->
+    <button class="logout-btn" (click)="logout()">
+      <i class="fas fa-sign-out-alt"></i>
+    </button>
+  </div>
+</header>

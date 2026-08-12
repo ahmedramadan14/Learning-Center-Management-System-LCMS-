@@ -30,19 +30,18 @@ const examSchema = new mongoose.Schema(
       type: Number,
       required: [true, "Passing marks is required"],
       min: [0, "Passing marks cannot be negative"],
-      validate: {
-        validator: function (value) {
-          return value <= this.totalMarks;
-        },
-        message: "Passing marks cannot exceed total marks",
-      },
     },
     examDate: {
       type: Date,
       required: [true, "Exam date is required"],
+      set: (val) => {
+        if (!val) return val;
+        const d = new Date(val);
+        return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
+      },
     },
     duration: {
-      type: Number, // minutes
+      type: Number, // دقائق
       required: [true, "Duration is required"],
       min: [1, "Duration must be at least 1 minute"],
     },

@@ -1,18 +1,21 @@
-const express = require("express");
-const router = express.Router();
-const examController = require("./exam.controller");
-const validate = require("../../middlewares/validate");
-const { createExamRules, updateExamRules, idParamRule } = require("./exam.validation");
+const authController = require("../auth/auth.controller.js");
+const router = require("express").Router();
+const validate = require("../../middlewares/errorMiddleware.js");
+const { createExamRules, updateExamRules, idParamRule } = require("./exam.validation.js");
+const examController = require("./exam.controller.js");
+
+
+router.use(authController.protect);
 
 router.route("/")
   .get(examController.getAllExams)
-  .post(createExamRules, validate, examController.createExam);
+  .post(authController.allowedTo("admin", "secretary", "teacher"), createExamRules, validate, examController.createExam);
 
-router.patch("/:id/publish", idParamRule, validate, examController.publishExam);
+router.patch("/:id/publish", authController.allowedTo("admin", "secretary", "teacher"), idParamRule, validate, examController.publishExam);
 
 router.route("/:id")
   .get(idParamRule, validate, examController.getExam)
-  .put([...idParamRule, ...updateExamRules], validate, examController.updateExam)
-  .delete(idParamRule, validate, examController.deleteExam);
+  .put(authController.allowedTo("admin", "secretary", "teacher"), [...idParamRule, ...updateExamRules], validate, examController.updateExam)
+  .delete(authController.allowedTo("admin", "teacher","secretary"), idParamRule, validate, examController.deleteExam);
 
-module.exports = router;
+  module.exports = router;
