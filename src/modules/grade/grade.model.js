@@ -8,7 +8,6 @@ const gradeSchema = new mongoose.Schema(
       trim: true,
       unique: true,
     },
-
     isActive: {
       type: Boolean,
       default: true,

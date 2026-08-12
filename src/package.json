@@ -1,0 +1,25 @@
+{
+  "name": "lcms-api",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Learning Center Management System API",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "check": "node --check app.js && node --check server.js && node --check middlewares/errorMiddleware.js && node --check modules/payment/payment.model.js && node --check modules/payment/payment.service.js && node --check modules/payment/payment.controller.js && node --check modules/payment/payment.validation.js && node --check modules/payment/payment.route.js && node --check modules/notification/notification.model.js && node --check modules/notification/notification.service.js && node --check modules/notification/notification.controller.js && node --check modules/notification/notification.validation.js && node --check modules/notification/notification.route.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.6.1",
+    "express": "^4.22.2",
+    "mongoose": "^8.24.2",
+    "qs": "^6.15.3"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}

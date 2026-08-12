@@ -1,9 +1,48 @@
 const asyncHandler = require("../../middlewares/asyncHandler");
 const groupService = require("./group.service");
+const Teacher = require("../teacher/teacher.model");
+const Secretary = require("../secretaries/secretary.model");
+const ApiError = require("../../utils/ApiErrors");
 
-// Create Group
+const getTeacherProfileId = async (user) => {
+  if (user.role === "teacher") {
+    const teacher = await Teacher.findOne({ userId: user._id || user.id });
+    if (!teacher) throw new ApiError("Teacher profile not found", 404);
+    return teacher._id;
+  }
+
+  if (user.role === "secretary") {
+    const secretary = await Secretary.findOne({ userId: user._id || user.id });
+    if (secretary && secretary.teacher) {
+      return secretary.teacher; 
+    }
+
+    if (user.createdBy) {
+      const teacherByProfileId = await Teacher.findById(user.createdBy);
+      if (teacherByProfileId) return teacherByProfileId._id;
+
+      const teacherByUserId = await Teacher.findOne({ userId: user.createdBy });
+      if (teacherByUserId) return teacherByUserId._id;
+    }
+
+    throw new ApiError("Linked teacher profile not found for this secretary", 404);
+  }
+
+  return null;
+};
+
 exports.createGroup = asyncHandler(async (req, res) => {
-  const group = await groupService.createGroup(req.body);
+  let teacherId = null;
+
+  if (req.user.role === "admin") {
+    teacherId = req.body.teacherId;
+    if (!teacherId) throw new ApiError("Teacher ID is required for admin", 400);
+  } else {
+    teacherId = await getTeacherProfileId(req.user);
+  }
+
+  const groupData = { ...req.body, teacherId };
+  const group = await groupService.createGroup(groupData);
 
   res.status(201).json({
     success: true,
@@ -12,9 +51,8 @@ exports.createGroup = asyncHandler(async (req, res) => {
   });
 });
 
-// Get All Groups
 exports.getAllGroups = asyncHandler(async (req, res) => {
-  const groups = await groupService.getAllGroups();
+  const groups = await groupService.getAllGroups(req.user);
 
   res.status(200).json({
     success: true,
@@ -23,9 +61,8 @@ exports.getAllGroups = asyncHandler(async (req, res) => {
   });
 });
 
-// Get Group By Id
 exports.getGroupById = asyncHandler(async (req, res) => {
-  const group = await groupService.getGroupById(req.params.id);
+  const group = await groupService.getGroupById(req.params.id, req.user);
 
   res.status(200).json({
     success: true,
@@ -33,9 +70,8 @@ exports.getGroupById = asyncHandler(async (req, res) => {
   });
 });
 
-// Update Group
 exports.updateGroup = asyncHandler(async (req, res) => {
-  const group = await groupService.updateGroup(req.params.id, req.body);
+  const group = await groupService.updateGroup(req.params.id, req.body, req.user);
 
   res.status(200).json({
     success: true,
@@ -44,9 +80,8 @@ exports.updateGroup = asyncHandler(async (req, res) => {
   });
 });
 
-// Delete Group
 exports.deleteGroup = asyncHandler(async (req, res) => {
-  await groupService.deleteGroup(req.params.id);
+  await groupService.deleteGroup(req.params.id, req.user);
 
   res.status(200).json({
     success: true,
@@ -54,14 +89,9 @@ exports.deleteGroup = asyncHandler(async (req, res) => {
   });
 });
 
-// Add Student To Group
 exports.addStudentToGroup = asyncHandler(async (req, res) => {
   const { groupId, studentCode } = req.params;
-
-  const student = await groupService.addStudentToGroup(
-    groupId,
-    studentCode
-  );
+  const student = await groupService.addStudentToGroup(groupId, studentCode, req.user);
 
   res.status(200).json({
     success: true,
@@ -70,14 +100,9 @@ exports.addStudentToGroup = asyncHandler(async (req, res) => {
   });
 });
 
-// Remove Student From Group
 exports.removeStudentFromGroup = asyncHandler(async (req, res) => {
   const { groupId, studentCode } = req.params;
-
-  const student = await groupService.removeStudentFromGroup(
-    groupId,
-    studentCode
-  );
+  const student = await groupService.removeStudentFromGroup(groupId, studentCode, req.user);
 
   res.status(200).json({
     success: true,
@@ -86,13 +111,12 @@ exports.removeStudentFromGroup = asyncHandler(async (req, res) => {
   });
 });
 
-// Get Group Students
 exports.getGroupStudents = asyncHandler(async (req, res) => {
-  const students = await groupService.getGroupStudents(req.params.groupId);
+  const students = await groupService.getGroupStudents(req.params.id, req.user);
 
   res.status(200).json({
     success: true,
     results: students.length,
-    data: students,
+    data: { students },
   });
 });

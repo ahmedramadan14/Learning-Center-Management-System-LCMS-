@@ -1,93 +1,119 @@
 const Group = require("./group.model");
 const Grade = require("../grade/grade.model");
 const Teacher = require("../teacher/teacher.model");
-const Student = require("../student/student.model");
+const Secretary = require("../secretaries/secretary.model");
 const ApiError = require("../../utils/ApiErrors");
+const Schedule = require("../schedule/schedule.model");
+const Student = require("../student/student.model");
 
-// Create Group
-exports.createGroup = async (data) => {
-  // Check Grade
-  const grade = await Grade.findById(data.gradeLevelId);
-
-  if (!grade) {
-    throw new ApiError("Grade not found", 404);
+const getTeacherProfileFromUser = async (user) => {
+  if (user.role === "teacher") {
+    const teacher = await Teacher.findOne({ userId: user._id || user.id });
+    if (!teacher) throw new ApiError("Teacher profile not found", 404);
+    return teacher;
   }
 
-  // Check Teacher
-  const teacher = await Teacher.findById(data.teacherId);
-
-  if (!teacher) {
-    throw new ApiError("Teacher not found", 404);
+  if (user.role === "secretary") {
+    const secretary = await Secretary.findOne({ userId: user._id || user.id });
+    if (secretary && secretary.teacher) {
+      return await Teacher.findById(secretary.teacher);
+    }
+    if (user.createdBy) {
+      return await Teacher.findOne({ userId: user.createdBy });
+    }
+    throw new ApiError("Secretary is not linked to any valid teacher", 400);
   }
 
-  // Check Duplicate Group Name
-  const groupExists = await Group.findOne({
-    groupName: data.groupName,
-  });
+  return null;
+};
 
-  if (groupExists) {
-    throw new ApiError("Group already exists", 400);
+
+const verifyGroupOwnership = async (groupId, user) => {
+  const group = await Group.findById(groupId);
+  if (!group) throw new ApiError("Group not found", 404);
+
+  if (user.role === "admin") return group;
+
+  const teacher = await getTeacherProfileFromUser(user);
+  if (!teacher || group.teacherId.toString() !== teacher._id.toString()) {
+    throw new ApiError("You are not authorized to manage or view this group", 403);
   }
-
-  const group = await Group.create(data);
 
   return group;
 };
 
+// Create Group
+exports.createGroup = async (data) => {
+  const grade = await Grade.findById(data.gradeLevelId);
+  if (!grade) {
+    throw new ApiError("Grade not found", 404);
+  }
+
+  const teacher = await Teacher.findById(data.teacherId);
+  if (!teacher) {
+    throw new ApiError("Teacher not found", 404);
+  }
+
+  const groupExists = await Group.findOne({
+    groupName: data.groupName,
+    teacherId: data.teacherId,
+  });
+
+  if (groupExists) {
+    throw new ApiError("Group with this name already exists for this teacher", 400);
+  }
+
+  return await Group.create(data);
+};
+
 // Get All Groups
-exports.getAllGroups = async () => {
-  return await Group.find()
+exports.getAllGroups = async (user) => {
+  let filter = {};
+
+  if (user.role === "teacher" || user.role === "secretary") {
+    const teacher = await getTeacherProfileFromUser(user);
+    if (!teacher) return [];
+    filter = { teacherId: teacher._id };
+  } else if (user.role === "student") {
+    const student = await Student.findOne({ userId: user._id || user.id });
+    if (!student) return [];
+    filter = { _id: { $in: student.groups || [] } };
+  }
+
+  return await Group.find(filter)
     .populate("gradeLevelId", "name")
     .populate("teacherId");
 };
 
 // Get Group By Id
-exports.getGroupById = async (id) => {
-  const group = await Group.findById(id)
-    .populate("gradeLevelId", "name")
-    .populate("teacherId");
-
-  if (!group) {
-    throw new ApiError("Group not found", 404);
-  }
-
-  return group;
+exports.getGroupById = async (id, user) => {
+  const group = await verifyGroupOwnership(id, user);
+  return await group.populate(["gradeLevelId", "teacherId"]);
 };
 
 // Update Group
-exports.updateGroup = async (id, data) => {
-  const group = await Group.findById(id);
-
-  if (!group) {
-    throw new ApiError("Group not found", 404);
-  }
+exports.updateGroup = async (id, data, user) => {
+  await verifyGroupOwnership(id, user);
 
   if (data.gradeLevelId) {
     const grade = await Grade.findById(data.gradeLevelId);
-
-    if (!grade) {
-      throw new ApiError("Grade not found", 404);
-    }
-  }
-
-  if (data.teacherId) {
-    const teacher = await Teacher.findById(data.teacherId);
-
-    if (!teacher) {
-      throw new ApiError("Teacher not found", 404);
-    }
+    if (!grade) throw new ApiError("Grade not found", 404);
   }
 
   if (data.groupName) {
+    const group = await Group.findById(id);
     const groupExists = await Group.findOne({
       groupName: data.groupName,
+      teacherId: group.teacherId,
       _id: { $ne: id },
     });
 
     if (groupExists) {
-      throw new ApiError("Group already exists", 400);
+      throw new ApiError("Group with this name already exists for this teacher", 400);
     }
   }
+
+  delete data.teacherId; 
 
   return await Group.findByIdAndUpdate(id, data, {
     new: true,
@@ -96,116 +122,69 @@ exports.updateGroup = async (id, data) => {
 };
 
 // Delete Group
-exports.deleteGroup = async (id) => {
-  const group = await Group.findById(id);
+exports.deleteGroup = async (id, user) => {
+  await verifyGroupOwnership(id, user);
 
-  if (!group) {
-    throw new ApiError("Group not found", 404);
+  const schedulesUsingGroup = await Schedule.exists({ groupId: id });
+  if (schedulesUsingGroup) {
+    throw new ApiError("Cannot delete group: it still has schedules attached", 400);
   }
 
   await Group.findByIdAndDelete(id);
-
-  return;
 };
 
 // Add Student To Group
-exports.addStudentToGroup = async (groupId, studentCode) => {
-  // Check Group
-  const group = await Group.findById(groupId);
+exports.addStudentToGroup = async (groupId, studentCode, user) => {
+  const group = await verifyGroupOwnership(groupId, user);
 
-  if (!group) {
-    throw new ApiError("Group not found", 404);
+  const student = await Student.findOne({ studentCode, isActive: true });
+  if (!student) throw new ApiError("Student not found or inactive", 404);
+
+
+  if (!student.groups) student.groups = [];
+
+  const isAlreadyInGroup = student.groups.some(
+    (gId) => gId.toString() === groupId.toString()
+  );
+
+  if (isAlreadyInGroup) {
+    throw new ApiError("Student is already enrolled in this group", 400);
   }
 
-  // Check Student
-  const student = await Student.findOne({
-    studentCode,
-    isActive: true,
-  });
-
-  if (!student) {
-    throw new ApiError("Student not found", 404);
-  }
-
-  // Check if student already belongs to this group
-  if (student.groups && student.groups.includes(groupId)) {
-    throw new ApiError("Student already belongs to this group", 400);
-  }
-
-  // Check group capacity
-  const studentsCount = await Student.countDocuments({
-    groups: groupId,
-    isActive: true,
-  });
-
-  if (studentsCount >= group.maxCapacity) {
-    throw new ApiError("Group has reached maximum capacity", 400);
-  }
-
-  // Add group to student's groups
-  if (!student.groups) {
-    student.groups = [];
+  const currentEnrolled = await Student.countDocuments({ groups: groupId, isActive: true });
+  if (currentEnrolled >= group.maxCapacity) {
+    throw new ApiError("Group has reached its maximum student capacity", 400);
   }
 
   student.groups.push(groupId);
-
   await student.save();
 
-  return await Student.findById(student._id).populate(
-    "userId",
-    "name phone role email"
-  );
+  await student.populate("userId", "name phone role");
+
+  return student;
 };
 
 // Remove Student From Group
-exports.removeStudentFromGroup = async (groupId, studentCode) => {
-  // Check Group
-  const group = await Group.findById(groupId);
+exports.removeStudentFromGroup = async (groupId, studentCode, user) => {
+  await verifyGroupOwnership(groupId, user);
 
-  if (!group) {
-    throw new ApiError("Group not found", 404);
-  }
+  const student = await Student.findOne({ studentCode, isActive: true });
+  if (!student) throw new ApiError("Student not found", 404);
 
-  // Check Student
-  const student = await Student.findOne({
-    studentCode,
-    isActive: true,
-  });
-
-  if (!student) {
-    throw new ApiError("Student not found", 404);
-  }
-
-  // Check if student belongs to this group
-  if (!student.groups || !student.groups.some(
-    (id) => id.toString() === groupId.toString()
-  )) {
+  if (!student.groups || !student.groups.some((id) => id.toString() === groupId.toString())) {
     throw new ApiError("Student does not belong to this group", 400);
   }
 
-  // Remove group from student's groups
-  student.groups = student.groups.filter(
-    (id) => id.toString() !== groupId.toString()
-  );
-
+  student.groups = student.groups.filter((id) => id.toString() !== groupId.toString());
   await student.save();
 
-  return await Student.findById(student._id).populate(
-    "userId",
-    "name phone role email"
-  );
+  return await Student.findById(student._id).populate("userId", "name phone role email");
 };
 
 // Get Students In Group
-exports.getGroupStudents = async (groupId) => {
-  // Check Group
-  const group = await Group.findById(groupId);
+exports.getGroupStudents = async (groupId, user) => {
+  await verifyGroupOwnership(groupId, user);
 
-  if (!group) {
-    throw new ApiError("Group not found", 404);
-  }
-
-  // Get active students that belong to this group
   return await Student.find({
     groups: groupId,
     isActive: true,

@@ -1,10 +1,8 @@
 const asyncHandler = require("../../middlewares/asyncHandler");
 const scheduleService = require("./schedule.service");
 
-// Create Schedule
 exports.createSchedule = asyncHandler(async (req, res) => {
-  const schedule = await scheduleService.createSchedule(req.body);
-
+  const schedule = await scheduleService.createSchedule(req.body, req.user);
   res.status(201).json({
     success: true,
     message: "Schedule created successfully",
@@ -12,10 +10,8 @@ exports.createSchedule = asyncHandler(async (req, res) => {
   });
 });
 
-// Get All Schedules
 exports.getAllSchedules = asyncHandler(async (req, res) => {
-  const schedules = await scheduleService.getAllSchedules();
-
+  const schedules = await scheduleService.getAllSchedules(req.user);
   res.status(200).json({
     success: true,
     results: schedules.length,
@@ -23,23 +19,16 @@ exports.getAllSchedules = asyncHandler(async (req, res) => {
   });
 });
 
-// Get Schedule By Id
 exports.getScheduleById = asyncHandler(async (req, res) => {
-  const schedule = await scheduleService.getScheduleById(req.params.id);
-
+  const schedule = await scheduleService.getScheduleById(req.params.id, req.user);
   res.status(200).json({
     success: true,
     data: schedule,
   });
 });
 
-// Update Schedule
 exports.updateSchedule = asyncHandler(async (req, res) => {
-  const schedule = await scheduleService.updateSchedule(
-    req.params.id,
-    req.body
-  );
-
+  const schedule = await scheduleService.updateSchedule(req.params.id, req.body, req.user);
   res.status(200).json({
     success: true,
     message: "Schedule updated successfully",
@@ -47,10 +36,8 @@ exports.updateSchedule = asyncHandler(async (req, res) => {
   });
 });
 
-// Delete Schedule
 exports.deleteSchedule = asyncHandler(async (req, res) => {
-  await scheduleService.deleteSchedule(req.params.id);
-
+  await scheduleService.deleteSchedule(req.params.id, req.user);
   res.status(200).json({
     success: true,
     message: "Schedule deleted successfully",

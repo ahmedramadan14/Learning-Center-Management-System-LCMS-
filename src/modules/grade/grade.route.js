@@ -1,28 +1,47 @@
 const express = require("express");
-
-const router = express.Router();
-
-const gradeController = require("./grade.controller");
-
+const authController = require("../auth/auth.controller.js");
+const gradeController = require("./grade.controller.js");
 const {
   createGradeValidator,
   updateGradeValidator,
   getGradeValidator,
   deleteGradeValidator,
-} = require("./grade.validation");
+} = require("./grade.validation.js");
+const validatorMiddleware = require("../../middlewares/validatorMiddleware.js");
 
-const validatorMiddleware = require("../../middlewares/validatorMiddleware");
+const router = express.Router();
+
+router.use(authController.protect);
 
 router
   .route("/")
-  .post(createGradeValidator, validatorMiddleware, gradeController.createGrade)
-  .get(gradeController.getAllGrades);
+  .post(
+    authController.allowedTo("admin", "teacher"), 
+    createGradeValidator,
+    validatorMiddleware,
+    gradeController.createGrade
+  )
+  .get(
+    authController.allowedTo("admin", "teacher", "secretary", "student", "parent"),
+    gradeController.getAllGrades
+  );
 
 router
   .route("/:id")
-  .get(getGradeValidator, validatorMiddleware, gradeController.getGradeById)
-  .put(updateGradeValidator, validatorMiddleware, gradeController.updateGrade)
+  .get(
+    authController.allowedTo("admin", "teacher", "secretary", "student"),
+    getGradeValidator,
+    validatorMiddleware,
+    gradeController.getGradeById
+  )
+  .put(
+    authController.allowedTo("admin", "teacher"), 
+    updateGradeValidator,
+    validatorMiddleware,
+    gradeController.updateGrade
+  )
   .delete(
+    authController.allowedTo("admin", "teacher"), 
     deleteGradeValidator,
     validatorMiddleware,
     gradeController.deleteGrade

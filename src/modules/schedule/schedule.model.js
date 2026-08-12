@@ -7,26 +7,17 @@ const scheduleSchema = new mongoose.Schema(
       ref: "Group",
       required: [true, "Group is required"],
     },
-
-    group: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Group",
-    },
-
     dayOfWeek: {
       type: Number,
-      required: [true, "Day of week is required"],
       min: 0,
       max: 6,
     },
-
     startTime: {
-      type: Date,
+      type: String,
       required: [true, "Start time is required"],
     },
-
     endTime: {
-      type: Date,
+      type: String,
       required: [true, "End time is required"],
     },
 
