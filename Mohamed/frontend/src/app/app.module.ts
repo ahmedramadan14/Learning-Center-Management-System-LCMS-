@@ -26,12 +26,18 @@ import { LoginComponent } from './pages/auth/login/login.component';
 import { RegisterComponent } from './pages/auth/register/register.component';
 import { ScheduleComponent } from './pages/dashboard/schedule/schedule.component';
 
+<<<<<<< HEAD
 
 
 @NgModule({
   declarations: [
     LoginComponent,
     RegisterComponent,
+=======
+@NgModule({
+  declarations: [
+    RegisterComponent, // 👈 رجّع RegisterComponent هنا في declarations
+>>>>>>> origin/ahmed
     AppComponent,
     HeaderComponent,
     FooterComponent,
@@ -51,6 +57,7 @@ import { ScheduleComponent } from './pages/dashboard/schedule/schedule.component
     DashboardLayoutComponent,
     ResultsComponent,
     ScheduleComponent,
+<<<<<<< HEAD
 
   ],
   imports: [
@@ -59,8 +66,22 @@ import { ScheduleComponent } from './pages/dashboard/schedule/schedule.component
   CommonModule,
   AppRoutingModule,
   HttpClientModule
+=======
+  ],
+  imports: [
+    BrowserModule,
+    FormsModule,
+    CommonModule,
+    AppRoutingModule,
+    HttpClientModule,
+    LoginComponent 
+>>>>>>> origin/ahmed
   ],
   providers: [],
   bootstrap: [AppComponent]
 })
+<<<<<<< HEAD
 export class AppModule { }
+=======
+export class AppModule { }
+>>>>>>> origin/ahmed

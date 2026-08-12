@@ -11,6 +11,7 @@
             </div>
 
             <div class="quick-icons">
+<<<<<<< HEAD
                 <div class="icon-box">
                     <span class="icon-circle"><i class="fa-regular fa-user"></i></span>Students
                 </div>
@@ -26,6 +27,13 @@
                 <div class="icon-box">
                     <span class="icon-circle"><i class="fa-solid fa-chart-column"></i></span>Payments
                 </div>
+=======
+                <div class="icon-box"><span class="icon-circle"><i class="fa-regular fa-user"></i></span>Students</div>
+                <div class="icon-box"><span class="icon-circle"><i class="fa-regular fa-credit-card"></i></span>Parents</div>
+                <div class="icon-box"><span class="icon-circle"><i class="fa-regular fa-file-lines"></i></span>Attendance</div>
+                <div class="icon-box"><span class="icon-circle"><i class="fa-solid fa-chart-column"></i></span>Grades</div>
+                <div class="icon-box"><span class="icon-circle"><i class="fa-solid fa-chart-column"></i></span>Payments</div>
+>>>>>>> origin/ahmed
             </div>
 
             <div class="illustration-wrap">
@@ -40,12 +48,22 @@
                     <p>Sign in to your account</p>
                 </div>
 
+<<<<<<< HEAD
                 <form (ngSubmit)="onSubmit()" #loginForm="ngForm">
                     <div class="form-group">
                         <label for="email">Email</label>
                         <div class="input-with-icon">
                             <i class="fa-regular fa-envelope"></i>
                             <input type="email" id="email" name="email" ngModel required placeholder="you@gmail.com">
+=======
+                <!-- تم ربط النموذج بدالة onSubmit وتمرير القيم -->
+                <form (ngSubmit)="onSubmit(loginForm)" #loginForm="ngForm">
+                    <div class="form-group">
+                        <label for="phone">Phone Number</label>
+                        <div class="input-with-icon">
+                            <i class="fa-solid fa-phone"></i>
+                            <input type="tel" id="phone" name="phone" ngModel required placeholder="010XXXXXXXX">
+>>>>>>> origin/ahmed
                         </div>
                     </div>
 
@@ -56,6 +74,7 @@
                         </div>
                         <div class="input-with-icon">
                             <i class="fa-regular fa-lock"></i>
+<<<<<<< HEAD
 
                             <input [type]="showPassword ? 'text' : 'password'" id="password" name="password" ngModel
                                 required placeholder="Enter your password">
@@ -79,10 +98,32 @@
 
                     <div class="signup-link">
                         New to LCMS? <a href="/register">Create an account</a>
+=======
+                            <input [type]="showPassword ? 'text' : 'password'" id="password" name="password" ngModel required placeholder="Enter your password">
+                            <i class="fa-regular toggle-password" [ngClass]="showPassword ? 'fa-eye' : 'fa-eye-slash'" (click)="showPassword = !showPassword" tabindex="0"></i>
+                        </div>
+                    </div>
+
+                    <!-- إظهار رسائل الخطأ من الباك إند -->
+                    <p *ngIf="errorMessage" style="color: #e63946; font-size: 13px; margin-bottom: 12px;">
+                        {{ errorMessage }}
+                    </p>
+
+                    <button type="submit" class="btn btn-primary" [disabled]="!loginForm.valid || isLoading">
+                        {{ isLoading ? 'Signing in...' : 'Sign in' }}
+                    </button>
+
+                    <div class="signup-link">
+                        New to LCMS? <a routerLink="/register">Create an account</a>
+>>>>>>> origin/ahmed
                     </div>
                 </form>
             </div>
         </div>
 
     </div>
+<<<<<<< HEAD
 </div>
+=======
+</div>
+>>>>>>> origin/ahmed
