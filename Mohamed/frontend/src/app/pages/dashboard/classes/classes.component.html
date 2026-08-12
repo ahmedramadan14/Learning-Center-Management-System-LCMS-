@@ -1,0 +1,1008 @@
+<section class="groups-page">
+
+  <!-- ===================================================== -->
+  <!-- Header -->
+  <!-- ===================================================== -->
+
+  <div class="groups-header-banner">
+
+    <div class="groups-page__header">
+
+      <div>
+
+        <h2 class="groups-page__title">
+          Groups
+        </h2>
+
+        <p class="groups-page__subtitle">
+          Manage and monitor all groups in your learning center.
+        </p>
+
+      </div>
+
+
+      <div class="groups-page__actions">
+
+        <button
+          type="button"
+          class="btn btn--primary"
+          (click)="onAddGroupClick()"
+        >
+
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+
+            <path
+              d="M12 5v14M5 12h14"
+              stroke-linecap="round"
+            ></path>
+
+          </svg>
+
+          Add Group
+
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- Statistics -->
+  <!-- ===================================================== -->
+
+  <div class="stats-grid">
+
+
+    <!-- Total Groups -->
+
+    <div class="stat-card">
+
+      <div class="stat-icon stat-icon--blue">
+
+        <i
+          class="fa-solid fa-layer-group"
+        ></i>
+
+      </div>
+
+
+      <div class="stat-content">
+
+        <span class="stat-title">
+          Total Groups
+        </span>
+
+        <strong>
+          {{ groups.length }}
+        </strong>
+
+        <span class="stat-description">
+          All groups
+        </span>
+
+      </div>
+
+    </div>
+
+
+    <!-- Capacity -->
+
+    <div class="stat-card">
+
+      <div class="stat-icon stat-icon--green">
+
+        <i
+          class="fa-solid fa-user-graduate"
+        ></i>
+
+      </div>
+
+
+      <div class="stat-content">
+
+        <span class="stat-title">
+          Total Capacity
+        </span>
+
+        <strong>
+          {{ totalStudentsCount }}
+        </strong>
+
+        <span class="stat-description">
+          Across all groups
+        </span>
+
+      </div>
+
+    </div>
+
+
+    <!-- Grade Levels -->
+
+    <div class="stat-card">
+
+      <div class="stat-icon stat-icon--orange">
+
+        <i
+          class="fa-solid fa-graduation-cap"
+        ></i>
+
+      </div>
+
+
+      <div class="stat-content">
+
+        <span class="stat-title">
+          Grade Levels
+        </span>
+
+        <strong>
+          {{ gradeLevelsCount }}
+        </strong>
+
+        <span class="stat-description">
+          Different levels
+        </span>
+
+      </div>
+
+    </div>
+
+
+    <!-- Teachers -->
+
+    <div class="stat-card">
+
+      <div class="stat-icon stat-icon--purple">
+
+        <i
+          class="fa-solid fa-chalkboard-user"
+        ></i>
+
+      </div>
+
+
+      <div class="stat-content">
+
+        <span class="stat-title">
+          Teachers
+        </span>
+
+        <strong>
+          {{ teachersCount }}
+        </strong>
+
+        <span class="stat-description">
+          Assigned teachers
+        </span>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- Groups Card -->
+  <!-- ===================================================== -->
+
+  <div class="groups-card">
+
+
+    <!-- Card Header -->
+
+    <div class="groups-card__header">
+
+      <div>
+
+        <h3>
+          Groups List
+        </h3>
+
+        <p>
+          {{ filteredGroups.length }} groups found
+        </p>
+
+      </div>
+
+
+      <!-- Filters -->
+
+      <div class="groups-filters">
+
+
+        <!-- Grade Filter -->
+
+        <select
+          [(ngModel)]="selectedGradeLevel"
+          (change)="applyFilters()"
+        >
+
+          <option value="">
+            All Grade Levels
+          </option>
+
+
+          <option
+            *ngFor="let level of gradeLevels"
+            [value]="level"
+          >
+
+            {{ level }}
+
+          </option>
+
+        </select>
+
+
+        <!-- Teacher Filter -->
+
+        <select
+          [(ngModel)]="selectedTeacher"
+          (change)="applyFilters()"
+        >
+
+          <option value="">
+            All Teachers
+          </option>
+
+
+          <option
+            *ngFor="let teacher of teachers"
+            [value]="teacher"
+          >
+
+            {{ teacher }}
+
+          </option>
+
+        </select>
+
+
+        <!-- Search -->
+
+        <div class="search-box">
+
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+
+            <circle
+              cx="11"
+              cy="11"
+              r="8"
+            ></circle>
+
+            <path
+              d="m21 21-4.3-4.3"
+            ></path>
+
+          </svg>
+
+
+          <input
+            type="text"
+            placeholder="Search groups..."
+            [(ngModel)]="searchValue"
+            (input)="applyFilters()"
+          />
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- ===================================================== -->
+    <!-- Table -->
+    <!-- ===================================================== -->
+
+    <div class="table-wrapper">
+
+      <table class="groups-table">
+
+
+        <thead>
+
+          <tr>
+
+            <th>
+              GROUP
+            </th>
+
+            <th>
+              GRADE LEVEL
+            </th>
+
+            <th>
+              CAPACITY
+            </th>
+
+            <th>
+              SESSIONS
+            </th>
+
+            <th>
+              TEACHER
+            </th>
+
+            <th>
+              ACTIONS
+            </th>
+
+          </tr>
+
+        </thead>
+
+
+        <tbody>
+
+
+          <!-- ================================================= -->
+          <!-- Groups -->
+          <!-- ================================================= -->
+
+          <tr
+            *ngFor="let group of filteredGroups"
+          >
+
+
+            <!-- Group -->
+
+            <td>
+
+              <div class="group-cell">
+
+
+                <div class="group-avatar">
+
+                  {{
+                    getInitial(
+                      group.groupName
+                    )
+                  }}
+
+                </div>
+
+
+                <div class="group-info">
+
+                  <strong>
+
+                    {{ group.groupName }}
+
+                  </strong>
+
+
+                  <span>
+                    Learning Group
+                  </span>
+
+                </div>
+
+              </div>
+
+            </td>
+
+
+            <!-- Grade -->
+
+            <td>
+
+              <span class="grade-badge">
+
+                {{
+                  getGradeLevelName(group)
+                }}
+
+              </span>
+
+            </td>
+
+
+            <!-- Capacity -->
+
+            <td>
+
+              <div class="students-count">
+
+                <i
+                  class="fa-solid fa-user-graduate"
+                ></i>
+
+
+                <strong>
+
+                  {{ group.maxCapacity }}
+
+                </strong>
+
+
+                <span>
+                  Capacity
+                </span>
+
+              </div>
+
+            </td>
+
+
+            <!-- Sessions -->
+
+            <td>
+
+              <span class="text-muted">
+
+                {{ group.sessionsPerCycle }}
+
+                sessions / cycle
+
+              </span>
+
+            </td>
+
+
+            <!-- Teacher -->
+
+            <td>
+
+              <div class="teacher-cell">
+
+
+                <div class="teacher-avatar">
+
+                  {{
+                    getInitials(
+                      getTeacherName(group)
+                    )
+                  }}
+
+                </div>
+
+
+                <span>
+
+                  {{
+                    getTeacherName(group)
+                  }}
+
+                </span>
+
+              </div>
+
+            </td>
+
+
+            <!-- Actions -->
+
+            <td>
+
+              <div class="actions">
+
+
+                <!-- View -->
+
+                <button
+                  type="button"
+                  title="View"
+                  (click)="viewGroup(group)"
+                >
+
+                  <i
+                    class="fa-regular fa-eye"
+                  ></i>
+
+                </button>
+
+
+                <!-- Edit -->
+
+                <button
+                  type="button"
+                  title="Edit"
+                  (click)="editGroup(group)"
+                >
+
+                  <i
+                    class="fa-solid fa-pen"
+                  ></i>
+
+                </button>
+
+
+                <!-- Delete -->
+
+                <button
+                  type="button"
+                  title="Delete"
+                  (click)="deleteGroup(group)"
+                >
+
+                  <i
+                    class="fa-regular fa-trash-can"
+                  ></i>
+
+                </button>
+
+              </div>
+
+            </td>
+
+          </tr>
+
+
+          <!-- ================================================= -->
+          <!-- Empty -->
+          <!-- ================================================= -->
+
+          <tr
+            *ngIf="filteredGroups.length === 0 && !isLoading"
+          >
+
+            <td
+              colspan="6"
+              class="empty-state"
+            >
+
+              <div class="empty-state__icon">
+
+                <i
+                  class="fa-solid fa-layer-group"
+                ></i>
+
+              </div>
+
+
+              <strong>
+                No groups found
+              </strong>
+
+
+              <span>
+                Try changing your search or filters.
+              </span>
+
+            </td>
+
+          </tr>
+
+
+          <!-- ================================================= -->
+          <!-- Loading -->
+          <!-- ================================================= -->
+
+          <tr
+            *ngIf="isLoading"
+          >
+
+            <td
+              colspan="6"
+              class="empty-state"
+            >
+
+              <strong>
+                Loading groups...
+              </strong>
+
+            </td>
+
+          </tr>
+
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+
+<!-- ========================================================= -->
+<!-- Add / Edit Group Modal -->
+<!-- ========================================================= -->
+
+<div
+  class="modal-overlay"
+  *ngIf="isModalOpen"
+>
+
+
+  <div class="modal-card">
+
+
+    <h3>
+
+      {{
+        isEditMode
+          ? 'Edit Group'
+          : 'New Group'
+      }}
+
+    </h3>
+
+
+    <!-- Group Name -->
+
+    <div class="form-group">
+
+      <label>
+        Group Name
+      </label>
+
+
+      <input
+        type="text"
+        [(ngModel)]="newGroup.groupName"
+        placeholder="Enter group name"
+      />
+
+    </div>
+
+
+    <!-- Grade Level ID -->
+
+    <div class="form-group">
+
+      <label>
+        Grade Level ID
+      </label>
+
+
+      <input
+        type="text"
+        [(ngModel)]="newGroup.gradeLevelId"
+        placeholder="Enter grade level ID"
+      />
+
+    </div>
+
+
+    <!-- Teacher ID -->
+
+    <div class="form-group">
+
+      <label>
+        Teacher ID
+      </label>
+
+
+      <input
+        type="text"
+        [(ngModel)]="newGroup.teacherId"
+        placeholder="Enter teacher ID"
+      />
+
+    </div>
+
+
+    <!-- Maximum Capacity -->
+
+    <div class="form-group">
+
+      <label>
+        Maximum Capacity
+      </label>
+
+
+      <input
+        type="number"
+        [(ngModel)]="newGroup.maxCapacity"
+        min="1"
+        placeholder="Enter maximum capacity"
+      />
+
+    </div>
+
+
+    <!-- Session Price -->
+
+    <div class="form-group">
+
+      <label>
+        Session Price
+      </label>
+
+
+      <input
+        type="number"
+        [(ngModel)]="newGroup.sessionPrice"
+        min="0"
+        placeholder="Enter session price"
+      />
+
+    </div>
+
+
+    <!-- Sessions Per Cycle -->
+
+    <div class="form-group">
+
+      <label>
+        Sessions Per Cycle
+      </label>
+
+
+      <input
+        type="number"
+        [(ngModel)]="newGroup.sessionsPerCycle"
+        min="1"
+        placeholder="Enter sessions per cycle"
+      />
+
+    </div>
+
+
+    <!-- Billing Anchor Date -->
+
+    <div class="form-group">
+
+      <label>
+        Billing Anchor Date
+      </label>
+
+
+      <input
+        type="date"
+        [(ngModel)]="newGroup.billingAnchorDate"
+      />
+
+    </div>
+
+
+    <!-- Active -->
+
+    <div class="form-group">
+
+      <label>
+
+        <input
+          type="checkbox"
+          [(ngModel)]="newGroup.isActive"
+        />
+
+        Active Group
+
+      </label>
+
+    </div>
+
+
+    <!-- Actions -->
+
+    <div class="modal-actions">
+
+
+      <button
+        type="button"
+        class="btn btn--ghost-dark"
+        (click)="closeModal()"
+      >
+
+        Cancel
+
+      </button>
+
+
+      <button
+        type="button"
+        class="btn btn--primary modal-save-btn"
+        (click)="saveGroup()"
+      >
+
+        {{
+          isEditMode
+            ? 'Update Group'
+            : 'Save Group'
+        }}
+
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+
+<!-- ========================================================= -->
+<!-- Group Details Modal -->
+<!-- ========================================================= -->
+
+<div
+  class="modal-overlay"
+  *ngIf="
+    isDetailsModalOpen &&
+    selectedGroup
+  "
+>
+
+
+  <div class="modal-card">
+
+
+    <h3>
+      Group Details
+    </h3>
+
+
+    <div class="group-details">
+
+
+      <!-- Group Name -->
+
+      <div>
+
+        <strong>
+          Group Name:
+        </strong>
+
+
+        {{
+          selectedGroup.groupName
+        }}
+
+      </div>
+
+
+      <!-- Grade -->
+
+      <div>
+
+        <strong>
+          Grade Level:
+        </strong>
+
+
+        {{
+          getGradeLevelName(
+            selectedGroup
+          )
+        }}
+
+      </div>
+
+
+      <!-- Capacity -->
+
+      <div>
+
+        <strong>
+          Maximum Capacity:
+        </strong>
+
+
+        {{
+          selectedGroup.maxCapacity
+        }}
+
+      </div>
+
+
+      <!-- Price -->
+
+      <div>
+
+        <strong>
+          Session Price:
+        </strong>
+
+
+        {{
+          selectedGroup.sessionPrice
+        }}
+
+      </div>
+
+
+      <!-- Sessions -->
+
+      <div>
+
+        <strong>
+          Sessions Per Cycle:
+        </strong>
+
+
+        {{
+          selectedGroup.sessionsPerCycle
+        }}
+
+      </div>
+
+
+      <!-- Teacher -->
+
+      <div>
+
+        <strong>
+          Teacher:
+        </strong>
+
+
+        {{
+          getTeacherName(
+            selectedGroup
+          )
+        }}
+
+      </div>
+
+
+      <!-- Status -->
+
+      <div>
+
+        <strong>
+          Status:
+        </strong>
+
+
+        {{
+          selectedGroup.isActive
+            ? 'Active'
+            : 'Inactive'
+        }}
+
+      </div>
+
+
+      <!-- Billing Date -->
+
+      <div>
+
+        <strong>
+          Billing Date:
+        </strong>
+
+
+        {{
+          selectedGroup.billingAnchorDate
+            || 'Not specified'
+        }}
+
+      </div>
+
+    </div>
+
+
+    <!-- Actions -->
+
+    <div class="modal-actions">
+
+      <button
+        type="button"
+        class="btn btn--primary modal-save-btn"
+        (click)="closeDetailsModal()"
+      >
+
+        Close
+
+      </button>
+
+    </div>
+
+  </div>
+
+</div>

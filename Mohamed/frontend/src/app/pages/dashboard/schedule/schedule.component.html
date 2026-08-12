@@ -1,0 +1,797 @@
+<div class="schedule-page">
+
+  <!-- HEADER -->
+  <div class="schedule-header-banner">
+
+    <div class="schedule-page__header">
+
+      <div>
+        <h1 class="schedule-page__title">
+          Schedule
+        </h1>
+
+        <p class="schedule-page__subtitle">
+          Manage learning center schedules and group sessions
+        </p>
+      </div>
+
+      <div class="schedule-page__actions">
+
+        <button
+          class="btn btn--primary"
+          (click)="openCreateModal()"
+        >
+          + Add Schedule
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- MESSAGES -->
+
+  <div
+    *ngIf="successMessage"
+    style="
+      padding: 12px;
+      margin-bottom: 15px;
+      background: #ecfdf5;
+      color: #047857;
+      border-radius: 8px;
+    "
+  >
+    {{ successMessage }}
+  </div>
+
+  <div
+    *ngIf="errorMessage"
+    style="
+      padding: 12px;
+      margin-bottom: 15px;
+      background: #fef2f2;
+      color: #b91c1c;
+      border-radius: 8px;
+    "
+  >
+    {{ errorMessage }}
+  </div>
+
+
+  <!-- STATISTICS -->
+
+  <div class="stats-grid">
+
+    <div class="stat-card">
+
+      <div class="stat-icon stat-icon--blue">
+        📅
+      </div>
+
+      <div class="stat-content">
+
+        <span class="stat-title">
+          Total Schedules
+        </span>
+
+        <strong>
+          {{ totalSchedules }}
+        </strong>
+
+        <span class="stat-description">
+          All schedules
+        </span>
+
+      </div>
+
+    </div>
+
+
+    <div class="stat-card">
+
+      <div class="stat-icon stat-icon--green">
+        ✓
+      </div>
+
+      <div class="stat-content">
+
+        <span class="stat-title">
+          Active
+        </span>
+
+        <strong>
+          {{ activeSchedules }}
+        </strong>
+
+        <span class="stat-description">
+          Active schedules
+        </span>
+
+      </div>
+
+    </div>
+
+
+    <div class="stat-card">
+
+      <div class="stat-icon stat-icon--orange">
+        ↻
+      </div>
+
+      <div class="stat-content">
+
+        <span class="stat-title">
+          Weekly
+        </span>
+
+        <strong>
+          {{ weeklySchedules }}
+        </strong>
+
+        <span class="stat-description">
+          Weekly sessions
+        </span>
+
+      </div>
+
+    </div>
+
+
+    <div class="stat-card">
+
+      <div class="stat-icon stat-icon--purple">
+        ★
+      </div>
+
+      <div class="stat-content">
+
+        <span class="stat-title">
+          Extra
+        </span>
+
+        <strong>
+          {{ extraSchedules }}
+        </strong>
+
+        <span class="stat-description">
+          Extra sessions
+        </span>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- TABLE CARD -->
+
+  <div class="schedule-card">
+
+    <div class="schedule-card__header">
+
+      <div>
+
+        <h3>
+          Learning Schedule
+        </h3>
+
+        <p>
+          All groups and their scheduled sessions
+        </p>
+
+      </div>
+
+
+      <div class="schedule-filters">
+
+        <select [(ngModel)]="selectedDay">
+
+          <option value="">
+            All Days
+          </option>
+
+          <option
+            *ngFor="let day of days"
+            [value]="day.value"
+          >
+            {{ day.label }}
+          </option>
+
+        </select>
+
+
+        <div class="search-box">
+
+          <input
+            type="text"
+            placeholder="Search group or teacher..."
+            [(ngModel)]="searchTerm"
+          />
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- LOADING -->
+
+    <div
+      *ngIf="loading"
+      class="empty-state"
+    >
+
+      <div class="empty-state__icon">
+        ⏳
+      </div>
+
+      <strong>
+        Loading schedules...
+      </strong>
+
+      <span>
+        Please wait
+      </span>
+
+    </div>
+
+
+    <!-- TABLE -->
+
+    <div
+      class="table-wrapper"
+      *ngIf="!loading"
+    >
+
+      <table class="schedule-table">
+
+        <thead>
+
+          <tr>
+
+            <th>
+              GROUP
+            </th>
+
+            <th>
+              GRADE
+            </th>
+
+            <th>
+              TEACHER
+            </th>
+
+            <th>
+              DAY
+            </th>
+
+            <th>
+              TIME
+            </th>
+
+            <th>
+              TYPE
+            </th>
+
+            <th>
+              STATUS
+            </th>
+
+            <th>
+              ACTIONS
+            </th>
+
+          </tr>
+
+        </thead>
+
+
+        <tbody>
+
+          <tr
+            *ngFor="let schedule of filteredSchedules"
+          >
+
+            <!-- GROUP -->
+
+            <td>
+
+              <div class="class-cell">
+
+                <div class="class-avatar">
+                  ▦
+                </div>
+
+                <div class="class-info">
+
+                  <strong>
+                    {{ getGroupName(schedule) }}
+                  </strong>
+
+                  <span>
+                    Group
+                  </span>
+
+                </div>
+
+              </div>
+
+            </td>
+
+
+            <!-- GRADE -->
+
+            <td>
+
+              <span class="group-badge">
+
+                {{ getGradeName(schedule) }}
+
+              </span>
+
+            </td>
+
+
+            <!-- TEACHER -->
+
+            <td>
+
+              <div class="teacher-cell">
+
+                <div class="teacher-avatar">
+                  T
+                </div>
+
+                <span>
+                  {{ getTeacherName(schedule) }}
+                </span>
+
+              </div>
+
+            </td>
+
+
+            <!-- DAY -->
+
+            <td>
+
+              <span *ngIf="schedule.type === 'weekly'">
+
+                {{ getDayName(schedule.dayOfWeek) }}
+
+              </span>
+
+              <span
+                *ngIf="schedule.type === 'extra'"
+                class="text-muted"
+              >
+                {{ formatDate(schedule.specificDate) }}
+              </span>
+
+            </td>
+
+
+            <!-- TIME -->
+
+            <td>
+
+              <span class="time-badge">
+
+                {{ schedule.startTime }}
+                -
+                {{ schedule.endTime }}
+
+              </span>
+
+            </td>
+
+
+            <!-- TYPE -->
+
+            <td>
+
+              <span class="group-badge">
+
+                {{ schedule.type }}
+
+              </span>
+
+            </td>
+
+
+            <!-- STATUS -->
+
+            <td>
+
+              <span
+                [style.color]="schedule.isActive ? '#059669' : '#64748b'"
+              >
+
+                {{ schedule.isActive ? 'Active' : 'Inactive' }}
+
+              </span>
+
+            </td>
+
+
+            <!-- ACTIONS -->
+
+            <td>
+
+              <div class="actions">
+
+                <button
+                  title="View"
+                  (click)="openDetails(schedule)"
+                >
+                  👁
+                </button>
+
+                <button
+                  title="Edit"
+                  (click)="openEditModal(schedule)"
+                >
+                  ✎
+                </button>
+
+                <button
+                  title="Delete"
+                  (click)="deleteSchedule(schedule)"
+                >
+                  🗑
+                </button>
+
+              </div>
+
+            </td>
+
+          </tr>
+
+
+          <!-- EMPTY -->
+
+          <tr
+            *ngIf="filteredSchedules.length === 0"
+          >
+
+            <td
+              colspan="8"
+              class="empty-state"
+            >
+
+              <div class="empty-state__icon">
+                📅
+              </div>
+
+              <strong>
+                No schedules found
+              </strong>
+
+              <span>
+                There are no schedules matching your filters.
+              </span>
+
+            </td>
+
+          </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+
+  <!-- CREATE / EDIT MODAL -->
+
+  <div
+    class="modal-overlay"
+    *ngIf="showModal"
+    (click)="closeModal()"
+  >
+
+    <div
+      class="modal-card"
+      (click)="$event.stopPropagation()"
+    >
+
+      <h3>
+
+        {{ editingSchedule ? 'Edit Schedule' : 'Add Schedule' }}
+
+      </h3>
+
+
+      <!-- GROUP -->
+
+      <div class="form-group">
+
+        <label>
+          Group
+        </label>
+
+        <select
+          [(ngModel)]="form.groupId"
+          [disabled]="loadingGroups"
+        >
+
+          <option value="">
+            Select Group
+          </option>
+
+          <option
+            *ngFor="let group of groups"
+            [value]="group._id"
+          >
+
+            {{ group.groupName }}
+
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <!-- TYPE -->
+
+      <div class="form-group">
+
+        <label>
+          Schedule Type
+        </label>
+
+        <select
+          [(ngModel)]="form.type"
+        >
+
+          <option value="weekly">
+            Weekly
+          </option>
+
+          <option value="extra">
+            Extra
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <!-- DAY -->
+
+      <div
+        class="form-group"
+        *ngIf="form.type === 'weekly'"
+      >
+
+        <label>
+          Day
+        </label>
+
+        <select
+          [(ngModel)]="form.dayOfWeek"
+        >
+
+          <option value="">
+            Select Day
+          </option>
+
+          <option
+            *ngFor="let day of days"
+            [value]="day.value"
+          >
+
+            {{ day.label }}
+
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <!-- SPECIFIC DATE -->
+
+      <div
+        class="form-group"
+        *ngIf="form.type === 'extra'"
+      >
+
+        <label>
+          Specific Date
+        </label>
+
+        <input
+          type="date"
+          [(ngModel)]="form.specificDate"
+        />
+
+      </div>
+
+
+      <!-- START -->
+
+      <div class="form-group">
+
+        <label>
+          Start Time
+        </label>
+
+        <input
+          type="time"
+          [(ngModel)]="form.startTime"
+        />
+
+      </div>
+
+
+      <!-- END -->
+
+      <div class="form-group">
+
+        <label>
+          End Time
+        </label>
+
+        <input
+          type="time"
+          [(ngModel)]="form.endTime"
+        />
+
+      </div>
+
+
+      <!-- ACTIVE -->
+
+      <div class="form-group">
+
+        <label>
+
+          <input
+            type="checkbox"
+            [(ngModel)]="form.isActive"
+          />
+
+          Active
+
+        </label>
+
+      </div>
+
+
+      <!-- ERROR -->
+
+      <div
+        *ngIf="errorMessage"
+        style="
+          margin-bottom: 15px;
+          padding: 10px;
+          background: #fef2f2;
+          color: #b91c1c;
+          border-radius: 7px;
+          font-size: 13px;
+        "
+      >
+
+        {{ errorMessage }}
+
+      </div>
+
+
+      <!-- ACTIONS -->
+
+      <div class="modal-actions">
+
+        <button
+          class="btn btn--ghost-dark"
+          (click)="closeModal()"
+        >
+          Cancel
+        </button>
+
+        <button
+          class="btn modal-save-btn"
+          (click)="submitSchedule()"
+        >
+
+          {{ editingSchedule ? 'Update' : 'Save' }}
+
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- DETAILS MODAL -->
+
+  <div
+    class="modal-overlay"
+    *ngIf="showDetails"
+    (click)="closeDetails()"
+  >
+
+    <div
+      class="modal-card"
+      (click)="$event.stopPropagation()"
+    >
+
+      <h3>
+        Schedule Details
+      </h3>
+
+      <div
+        *ngIf="selectedSchedule"
+        class="schedule-details"
+      >
+
+        <div>
+          <strong>Group:</strong>
+          {{ getGroupName(selectedSchedule) }}
+        </div>
+
+        <div>
+          <strong>Grade:</strong>
+          {{ getGradeName(selectedSchedule) }}
+        </div>
+
+        <div>
+          <strong>Teacher:</strong>
+          {{ getTeacherName(selectedSchedule) }}
+        </div>
+
+        <div>
+          <strong>Type:</strong>
+          {{ selectedSchedule.type }}
+        </div>
+
+        <div *ngIf="selectedSchedule.type === 'weekly'">
+          <strong>Day:</strong>
+          {{ getDayName(selectedSchedule.dayOfWeek) }}
+        </div>
+
+        <div *ngIf="selectedSchedule.type === 'extra'">
+          <strong>Date:</strong>
+          {{ formatDate(selectedSchedule.specificDate) }}
+        </div>
+
+        <div>
+          <strong>Time:</strong>
+          {{ selectedSchedule.startTime }}
+          -
+          {{ selectedSchedule.endTime }}
+        </div>
+
+        <div>
+          <strong>Status:</strong>
+          {{ selectedSchedule.isActive ? 'Active' : 'Inactive' }}
+        </div>
+
+      </div>
+
+
+      <div class="modal-actions">
+
+        <button
+          class="btn btn--ghost-dark"
+          (click)="closeDetails()"
+        >
+          Close
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
