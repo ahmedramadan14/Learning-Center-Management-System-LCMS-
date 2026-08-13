@@ -1,11 +1,40 @@
 const mongoose = require("mongoose");
 const Teacher = require("./teacher.model");
 const User = require("../user/user.model");
-const Group = require("../group/group.model");
 const bcrypt = require("bcryptjs");
 const ApiError = require("../../utils/ApiErrors");
 
 const ALLOWED_UPDATE_FIELDS = ["description", "subject"];
+
+const resolvedApprovalStatus = (user) => {
+  if (["pending", "approved", "rejected"].includes(user?.approvalStatus)) {
+    return user.approvalStatus;
+  }
+
+  // Existing accounts predate approvalStatus. Preserve their current access
+  // behavior instead of requiring a data migration before they can be listed.
+  return user?.isApproved === true ? "approved" : "pending";
+};
+
+const getPendingTeacherUser = async (id) => {
+  const teacher = await Teacher.findById(id).select("userId");
+  if (!teacher) throw new ApiError("Teacher not found", 404);
+
+  const user = await User.findById(teacher.userId);
+  if (!user || user.role !== "teacher") {
+    throw new ApiError("Teacher account not found", 404);
+  }
+
+  const status = resolvedApprovalStatus(user);
+  if (status === "approved") {
+    throw new ApiError("Teacher is already approved", 400);
+  }
+  if (status === "rejected") {
+    throw new ApiError("Teacher request has already been rejected", 400);
+  }
+
+  return user;
+};
 
 const createTeacher = async (data) => {
   const { name, phone, password, description, subject } = data;
@@ -24,6 +53,7 @@ const createTeacher = async (data) => {
           password: hashedPassword,
           role: "teacher",
           isApproved: true,
+          approvalStatus: "approved",
         },
       ],
       { session }
@@ -97,19 +127,9 @@ const updateTeacher = async (id, data, currentUser) => {
 };
 
 const deleteTeacher = async (id) => {
-  const hasGroups = await Group.exists({ teacherId: id });
-  if (hasGroups) {
-    throw new ApiError(
-      "Cannot delete teacher: they still have groups assigned. Reassign or delete those groups first, or use deactivate instead.",
-      400
-    );
-  }
-
-  const teacher = await Teacher.findByIdAndDelete(id);
-  if (teacher && teacher.userId) {
-    await User.findByIdAndDelete(teacher.userId).catch(() => {});
-  }
-  return teacher;
+  // Deleting a teacher from the admin dashboard is a soft delete. Keeping the
+  // profile and its group relationships intact avoids orphaning related data.
+  return deactivateTeacher(id);
 };
 
 const activateTeacher = async (id) => {
@@ -128,13 +148,32 @@ const deactivateTeacher = async (id) => {
   return teacher;
 };
 
-const approveTeacher = async (id) => {
-  const teacher = await Teacher.findById(id);
-  if (!teacher) return null;
+const approveTeacher = async (id, reviewer) => {
+  const user = await getPendingTeacherUser(id);
 
   return await User.findByIdAndUpdate(
-    teacher.userId,
-    { isApproved: true },
+    user._id,
+    {
+      isApproved: true,
+      approvalStatus: "approved",
+      approvalReviewedAt: new Date(),
+      approvalReviewedBy: reviewer?._id || reviewer?.id || null,
+    },
+    { new: true }
+  ).select("-password");
+};
+
+const rejectTeacher = async (id, reviewer) => {
+  const user = await getPendingTeacherUser(id);
+
+  return await User.findByIdAndUpdate(
+    user._id,
+    {
+      isApproved: false,
+      approvalStatus: "rejected",
+      approvalReviewedAt: new Date(),
+      approvalReviewedBy: reviewer?._id || reviewer?.id || null,
+    },
     { new: true }
   ).select("-password");
 };
@@ -149,4 +188,5 @@ module.exports = {
   activateTeacher,
   deactivateTeacher,
   approveTeacher,
+  rejectTeacher,
 };

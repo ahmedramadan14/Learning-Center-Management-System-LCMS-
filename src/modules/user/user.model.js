@@ -46,6 +46,21 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    // Approval review is currently used for public teacher registrations.
+    // Keep this optional so legacy accounts continue to derive their state
+    // from isApproved (true = approved, false = pending).
+    approvalStatus: {
+      type: String,
+      enum: ["pending", "approved", "rejected"],
+    },
+    approvalReviewedAt: {
+      type: Date,
+    },
+    approvalReviewedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: null,
+    },
     passwordChangedAt: { type: Date },
     passwordResetCode: { type: String },
     passwordResetExpires: { type: Date },

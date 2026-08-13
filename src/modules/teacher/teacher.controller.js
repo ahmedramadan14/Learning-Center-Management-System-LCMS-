@@ -57,10 +57,11 @@ const updateTeacher = asyncHandler(async (req, res) => {
 const deleteTeacher = asyncHandler(async (req, res) => {
   const id = req.params.id;
   const deletedTeacher = await teacherService.deleteTeacher(id);
+  if (!deletedTeacher) throw new ApiError("Teacher not found", 404);
 
   res.status(200).json({
     success: true,
-    message: "Teacher deleted successfully",
+    message: "Teacher deactivated successfully",
     data: deletedTeacher,
   });
 });
@@ -84,11 +85,20 @@ const deactivateTeacher = asyncHandler(async (req, res) => {
 });
 
 const approveTeacher = asyncHandler(async (req, res) => {
-  const approvedUser = await teacherService.approveTeacher(req.params.id);
+  const approvedUser = await teacherService.approveTeacher(req.params.id, req.user);
   res.status(200).json({
     success: true,
     message: "Teacher approved successfully",
     data: approvedUser,
+  });
+});
+
+const rejectTeacher = asyncHandler(async (req, res) => {
+  const rejectedUser = await teacherService.rejectTeacher(req.params.id, req.user);
+  res.status(200).json({
+    success: true,
+    message: "Teacher request rejected",
+    data: rejectedUser,
   });
 });
 
@@ -102,4 +112,5 @@ module.exports = {
   activateTeacher,
   deactivateTeacher,
   approveTeacher,
+  rejectTeacher,
 };

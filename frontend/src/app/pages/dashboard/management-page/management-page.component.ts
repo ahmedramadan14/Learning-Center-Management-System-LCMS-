@@ -65,7 +65,7 @@ const courseFields: readonly Field[] = [
 
 const classUpdateFields: readonly Field[] = [
   { key: 'groupName', label: 'Class name', required: true },
-  { key: 'gradeLevelId', label: 'Grade ID', required: true },
+  { key: 'gradeLevelId', label: 'Grade', type: 'grade-select', required: true },
   { key: 'maxCapacity', label: 'Capacity', type: 'number' },
   { key: 'sessionPrice', label: 'Session price', type: 'number', required: true },
   { key: 'sessionsPerCycle', label: 'Sessions per cycle', type: 'number' }
@@ -87,19 +87,12 @@ const scheduleFields: readonly Field[] = [
 
 const examFields: readonly Field[] = [
   { key: 'title', label: 'Exam title', required: true },
+  { key: 'description', label: 'Description or instructions', type: 'textarea' },
   { key: 'group', label: 'Class', type: 'group-select', required: true },
   { key: 'examDate', label: 'Exam date', type: 'date', required: true },
-  { key: 'totalMarks', label: 'Total marks', type: 'number', required: true },
-  { key: 'passingMarks', label: 'Passing marks', type: 'number', required: true },
-  { key: 'duration', label: 'Duration (minutes)', type: 'number', required: true },
-  {
-    key: 'status',
-    label: 'Status',
-    type: 'select',
-    required: true,
-    options: ['draft', 'published', 'closed'],
-    defaultValue: 'published'
-  }
+  { key: 'totalMarks', label: 'Total marks', type: 'number', required: true, defaultValue: 100 },
+  { key: 'passingMarks', label: 'Passing marks', type: 'number', required: true, defaultValue: 50 },
+  { key: 'duration', label: 'Duration (minutes)', type: 'number', required: true, defaultValue: 60 }
 ];
 
 const secretaryUpdateFields: readonly Field[] = [
@@ -138,7 +131,9 @@ const pages: Record<string, Config> = {
     path: '/teachers',
     create: '/teachers',
     update: { method: 'patch', fields: teacherUpdateFields },
-    columns: ['userId.name', 'subject', 'userId.phone', 'isActive', 'createdAt'],
+    // DELETE /teachers/:id deactivates the teacher account instead of removing it.
+    remove: true,
+    columns: ['userId.name', 'subject', 'userId.phone', 'userId.approvalStatus', 'isActive', 'createdAt'],
     fields: [
       { key: 'name', label: 'Full name', required: true },
       { key: 'phone', label: 'Phone', required: true },
@@ -169,7 +164,7 @@ const pages: Record<string, Config> = {
     columns: ['groupName', 'gradeLevelId.name', 'teacherId.userId.name', 'maxCapacity', 'sessionPrice', 'isActive'],
     fields: [
       { key: 'groupName', label: 'Class name', required: true },
-      { key: 'gradeLevelId', label: 'Grade ID', required: true },
+      { key: 'gradeLevelId', label: 'Grade', type: 'grade-select', required: true },
       { key: 'teacherId', label: 'Teacher profile ID' },
       { key: 'maxCapacity', label: 'Capacity', type: 'number' },
       { key: 'sessionPrice', label: 'Session price', type: 'number', required: true },
@@ -202,7 +197,7 @@ const pages: Record<string, Config> = {
   exams: {
     title: 'Exams',
     icon: 'bi-clipboard2-check',
-    description: 'Plan, publish and track examinations.',
+    description: 'Create exam drafts, publish them when ready, then record student results.',
     path: '/exams',
     create: '/exams',
     update: {
@@ -211,7 +206,7 @@ const pages: Record<string, Config> = {
     },
     publishPath: '/exams',
     remove: true,
-    columns: ['title', 'group.groupName', 'examDate', 'totalMarks', 'status'],
+    columns: ['title', 'group.groupName', 'examDate', 'totalMarks', 'passingMarks', 'duration', 'status'],
     fields: examFields
   },
   attendance: {
@@ -345,6 +340,7 @@ export class ManagementPageComponent implements OnInit, OnDestroy {
   open = false;
   editing: Record<string, unknown> | null = null;
   pendingDelete: Record<string, unknown> | null = null;
+  pendingTeacherRejection: Record<string, unknown> | null = null;
   enrollmentStudent: Record<string, unknown> | null = null;
   enrollmentGroupId = '';
   enrollmentGroups: Record<string, unknown>[] = [];
@@ -356,6 +352,9 @@ export class ManagementPageComponent implements OnInit, OnDestroy {
   formGroups: Record<string, unknown>[] = [];
   loadingFormGroups = false;
   formGroupsError = '';
+  formGrades: Record<string, unknown>[] = [];
+  loadingFormGrades = false;
+  formGradesError = '';
   formExams: Record<string, unknown>[] = [];
   loadingFormExams = false;
   formExamsError = '';
@@ -364,6 +363,7 @@ export class ManagementPageComponent implements OnInit, OnDestroy {
   formStudentsError = '';
   activatingStudentCode = '';
   publishingExamId = '';
+  teacherDecisionId = '';
   enrollmentError = '';
   search = '';
   error = '';
@@ -394,6 +394,8 @@ export class ManagementPageComponent implements OnInit, OnDestroy {
       this.config = pages[resource];
       this.search = '';
       this.message = '';
+      this.pendingTeacherRejection = null;
+      this.teacherDecisionId = '';
       this.closeForm();
       this.closeEnrollment();
       this.resetFormReferences();
@@ -429,6 +431,10 @@ export class ManagementPageComponent implements OnInit, OnDestroy {
     return Boolean(this.config.remove && this.access.can(this.resource, 'delete'));
   }
 
+  get deletingTeacher(): boolean {
+    return this.resource === 'teachers';
+  }
+
   canPublishExam(row: Record<string, unknown>): boolean {
     return this.resource === 'exams'
       && this.canUpdate
@@ -442,7 +448,7 @@ export class ManagementPageComponent implements OnInit, OnDestroy {
   }
 
   get hasActions(): boolean {
-    return this.canUpdate || this.canDelete || this.canManageEnrollment;
+    return this.canUpdate || this.canDelete || this.canManageEnrollment || this.canReviewTeacherRequests;
   }
 
   /** The server re-checks ownership; this only exposes the flow to staff who manage both records and classes. */
@@ -452,8 +458,32 @@ export class ManagementPageComponent implements OnInit, OnDestroy {
       && this.access.can('classes', 'update');
   }
 
+  get canReviewTeacherRequests(): boolean {
+    return this.resource === 'teachers' && this.access.currentRole === 'admin';
+  }
+
   get isEditing(): boolean {
     return this.editing !== null;
+  }
+
+  get formDialogTitle(): string {
+    if (this.resource === 'exams') {
+      return this.isEditing ? 'Edit exam' : 'Create exam';
+    }
+
+    return `${this.isEditing ? 'Edit' : 'Add'} ${this.config.title.slice(0, -1)}`;
+  }
+
+  get formDialogDescription(): string {
+    if (this.resource === 'exams') {
+      return this.isEditing
+        ? 'Update the exam details before recording results.'
+        : 'Choose the class and exam details. It will be saved as a draft until you publish it.';
+    }
+
+    return this.isEditing
+      ? 'Update the fields that this account is allowed to change.'
+      : 'Enter the required details below.';
   }
 
   get dialogFields(): readonly Field[] {
@@ -464,6 +494,9 @@ export class ManagementPageComponent implements OnInit, OnDestroy {
     const requiresGroups = this.dialogFields.some(
       (field) => field.type === 'group-select' && this.isDialogFieldRequired(field)
     );
+    const requiresGrades = this.dialogFields.some(
+      (field) => field.type === 'grade-select' && this.isDialogFieldRequired(field)
+    );
     const requiresExams = this.dialogFields.some(
       (field) => field.type === 'exam-select' && this.isDialogFieldRequired(field)
     );
@@ -472,13 +505,14 @@ export class ManagementPageComponent implements OnInit, OnDestroy {
     );
 
     return (requiresGroups && (this.loadingFormGroups || this.formGroups.length === 0))
+      || (requiresGrades && (this.loadingFormGrades || this.formGrades.length === 0))
       || (requiresExams && (this.loadingFormExams || this.formExams.length === 0))
       || (requiresStudents && Boolean(this.form['exam'])
         && (this.loadingFormStudents || this.eligibleFormStudents.length === 0));
   }
 
   get formReferencesError(): string {
-    return this.formGroupsError || this.formExamsError || this.formStudentsError;
+    return this.formGroupsError || this.formGradesError || this.formExamsError || this.formStudentsError;
   }
 
   get eligibleFormStudents(): Record<string, unknown>[] {
@@ -610,6 +644,93 @@ export class ManagementPageComponent implements OnInit, OnDestroy {
       && this.access.currentRole === 'admin'
       && row['isActive'] === false
       && Boolean(this.recordId(row));
+  }
+
+  teacherApprovalStatus(row: Record<string, unknown>): 'pending' | 'approved' | 'rejected' {
+    const status = this.readValue(row, 'userId.approvalStatus');
+    if (status === 'pending' || status === 'approved' || status === 'rejected') {
+      return status;
+    }
+
+    // Teacher accounts created before approvalStatus existed remain readable.
+    return this.readValue(row, 'userId.isApproved') === true ? 'approved' : 'pending';
+  }
+
+  teacherApprovalLabel(row: Record<string, unknown>): string {
+    const labels = {
+      pending: 'Pending approval',
+      approved: 'Approved',
+      rejected: 'Rejected'
+    } as const;
+
+    return labels[this.teacherApprovalStatus(row)];
+  }
+
+  canApproveTeacher(row: Record<string, unknown>): boolean {
+    return this.canReviewTeacherRequests
+      && this.teacherApprovalStatus(row) === 'pending'
+      && Boolean(this.recordId(row));
+  }
+
+  canRejectTeacher(row: Record<string, unknown>): boolean {
+    return this.canApproveTeacher(row);
+  }
+
+  isTeacherDecisionInProgress(row: Record<string, unknown>): boolean {
+    return this.teacherDecisionId === this.recordId(row);
+  }
+
+  approveTeacher(row: Record<string, unknown>): void {
+    const id = this.recordId(row);
+    if (!this.canApproveTeacher(row) || !id || this.teacherDecisionId) return;
+
+    this.teacherDecisionId = id;
+    this.error = '';
+    this.message = '';
+    this.api.patch(`/teachers/${encodeURIComponent(id)}/approve`, {}).subscribe({
+      next: () => {
+        this.teacherDecisionId = '';
+        this.message = 'Teacher approved successfully. They can now sign in.';
+        this.load();
+      },
+      error: (error: { error?: { message?: string } }) => {
+        this.teacherDecisionId = '';
+        this.error = error.error?.message || 'Could not approve this teacher.';
+      }
+    });
+  }
+
+  requestTeacherRejection(row: Record<string, unknown>): void {
+    if (!this.canRejectTeacher(row) || this.teacherDecisionId) return;
+
+    this.pendingTeacherRejection = row;
+    this.error = '';
+    this.message = '';
+  }
+
+  cancelTeacherRejection(): void {
+    if (!this.teacherDecisionId) this.pendingTeacherRejection = null;
+  }
+
+  confirmTeacherRejection(): void {
+    const row = this.pendingTeacherRejection;
+    const id = row ? this.recordId(row) : null;
+    if (!row || !id || !this.canRejectTeacher(row) || this.teacherDecisionId) return;
+
+    this.teacherDecisionId = id;
+    this.error = '';
+    this.api.patch(`/teachers/${encodeURIComponent(id)}/reject`, {}).subscribe({
+      next: () => {
+        this.teacherDecisionId = '';
+        this.pendingTeacherRejection = null;
+        this.message = 'Teacher request rejected.';
+        this.load();
+      },
+      error: (error: { error?: { message?: string } }) => {
+        this.teacherDecisionId = '';
+        this.error = error.error?.message || 'Could not reject this teacher request.';
+      }
+    });
   }
 
   isActivatingStudent(row: Record<string, unknown>): boolean {
@@ -752,6 +873,8 @@ export class ManagementPageComponent implements OnInit, OnDestroy {
   }
 
   save(): void {
+    if (!this.validateExamForm()) return;
+
     if (this.editing) {
       this.update(this.editing);
       return;
@@ -799,12 +922,16 @@ export class ManagementPageComponent implements OnInit, OnDestroy {
       next: () => {
         this.deleting = false;
         this.pendingDelete = null;
-        this.message = 'Record deleted successfully.';
+        this.message = this.deletingTeacher
+          ? 'Teacher deactivated successfully.'
+          : 'Record deleted successfully.';
         this.load();
       },
       error: (error: { error?: { message?: string } }) => {
         this.deleting = false;
-        this.error = error.error?.message || 'Could not delete this record.';
+        this.error = error.error?.message || (this.deletingTeacher
+          ? 'Could not deactivate this teacher.'
+          : 'Could not delete this record.');
       }
     });
   }
@@ -820,6 +947,17 @@ export class ManagementPageComponent implements OnInit, OnDestroy {
   }
 
   value(row: Record<string, unknown>, key: string): string {
+    if (this.resource === 'teachers' && key === 'userId.approvalStatus') {
+      return this.teacherApprovalLabel(row);
+    }
+
+    if (this.resource === 'exams' && key === 'status') {
+      const status = this.readValue(row, key);
+      if (status === 'draft') return 'Draft';
+      if (status === 'published') return 'Published';
+      if (status === 'closed') return 'Closed';
+    }
+
     const value = this.readValue(row, key);
     if (value === true) return 'Active';
     if (value === false) return 'Inactive';
@@ -869,7 +1007,9 @@ export class ManagementPageComponent implements OnInit, OnDestroy {
       next: () => {
         this.saving = false;
         this.closeForm();
-        this.message = 'Record created successfully.';
+        this.message = this.resource === 'exams'
+          ? 'Exam saved as a draft. Publish it when you are ready.'
+          : 'Record created successfully.';
         this.load();
       },
       error: (error: { error?: { message?: string } }) => {
@@ -908,16 +1048,47 @@ export class ManagementPageComponent implements OnInit, OnDestroy {
     this.formGroupsError = '';
     this.api.list('/groups').subscribe({
       next: (groups) => {
-        this.formGroups = groups.filter((group) => Boolean(this.entityId(group)));
+        this.formGroups = groups.filter((group) =>
+          Boolean(this.entityId(group))
+          && (this.resource !== 'exams' || group['isActive'] !== false)
+        );
         this.loadingFormGroups = false;
         if (this.formGroups.length === 0) {
-          this.formGroupsError = 'No classes are available for your account.';
+          this.formGroupsError = this.resource === 'exams'
+            ? 'Create or activate a class before scheduling an exam.'
+            : 'No classes are available for your account.';
         }
       },
       error: (error: { error?: { message?: string } }) => {
         this.formGroups = [];
         this.loadingFormGroups = false;
         this.formGroupsError = error.error?.message || 'Could not load available classes.';
+      }
+    });
+  }
+
+  private loadFormGrades(): void {
+    const needsGrades = this.dialogFields.some((field) => field.type === 'grade-select');
+    if (!needsGrades || this.loadingFormGrades) return;
+
+    this.loadingFormGrades = true;
+    this.formGradesError = '';
+    this.api.list('/grades').subscribe({
+      next: (grades) => {
+        const selectedGradeId = this.entityId(this.form['gradeLevelId']);
+        this.formGrades = grades.filter((grade) =>
+          Boolean(this.entityId(grade))
+          && (grade['isActive'] !== false || this.entityId(grade) === selectedGradeId)
+        );
+        this.loadingFormGrades = false;
+        if (this.formGrades.length === 0) {
+          this.formGradesError = 'Create or activate a grade before creating a class.';
+        }
+      },
+      error: (error: { error?: { message?: string } }) => {
+        this.formGrades = [];
+        this.loadingFormGrades = false;
+        this.formGradesError = error.error?.message || 'Could not load available grades.';
       }
     });
   }
@@ -970,6 +1141,7 @@ export class ManagementPageComponent implements OnInit, OnDestroy {
 
   private loadFormReferences(): void {
     this.loadFormGroups();
+    this.loadFormGrades();
     this.loadFormExams();
     this.loadFormStudents();
   }
@@ -978,6 +1150,9 @@ export class ManagementPageComponent implements OnInit, OnDestroy {
     this.formGroups = [];
     this.loadingFormGroups = false;
     this.formGroupsError = '';
+    this.formGrades = [];
+    this.loadingFormGrades = false;
+    this.formGradesError = '';
     this.formExams = [];
     this.loadingFormExams = false;
     this.formExamsError = '';
@@ -1021,6 +1196,36 @@ export class ManagementPageComponent implements OnInit, OnDestroy {
     }
 
     return form;
+  }
+
+  private validateExamForm(): boolean {
+    if (this.resource !== 'exams') return true;
+
+    const totalMarks = Number(this.form['totalMarks']);
+    const passingMarks = Number(this.form['passingMarks']);
+    const duration = Number(this.form['duration']);
+
+    if (!Number.isFinite(totalMarks) || totalMarks < 1) {
+      this.error = 'Total marks must be at least 1.';
+      return false;
+    }
+
+    if (!Number.isFinite(passingMarks) || passingMarks < 0) {
+      this.error = 'Passing marks cannot be negative.';
+      return false;
+    }
+
+    if (passingMarks > totalMarks) {
+      this.error = 'Passing marks cannot be greater than total marks.';
+      return false;
+    }
+
+    if (!Number.isInteger(duration) || duration < 1) {
+      this.error = 'Duration must be at least 1 minute.';
+      return false;
+    }
+
+    return true;
   }
 
   private recordId(row: Record<string, unknown>): string | null {

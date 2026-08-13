@@ -16,3 +16,17 @@
 .schedule-preview { display: grid; gap: 6px; margin-top: 14px; padding: 12px; border: 1px solid #dbe7fd; border-radius: 8px; background: #f7faff; color: #344565; font-size: 12px; }.schedule-preview strong { color: #17234b; }.schedule-preview ul { margin: 0; padding-left: 20px; }.schedule-preview__error { color: #bd1740; }
 .form-help { display: block; margin-top: 5px; color: #6d7b9c; font-size: 11px; line-height: 1.35; }
 .form-help--error { color: #bd1740; }
+
+.status.pending { background: #fff7e6; color: #a15c00; }
+.approve { background: #ecfdf3; color: #087c40; border-radius: 6px; padding: 6px 9px; font-size: 11px; font-weight: 700; }
+.approve:hover { background: #d9f8e5; }
+.approve:disabled, .reject:disabled { opacity: .65; cursor: not-allowed; }
+.approve .bi-arrow-repeat, .reject-confirm .bi-arrow-repeat { display: inline-block; animation: enrollment-spin 1s linear infinite; }
+.reject { background: #fff1f2; color: #df1d49; border-radius: 6px; padding: 6px 9px; font-size: 11px; font-weight: 700; }
+.reject:hover { background: #ffe4e6; }
+.confirm-icon--reject { background: #fff7e6; color: #b45309; }
+.reject-confirm { padding: 10px 15px; border-radius: 8px; background: #b45309; color: #fff; font-size: 13px; font-weight: 700; }
+.reject-confirm:hover { background: #92400e; }
+.reject-confirm:disabled { opacity: .6; cursor: not-allowed; }
+
+@media (max-width: 520px) { .confirm-dialog .reject-confirm { width: 100%; padding: 12px; } }

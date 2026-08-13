@@ -51,7 +51,11 @@
           </tr>
           <tr *ngFor="let row of filtered">
             <td *ngFor="let column of config.columns">
-              <span [class.status]="column === 'status' || column === 'isActive'" [class.inactive]="value(row, column) === 'Inactive'">
+              <span
+                [class.status]="column === 'status' || column === 'isActive' || column === 'userId.approvalStatus'"
+                [class.inactive]="value(row, column) === 'Inactive' || value(row, column) === 'Rejected'"
+                [class.pending]="value(row, column) === 'Pending approval'"
+              >
                 {{ value(row, column) }}
               </span>
             </td>
@@ -62,6 +66,13 @@
               <button *ngIf="canPublishExam(row)" class="publish" type="button" (click)="publishExam(row)" [disabled]="isPublishingExam(row)">
                 <i class="bi" [ngClass]="isPublishingExam(row) ? 'bi-arrow-repeat' : 'bi-send-check'"></i>
                 {{ isPublishingExam(row) ? 'Publishing...' : 'Publish' }}
+              </button>
+              <button *ngIf="canApproveTeacher(row)" class="approve" type="button" (click)="approveTeacher(row)" [disabled]="teacherDecisionId !== ''">
+                <i class="bi" [ngClass]="isTeacherDecisionInProgress(row) ? 'bi-arrow-repeat' : 'bi-check2-circle'"></i>
+                {{ isTeacherDecisionInProgress(row) ? 'Approving...' : 'Approve' }}
+              </button>
+              <button *ngIf="canRejectTeacher(row)" class="reject" type="button" (click)="requestTeacherRejection(row)" [disabled]="teacherDecisionId !== ''">
+                <i class="bi bi-x-circle"></i> Reject
               </button>
               <button *ngIf="canActivateStudent(row)" class="edit" type="button" (click)="activateStudent(row)" [disabled]="isActivatingStudent(row)">
                 <i class="bi bi-person-check"></i> {{ isActivatingStudent(row) ? 'Activating...' : 'Activate' }}
@@ -80,8 +91,8 @@
   <section class="dialog" (click)="$event.stopPropagation()">
     <div class="dialog-head">
       <div>
-        <h2>{{ isEditing ? 'Edit' : 'Add' }} {{ config.title.slice(0, -1) }}</h2>
-        <p>{{ isEditing ? 'Update the fields that this account is allowed to change.' : 'Enter the required details below.' }}</p>
+        <h2>{{ formDialogTitle }}</h2>
+        <p>{{ formDialogDescription }}</p>
       </div>
       <button type="button" aria-label="Close" (click)="closeForm()"><i class="bi bi-x-lg"></i></button>
     </div>
@@ -113,6 +124,20 @@
               </option>
               <option *ngFor="let group of formGroups" [value]="group['_id']">
                 {{ value(group, 'groupName') }}
+              </option>
+            </select>
+            <select
+              *ngIf="field.type === 'grade-select'"
+              [name]="field.key"
+              [(ngModel)]="form[field.key]"
+              [required]="isDialogFieldRequired(field)"
+              [disabled]="loadingFormGrades || formGrades.length === 0"
+            >
+              <option value="">
+                {{ loadingFormGrades ? 'Loading available grades...' : 'Select a grade' }}
+              </option>
+              <option *ngFor="let grade of formGrades" [value]="grade['_id']">
+                {{ value(grade, 'name') }}
               </option>
             </select>
             <select
@@ -148,17 +173,23 @@
               The selected class schedule will be available to the student after saving.
             </small>
             <small *ngIf="resource === 'exams' && field.key === 'group'" class="form-help">
-              Only students enrolled in this class can receive results for this exam.
+              Only active classes you can manage are shown. The responsible teacher is selected automatically.
+            </small>
+            <small *ngIf="resource === 'classes' && field.key === 'gradeLevelId'" class="form-help">
+              Select the grade level for this class.
             </small>
             <small *ngIf="resource === 'results' && field.key === 'studentCode' && form['exam'] && !loadingFormStudents && eligibleFormStudents.length === 0" class="form-help form-help--error">
               No enrolled students are available for the selected exam.
             </small>
             <textarea *ngIf="field.type === 'textarea'" [name]="field.key" [(ngModel)]="form[field.key]" [required]="isDialogFieldRequired(field)"></textarea>
-            <input *ngIf="field.type !== 'select' && field.type !== 'textarea' && field.type !== 'group-select' && field.type !== 'exam-select' && field.type !== 'student-select'" [type]="field.type || 'text'" [name]="field.key" [(ngModel)]="form[field.key]" [required]="isDialogFieldRequired(field)">
+            <input *ngIf="field.type !== 'select' && field.type !== 'textarea' && field.type !== 'group-select' && field.type !== 'grade-select' && field.type !== 'exam-select' && field.type !== 'student-select'" [type]="field.type || 'text'" [name]="field.key" [(ngModel)]="form[field.key]" [required]="isDialogFieldRequired(field)">
           </label>
         </ng-container>
       </div>
 
+      <p *ngIf="resource === 'exams' && !isEditing" class="form-help">
+        This exam is saved as a draft. Use Publish from the exam list when students should be able to see it.
+      </p>
       <p *ngIf="formReferencesError" class="notice error" role="alert">{{ formReferencesError }}</p>
       <p *ngIf="error" class="notice error">{{ error }}</p>
       <footer>
@@ -228,13 +259,33 @@
   <section class="dialog confirm-dialog" role="alertdialog" aria-modal="true" aria-labelledby="delete-dialog-title" (click)="$event.stopPropagation()">
     <span class="confirm-icon"><i class="bi bi-trash3"></i></span>
     <div>
-      <h2 id="delete-dialog-title">Delete this record?</h2>
-      <p>This action cannot be undone.</p>
+      <h2 id="delete-dialog-title">{{ deletingTeacher ? 'Deactivate this teacher?' : 'Delete this record?' }}</h2>
+      <p>{{ deletingTeacher ? 'The teacher will no longer be able to sign in.' : 'This action cannot be undone.' }}</p>
     </div>
     <footer>
       <button type="button" class="secondary" (click)="cancelDelete()" [disabled]="deleting">Cancel</button>
       <button type="button" class="delete-confirm" (click)="confirmDelete()" [disabled]="deleting">
-        <i class="bi bi-trash3"></i> {{ deleting ? 'Deleting...' : 'Delete record' }}
+        <i class="bi" [ngClass]="deletingTeacher ? 'bi-person-dash' : 'bi-trash3'"></i>
+        {{ deleting ? (deletingTeacher ? 'Deactivating...' : 'Deleting...') : (deletingTeacher ? 'Deactivate teacher' : 'Delete record') }}
+      </button>
+    </footer>
+  </section>
+</div>
+
+<div class="backdrop confirm-backdrop" *ngIf="pendingTeacherRejection && canReviewTeacherRequests" (click)="cancelTeacherRejection()">
+  <section class="dialog confirm-dialog" role="alertdialog" aria-modal="true" aria-labelledby="reject-teacher-dialog-title" (click)="$event.stopPropagation()">
+    <span class="confirm-icon confirm-icon--reject"><i class="bi bi-person-x"></i></span>
+    <div>
+      <h2 id="reject-teacher-dialog-title">Reject teacher request?</h2>
+      <p>
+        {{ value(pendingTeacherRejection, 'userId.name') }} will not be able to sign in. This request can no longer be approved.
+      </p>
+    </div>
+    <footer>
+      <button type="button" class="secondary" (click)="cancelTeacherRejection()" [disabled]="teacherDecisionId !== ''">Cancel</button>
+      <button type="button" class="reject-confirm" (click)="confirmTeacherRejection()" [disabled]="teacherDecisionId !== ''">
+        <i class="bi" [ngClass]="teacherDecisionId ? 'bi-arrow-repeat' : 'bi-person-x'"></i>
+        {{ teacherDecisionId ? 'Rejecting...' : 'Reject teacher' }}
       </button>
     </footer>
   </section>

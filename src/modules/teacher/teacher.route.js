@@ -20,6 +20,7 @@ router.patch("/:id", authController.allowedTo("admin", "teacher"), updateTeacher
 router.delete("/:id", authController.allowedTo("admin"), teacherIdParamValidation, teacherController.deleteTeacher);
 
 router.patch("/:id/approve", authController.allowedTo("admin"), teacherIdParamValidation, teacherController.approveTeacher);
+router.patch("/:id/reject", authController.allowedTo("admin"), teacherIdParamValidation, teacherController.rejectTeacher);
 router.patch("/:id/activate", authController.allowedTo("admin"), teacherIdParamValidation, teacherController.activateTeacher);
 router.patch("/:id/deactivate", authController.allowedTo("admin"), teacherIdParamValidation, teacherController.deactivateTeacher);
 

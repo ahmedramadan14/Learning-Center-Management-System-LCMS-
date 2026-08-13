@@ -64,6 +64,7 @@ exports.signup = asyncHandler(async (req, res, next) => {
           password: hashedPassword,
           role,
           isApproved,
+          ...(role === 'teacher' && { approvalStatus: 'pending' }),
         },
       ],
       { session }
@@ -147,7 +148,11 @@ exports.login = asyncHandler(async (req, res, next) => {
     return next(new ApiError('Your account has been deactivated', 403));
   }
 
-  if (!user.isApproved) {
+  if (user.role === 'teacher' && user.approvalStatus === 'rejected') {
+    return next(new ApiError('Your teacher account request was rejected', 403));
+  }
+
+  if (user.isApproved !== true) {
     return next(new ApiError('Your account is pending approval', 403));
   }
 
@@ -189,6 +194,10 @@ exports.protect = asyncHandler(async (req, res, next) => {
     return next(new ApiError('Your account has been deactivated', 403));
   }
 
+  if (currentUser.role === 'teacher' && currentUser.approvalStatus === 'rejected') {
+    return next(new ApiError('Your teacher account request was rejected', 403));
+  }
+
   if (currentUser.isApproved !== true) {
     return next(new ApiError('Your account is pending admin approval', 403));
   }
@@ -211,7 +220,11 @@ exports.protect = asyncHandler(async (req, res, next) => {
 });
 
 exports.requireApproved = asyncHandler(async (req, res, next) => {
-  if (!req.user.isApproved) {
+  if (req.user.role === 'teacher' && req.user.approvalStatus === 'rejected') {
+    return next(new ApiError('Your teacher account request was rejected', 403));
+  }
+
+  if (req.user.isApproved !== true) {
     return next(new ApiError('Your account is pending admin approval', 403));
   }
   next();
