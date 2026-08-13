@@ -1,56 +1,28 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { tap } from 'rxjs/operators';
 
-export interface User {
-  _id: string;
+export interface CurrentUser {
   name: string;
-  phone: string;
-  role: 'admin' | 'secretary' | 'teacher' | 'student' | 'parent';
-  isApproved: boolean;
-}
-
-export interface LoginResponse {
-  data: User;
-  token: string;
+  role: string;
 }
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = 'http://localhost:3000/api/v1/auth';
 
-  constructor(private http: HttpClient) {}
+  private currentUser: CurrentUser | null = null;
 
-  login(credentials: { phone: string; password: string }): Observable<LoginResponse> {
-    return this.http.post<LoginResponse>(`${this.apiUrl}/login`, credentials).pipe(
-      tap((response) => {
-        if (response && response.token) {
-          localStorage.setItem('token', response.token);
-          localStorage.setItem('user', JSON.stringify(response.data));
-        }
-      })
-    );
+  constructor() {}
+
+  setCurrentUser(user: CurrentUser): void {
+    this.currentUser = user;
   }
 
-  getCurrentUser(): User | null {
-    const userJson = localStorage.getItem('user');
-    return userJson ? JSON.parse(userJson) : null;
+  getCurrentUser(): CurrentUser | null {
+    return this.currentUser;
   }
 
-  getUserRole(): string {
-    const user = this.getCurrentUser();
-    return user ? user.role : '';
-  }
-
-  getToken(): string | null {
-    return localStorage.getItem('token');
-  }
-
-  logout(): void {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+  clearCurrentUser(): void {
+    this.currentUser = null;
   }
 }

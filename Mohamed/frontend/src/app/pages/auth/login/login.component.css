@@ -166,18 +166,6 @@
     color: var(--text-light);
 }
 
-.error-banner {
-    background: #FDECEC;
-    border: 1px solid #F5B5B5;
-    color: #C0392B;
-    font-size: 12.5px;
-    font-weight: 500;
-    padding: 10px 14px;
-    border-radius: 8px;
-    margin-bottom: 16px;
-    text-align: center;
-}
-
 .form-group {
     margin-bottom: 18px;
 }
@@ -332,3 +320,4 @@
   background-color: var(--white);
   object-fit: cover;
 }
+

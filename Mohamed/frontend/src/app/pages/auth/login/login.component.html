@@ -40,22 +40,12 @@
                     <p>Sign in to your account</p>
                 </div>
 
-                <form (ngSubmit)="onLogin()" #loginForm="ngForm">
-                    <div *ngIf="errorMessage" class="error-banner">
-                        {{ errorMessage }}
-                    </div>
-
+                <form (ngSubmit)="onSubmit()" #loginForm="ngForm">
                     <div class="form-group">
-                        <label for="phone">Phone Number</label>
+                        <label for="email">Email</label>
                         <div class="input-with-icon">
-                            <i class="fa-solid fa-phone"></i>
-                            <input 
-                                type="text" 
-                                id="phone" 
-                                name="phone" 
-                                [(ngModel)]="credentials.phone" 
-                                required
-                                placeholder="01xxxxxxxxx">
+                            <i class="fa-regular fa-envelope"></i>
+                            <input type="email" id="email" name="email" ngModel required placeholder="you@gmail.com">
                         </div>
                     </div>
 
@@ -67,8 +57,8 @@
                         <div class="input-with-icon">
                             <i class="fa-regular fa-lock"></i>
 
-                            <input [type]="showPassword ? 'text' : 'password'" id="password" name="password"
-                                [(ngModel)]="credentials.password" required placeholder="Enter your password">
+                            <input [type]="showPassword ? 'text' : 'password'" id="password" name="password" ngModel
+                                required placeholder="Enter your password">
 
                             <i class="fa-regular toggle-password" [ngClass]="showPassword ? 'fa-eye' : 'fa-eye-slash'"
                                 (click)="showPassword = !showPassword" tabindex="0"
@@ -83,12 +73,12 @@
                         </label>
                     </div>
 
-                    <button type="submit" class="btn btn-primary" [disabled]="!loginForm.valid || isLoading">
-                        {{ isLoading ? 'Signing in...' : 'Sign in' }}
+                    <button type="submit" class="btn btn-primary" [disabled]="!loginForm.valid">
+                        Sign in
                     </button>
 
                     <div class="signup-link">
-                        New to LCMS? <a routerLink="/register">Create an account</a>
+                        New to LCMS? <a href="/register">Create an account</a>
                     </div>
                 </form>
             </div>

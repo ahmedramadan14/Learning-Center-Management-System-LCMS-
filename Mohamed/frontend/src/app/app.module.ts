@@ -26,9 +26,12 @@ import { LoginComponent } from './pages/auth/login/login.component';
 import { RegisterComponent } from './pages/auth/register/register.component';
 import { ScheduleComponent } from './pages/dashboard/schedule/schedule.component';
 
+
+
 @NgModule({
   declarations: [
-    RegisterComponent, // 👈 رجّع RegisterComponent هنا في declarations
+    LoginComponent,
+    RegisterComponent,
     AppComponent,
     HeaderComponent,
     FooterComponent,
@@ -48,14 +51,14 @@ import { ScheduleComponent } from './pages/dashboard/schedule/schedule.component
     DashboardLayoutComponent,
     ResultsComponent,
     ScheduleComponent,
+
   ],
   imports: [
-    BrowserModule,
-    FormsModule,
-    CommonModule,
-    AppRoutingModule,
-    HttpClientModule,
-    LoginComponent 
+  BrowserModule,
+  FormsModule,
+  CommonModule,
+  AppRoutingModule,
+  HttpClientModule
   ],
   providers: [],
   bootstrap: [AppComponent]
