@@ -233,7 +233,7 @@ const pages: Record<string, Config> = {
     columns: ['studentId.userId.name', 'groupId.groupName', 'date', 'status', 'method'],
     fields: [
       { key: 'studentCode', label: 'Student code', required: true },
-      { key: 'groupId', label: 'Class ID', required: true },
+      { key: 'groupId', label: 'Class', type: 'group-select', required: true },
       { key: 'date', label: 'Date', type: 'date' },
       { key: 'status', label: 'Status', type: 'select', required: true, options: ['Present', 'Absent', 'Late', 'Excused'] },
       { key: 'method', label: 'Method', type: 'select', options: ['Manual', 'QR', 'NFC', 'Barcode'] }
@@ -256,7 +256,7 @@ const pages: Record<string, Config> = {
     columns: ['studentId.userId.name', 'groupId.groupName', 'amountDue', 'amountPaid', 'remaining', 'status'],
     fields: [
       { key: 'studentId', label: 'Student ID', required: true },
-      { key: 'groupId', label: 'Class ID', required: true },
+      { key: 'groupId', label: 'Class', type: 'group-select', required: true },
       { key: 'sessionDate', label: 'Session date', type: 'date', required: true },
       { key: 'amountDue', label: 'Amount due', type: 'number', required: true },
       { key: 'amountPaid', label: 'Amount paid', type: 'number' }

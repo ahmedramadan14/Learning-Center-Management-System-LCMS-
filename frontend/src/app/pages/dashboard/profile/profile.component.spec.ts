@@ -31,6 +31,7 @@ describe('ProfileComponent', () => {
         {
           provide: ApiService,
           useValue: {
+            get: () => of({ data: { studentCode: 'STU-12345' } }),
             post: () => of({})
           }
         }
@@ -47,5 +48,9 @@ describe('ProfileComponent', () => {
 
   it('shows the authenticated user name', () => {
     expect(fixture.nativeElement.textContent).toContain('Test User');
+  });
+
+  it('shows the student code for a student profile', () => {
+    expect(fixture.nativeElement.textContent).toContain('STU-12345');
   });
 });

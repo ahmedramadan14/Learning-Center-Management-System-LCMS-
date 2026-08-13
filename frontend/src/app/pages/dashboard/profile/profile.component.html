@@ -57,6 +57,14 @@
         </div>
       </article>
 
+      <article class="detail-item" *ngIf="profile?.role === 'student'">
+        <span class="detail-icon detail-icon--blue"><i class="bi bi-person-vcard" aria-hidden="true"></i></span>
+        <div>
+          <small>Student code</small>
+          <strong>{{ studentCode || 'Not available' }}</strong>
+        </div>
+      </article>
+
       <article class="detail-item">
         <span class="detail-icon detail-icon--orange"><i class="bi bi-calendar3" aria-hidden="true"></i></span>
         <div>

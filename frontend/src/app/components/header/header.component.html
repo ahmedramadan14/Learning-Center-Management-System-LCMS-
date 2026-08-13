@@ -11,10 +11,10 @@
   </div>
 
   <div class="header-right">
-    <div class="notification-icon" aria-label="Notifications">
+    <a class="notification-icon" routerLink="/dashboard/notifications" aria-label="Notifications" title="Notifications">
       <i class="bi bi-bell" aria-hidden="true"></i>
       <span *ngIf="unreadCount > 0" class="badge notification-badge">{{ unreadCount }}</span>
-    </div>
+    </a>
 
     <!-- أضفنا الكليك على كارت البروفايل بالكامل -->
     <div class="user-profile-dropdown" *ngIf="currentUser">

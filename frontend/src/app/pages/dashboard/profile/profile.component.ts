@@ -18,6 +18,7 @@ const ROLE_DESCRIPTIONS: Record<UserRole, string> = {
 })
 export class ProfileComponent implements OnInit {
   profile: CurrentUser | null = null;
+  studentCode = '';
   loading = true;
   error = '';
   childCode = '';
@@ -42,6 +43,7 @@ export class ProfileComponent implements OnInit {
     this.auth.getMyProfile().subscribe({
       next: (profile) => {
         this.profile = profile;
+        this.loadStudentCode();
         this.loading = false;
       },
       error: (error: { error?: { message?: string } }) => {
@@ -99,6 +101,20 @@ export class ProfileComponent implements OnInit {
 
   get canLinkChild(): boolean {
     return this.profile?.role === 'parent';
+  }
+
+  private loadStudentCode(): void {
+    this.studentCode = '';
+    if (this.profile?.role !== 'student') return;
+
+    this.api.get<{ data?: { studentCode?: string } }>('/students/my-code').subscribe({
+      next: (response) => {
+        this.studentCode = response.data?.studentCode || '';
+      },
+      error: () => {
+        this.studentCode = '';
+      }
+    });
   }
 
   linkChild(): void {
