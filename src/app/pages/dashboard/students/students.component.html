@@ -1,0 +1,133 @@
+<div class="students-page-container">
+
+  <!-- Header Banner -->
+  <div class="page-banner">
+    <div class="banner-text">
+      <h1>Students</h1>
+      <p>Manage and monitor all students in your learning center.</p>
+    </div>
+    <button class="btn-add">+ Add Student</button>
+  </div>
+
+  <!-- Cards Section -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon total"><i class="fa-solid fa-user-graduate"></i></div>
+      <div class="stat-info">
+        <span class="label">Total Students</span>
+        <h2>{{ totalStudents }}</h2>
+        <span class="sub">All students</span>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon active"><i class="fa-solid fa-user-check"></i></div>
+      <div class="stat-info">
+        <span class="label">Active Students</span>
+        <h2>{{ activeStudents }}</h2>
+        <span class="sub">Currently active</span>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon inactive"><i class="fa-solid fa-user-clock"></i></div>
+      <div class="stat-info">
+        <span class="label">Inactive Students</span>
+        <h2>{{ inactiveStudents }}</h2>
+        <span class="sub">Currently inactive</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Table Card Section -->
+  <div class="table-card">
+    <div class="table-header-action">
+      <div class="title-area">
+        <h3>Students List</h3>
+        <p>{{ filteredStudents.length }} students found</p>
+      </div>
+
+      <div class="filter-controls">
+        <select [(ngModel)]="selectedStatus" (change)="applyFilter()" class="filter-select">
+          <option value="all">All Status</option>
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
+        </select>
+
+        <div class="search-box">
+          <input 
+            type="text" 
+            [(ngModel)]="searchTerm" 
+            (input)="applyFilter()" 
+            placeholder="Search students..." />
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="loading-state">
+      <p>Loading students data...</p>
+    </div>
+
+    <!-- Table -->
+    <div class="table-responsive" *ngIf="!isLoading">
+      <table class="custom-table">
+        <thead>
+          <tr>
+            <th>STUDENT</th>
+            <th>GRADE</th>
+            <th>PHONE</th>
+            <th>STATUS</th>
+            <th class="text-center">ACTIONS</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let student of filteredStudents">
+            <td>
+              <div class="student-user-info">
+                <div class="avatar-badge">{{ getInitials(student.userId?.name ?? '') }}</div>
+                <div class="user-details">
+                  <span class="name">{{ student.userId?.name || 'N/A' }}</span>
+                  <span class="role">{{ student.userId?.role || 'student' }}</span>
+                </div>
+              </div>
+            </td>
+
+            <td>
+              <span class="group-pill" *ngIf="student.grade">
+                {{ student.grade }}
+              </span>
+              <span class="no-group" *ngIf="!student.grade">
+                No Grade
+              </span>
+            </td>
+
+            <td>
+              <span class="phone-number">{{ student.userId?.phone || 'N/A' }}</span>
+            </td>
+
+            <td>
+              <span class="status-pill" [class.active]="student.isActive" [class.inactive]="!student.isActive">
+                • {{ student.isActive ? 'Active' : 'Inactive' }}
+              </span>
+            </td>
+
+            <td class="text-center">
+              <div class="action-buttons">
+                <button class="btn-icon view" title="View"><i class="fa-regular fa-eye"></i></button>
+                <button class="btn-icon edit" title="Edit"><i class="fa-regular fa-pen-to-square"></i></button>
+                <button class="btn-icon delete" title="Delete"><i class="fa-regular fa-trash-can"></i></button>
+              </div>
+            </td>
+          </tr>
+
+          <tr *ngIf="filteredStudents.length === 0">
+            <td colspan="5" class="empty-table">No students found.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+</div>
