@@ -13,13 +13,14 @@ const paymentRoutes = require("./modules/payment/payment.route");
 const notificationRoutes = require("./modules/notification/notification.route");
 const attendrouter = require("./modules/attendance/attendance.route.js");
 const parentRoutes = require("./modules/parent/parent.route.js");
-const ParentStudent = require("./modules/parentStudent/parentStudent.route.js");
+const ParentStudent = require("./modules/ParentStudent/parentStudent.route.js");
 const secretarieRoutes = require("./modules/secretaries/secretary.route");
 const gradeRoutes = require("./modules/grade/grade.route.js");
 const groupRoutes = require("./modules/group/group.route.js");
 const scheduleRoutes = require("./modules/schedule/schedule.route.js");
 const examRoutes = require("./modules/exam/exam.route.js");
 const resultRoutes = require("./modules/results/result.route.js");
+const courseRoutes = require("./modules/course/course.route.js");
 
 
 const app = express();
@@ -54,6 +55,7 @@ app.use("/api/v1/groups", groupRoutes);
 app.use("/api/v1/schedules", scheduleRoutes);
 app.use("/api/v1/exams", examRoutes);
 app.use("/api/v1/results", resultRoutes);
+app.use("/api/v1/courses", courseRoutes);
 
 
 // 404 Handler

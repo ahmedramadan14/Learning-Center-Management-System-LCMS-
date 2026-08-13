@@ -2,7 +2,7 @@ const asyncHandler = require("../../middlewares/asyncHandler");
 const parentService = require("./parent.service");
 
 exports.createParent = asyncHandler(async (req, res) => {
-  const newParent = await parentService.createParent(req.body);
+  const newParent = await parentService.createParent(req.body, req.user);
   res.status(201).json({
     success: true,
     message: "Parent created successfully",
@@ -11,7 +11,7 @@ exports.createParent = asyncHandler(async (req, res) => {
 });
 
 exports.getAllParents = asyncHandler(async (req, res) => {
-  const parents = await parentService.getAllParents();
+  const parents = await parentService.getAllParents(req.user);
   res.status(200).json({
     success: true,
     results: parents.length,
@@ -37,7 +37,7 @@ exports.updateParent = asyncHandler(async (req, res) => {
 });
 
 exports.deleteParent = asyncHandler(async (req, res) => {
-  await parentService.deleteParent(req.params.id);
+  await parentService.deleteParent(req.params.id, req.user);
   res.status(200).json({
     success: true,
     message: "Parent deleted successfully",

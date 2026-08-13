@@ -16,7 +16,7 @@ const userSchema = new mongoose.Schema(
       unique: true,
       trim: true,
     },
-    email: { type: String, unique: true, sparse: true },
+    email: { type: String, unique: true, sparse: true, trim: true, lowercase: true },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",

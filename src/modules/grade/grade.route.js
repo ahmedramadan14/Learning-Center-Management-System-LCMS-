@@ -29,7 +29,7 @@ router
 router
   .route("/:id")
   .get(
-    authController.allowedTo("admin", "teacher", "secretary", "student"),
+    authController.allowedTo("admin", "teacher", "secretary", "student", "parent"),
     getGradeValidator,
     validatorMiddleware,
     gradeController.getGradeById

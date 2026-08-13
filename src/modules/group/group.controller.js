@@ -42,7 +42,7 @@ exports.createGroup = asyncHandler(async (req, res) => {
   }
 
   const groupData = { ...req.body, teacherId };
-  const group = await groupService.createGroup(groupData);
+  const group = await groupService.createGroup(groupData, req.user);
 
   res.status(201).json({
     success: true,

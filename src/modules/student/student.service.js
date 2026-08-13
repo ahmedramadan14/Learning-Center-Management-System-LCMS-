@@ -14,9 +14,42 @@ const createStudent = async (data) => {
   } = data;
 
   const session = await mongoose.startSession();
-  session.startTransaction();
+  let createdStudent;
 
   try {
+    await session.withTransaction(async () => {
+    if (groupId) {
+      const group = await Group.findById(groupId)
+        .select("teacherId maxCapacity")
+        .session(session);
+      if (!group) {
+        throw new ApiError("Group not found", 404);
+      }
+      if (!teacherProfileId || group.teacherId.toString() !== teacherProfileId.toString()) {
+        throw new ApiError("You can only enroll a student in a group owned by the assigned teacher", 403);
+      }
+
+      // Creating a student with a group must respect the same capacity rule as
+      // the dedicated enrollment endpoint.
+      const enrolledStudents = await Student.countDocuments({
+        groups: group._id,
+        isActive: true,
+      }).session(session);
+
+      if (enrolledStudents >= group.maxCapacity) {
+        throw new ApiError("Group has reached its maximum student capacity", 400);
+      }
+
+      // Every enrollment transaction updates the group record. This gives
+      // concurrent enrollment attempts a shared write target, so MongoDB can
+      // retry one attempt with the latest capacity instead of overbooking.
+      await Group.updateOne(
+        { _id: group._id },
+        { $currentDate: { updatedAt: true } },
+        { session, timestamps: false }
+      );
+    }
+
     const hashedPassword = await bcrypt.hash(password, 12);
     const displayName = name || (firstName && lastName ? `${firstName} ${lastName}` : firstName || username || "Student");
 
@@ -37,7 +70,7 @@ const createStudent = async (data) => {
 
     const studentCode = await generateUniqueStudentCode(session);
 
-    const [createdStudent] = await Student.create(
+    [createdStudent] = await Student.create(
       [
         {
           userId: user._id,
@@ -53,23 +86,22 @@ const createStudent = async (data) => {
       { session }
     );
 
-    await session.commitTransaction();
-    session.endSession();
-
-    return await Student.findById(createdStudent._id)
-      .populate("userId", "name phone role email createdBy")
-      .populate("teacher");
-  } catch (err) {
-    if (session.inTransaction()) {
-      await session.abortTransaction();
-    }
-    session.endSession();
-    throw err;
+    });
+  } finally {
+    await session.endSession();
   }
+
+  return await Student.findById(createdStudent._id)
+    .populate("userId", "name phone role email createdBy")
+    .populate("teacher");
 };
 
-const getAllStudents = async (teacherProfileId, queryParams = {}) => {
-  let filter = { isActive: true };
+const getAllStudents = async (
+  teacherProfileId,
+  queryParams = {},
+  includeInactive = false
+) => {
+  let filter = includeInactive ? {} : { isActive: true };
 
   if (teacherProfileId) {
     const teacherGroups = await Group.find({ teacherId: teacherProfileId }).select("_id");
@@ -86,15 +118,18 @@ const getAllStudents = async (teacherProfileId, queryParams = {}) => {
   return await Student.find(filter)
     .populate("userId", "name phone role email isActive")
     .populate("teacher")
-    .populate("groups", "name gradeLevelId")
+    .populate("groups", "groupName gradeLevelId")
     .sort({ createdAt: -1 });
 };
 
-const getStudentByCode = async (studentCode, teacherProfileId) => {
-  const student = await Student.findOne({ studentCode, isActive: true })
+const getStudentByCode = async (studentCode, teacherProfileId, includeInactive = false) => {
+  const student = await Student.findOne({
+    studentCode,
+    ...(!includeInactive && { isActive: true }),
+  })
     .populate("userId", "name phone role email isActive")
     .populate("teacher")
-    .populate("groups", "name");
+    .populate("groups", "groupName");
 
   if (!student) {
     throw new ApiError("Student not found", 404);
@@ -102,7 +137,14 @@ const getStudentByCode = async (studentCode, teacherProfileId) => {
 
   if (teacherProfileId) {
     const studentTeacherId = student.teacher?._id || student.teacher;
-    if (studentTeacherId.toString() !== teacherProfileId.toString()) {
+    const isDirectlyAssigned =
+      studentTeacherId && studentTeacherId.toString() === teacherProfileId.toString();
+    const belongsToTeacherGroup = await Group.exists({
+      _id: { $in: student.groups || [] },
+      teacherId: teacherProfileId,
+    });
+
+    if (!isDirectlyAssigned && !belongsToTeacherGroup) {
       throw new ApiError("Not authorized to view this student", 403);
     }
   }
@@ -110,8 +152,13 @@ const getStudentByCode = async (studentCode, teacherProfileId) => {
   return student;
 };
 
-const updateStudentByCode = async (studentCode, updateData, teacherProfileId) => {
-  const student = await getStudentByCode(studentCode, teacherProfileId);
+const updateStudentByCode = async (
+  studentCode,
+  updateData,
+  teacherProfileId,
+  includeInactive = false
+) => {
+  const student = await getStudentByCode(studentCode, teacherProfileId, includeInactive);
 
   if (updateData.name || updateData.phone) {
     await User.findByIdAndUpdate(student.userId._id, {
@@ -134,11 +181,21 @@ const updateStudentByCode = async (studentCode, updateData, teacherProfileId) =>
 
   return updatedStudent;
 };
-const deactivateStudentByCode = async (studentCode, teacherProfileId) => {
-  const student = await getStudentByCode(studentCode, teacherProfileId);
+const deactivateStudentByCode = async (studentCode, teacherProfileId, includeInactive = false) => {
+  const student = await getStudentByCode(studentCode, teacherProfileId, includeInactive);
 
   await User.findByIdAndUpdate(student.userId._id, { isActive: false });
   student.isActive = false;
+  await student.save();
+
+  return student;
+};
+
+const activateStudentByCode = async (studentCode) => {
+  const student = await getStudentByCode(studentCode, null, true);
+
+  await User.findByIdAndUpdate(student.userId._id, { isActive: true });
+  student.isActive = true;
   await student.save();
 
   return student;
@@ -160,5 +217,6 @@ module.exports = {
   getStudentByCode,
   updateStudentByCode,
   deactivateStudentByCode,
+  activateStudentByCode,
   getMyCode,
 };

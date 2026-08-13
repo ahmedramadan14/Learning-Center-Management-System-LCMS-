@@ -1,9 +1,28 @@
 const Grade = require("./grade.model");
 const ApiError = require("../../utils/ApiErrors");
 const Group = require("../group/group.model");
-const Teacher = require("../teacher/teacher.model");
-const Secretary = require("../secretaries/secretary.model");
 const Student = require("../student/student.model");
+const Parent = require("../parent/parent.model");
+const ParentStudent = require("../ParentStudent/parentStudent.model");
+const mongoose = require("mongoose");
+
+const findGradesForStudentRecords = async (students) => {
+  const values = students
+    .map((student) => student.grade)
+    .filter((grade) => typeof grade === "string" && grade.trim());
+
+  if (values.length === 0) return [];
+
+  const uniqueValues = [...new Set(values)];
+  const gradeIds = uniqueValues.filter((value) => mongoose.isValidObjectId(value));
+  const filters = [{ name: { $in: uniqueValues } }];
+
+  if (gradeIds.length > 0) {
+    filters.push({ _id: { $in: gradeIds } });
+  }
+
+  return Grade.find({ $or: filters });
+};
 
 // Create Grade (Admin or Teacher)
 exports.createGrade = async (data) => {
@@ -16,8 +35,6 @@ exports.createGrade = async (data) => {
 
 // Get All Grades
 exports.getAllGrades = async (user) => {
-  let filter = {};
-
   if (!user) return [];
 
   if (user.role === "admin") {
@@ -25,35 +42,48 @@ exports.getAllGrades = async (user) => {
   }
 
   if (user.role === "teacher" || user.role === "secretary") {
-    let teacher = null;
-
-    if (user.role === "teacher") {
-      teacher = await Teacher.findOne({ userId: user._id || user.id });
-    } else if (user.role === "secretary") {
-      const secretary = await Secretary.findOne({ userId: user._id || user.id });
-      if (secretary && secretary.teacher) {
-        teacher = await Teacher.findById(secretary.teacher);
-      } else if (user.createdBy) {
-        teacher = await Teacher.findOne({ userId: user.createdBy });
-      }
-    }
-
     return await Grade.find({});
-  } else if (user.role === "student") {
-    const student = await Student.findOne({ userId: user._id || user.id });
-    if (!student) return [];
-    filter = { _id: student.grade };
   }
 
-  return await Grade.find(filter);
+  if (user.role === "student") {
+    const student = await Student.findOne({ userId: user._id || user.id });
+    if (!student) return [];
+    return findGradesForStudentRecords([student]);
+  }
+
+  if (user.role === "parent") {
+    const parent = await Parent.findOne({ user: user._id || user.id }).select("_id");
+    if (!parent) return [];
+
+    const links = await ParentStudent.find({ parent: parent._id }).select("student");
+    const studentIds = links.map((link) => link.student);
+    if (studentIds.length === 0) return [];
+
+    const students = await Student.find({ _id: { $in: studentIds } }).select("grade");
+    return findGradesForStudentRecords(students);
+  }
+
+  return [];
 };
 
 // Get Grade By Id
-exports.getGradeById = async (id) => {
+exports.getGradeById = async (id, user) => {
   const grade = await Grade.findById(id);
   if (!grade) {
     throw new ApiError("Grade not found", 404);
   }
+
+  if (user.role === "student" || user.role === "parent") {
+    const visibleGrades = await exports.getAllGrades(user);
+    const canView = visibleGrades.some((visibleGrade) =>
+      visibleGrade._id.toString() === grade._id.toString()
+    );
+
+    if (!canView) {
+      throw new ApiError("You are not authorized to view this grade", 403);
+    }
+  }
+
   return grade;
 };
 

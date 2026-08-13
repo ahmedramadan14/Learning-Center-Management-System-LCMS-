@@ -1,5 +1,5 @@
 const Parent = require("../modules/parent/parent.model");
-const ParentStudent = require("../modules/parentStudent/parentStudent.model");
+const ParentStudent = require("../modules/ParentStudent/parentStudent.model");
 const ApiError = require("../utils/ApiErrors");
 const asyncHandler = require("./asyncHandler");
 

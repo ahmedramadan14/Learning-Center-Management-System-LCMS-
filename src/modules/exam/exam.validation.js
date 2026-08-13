@@ -14,7 +14,6 @@ exports.createExamRules = [
   body("title").trim().notEmpty().withMessage("title is required"),
   body("description").optional().trim(),
   body("group").isMongoId().withMessage("group must be a valid ID"),
-  body("teacher").isMongoId().withMessage("teacher must be a valid ID"),
   body("totalMarks").isFloat({ min: 1 }).withMessage("totalMarks must be at least 1"),
   body("passingMarks")
     .isFloat({ min: 0 }).withMessage("passingMarks must be a non-negative number")
@@ -37,7 +36,6 @@ exports.updateExamRules = [
   body("title").optional().trim().notEmpty().withMessage("title cannot be empty"),
   body("description").optional().trim(),
   body("group").optional().isMongoId().withMessage("group must be a valid ID"),
-  body("teacher").optional().isMongoId().withMessage("teacher must be a valid ID"),
   body("totalMarks").optional().isFloat({ min: 1 }).withMessage("totalMarks must be at least 1"),
   body("passingMarks")
     .optional()

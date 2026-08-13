@@ -2,7 +2,7 @@ const asyncHandler = require("../../middlewares/asyncHandler");
 const parentStudentService = require("./parentStudent.service");
 
 exports.createParentStudent = asyncHandler(async (req, res) => {
-  const newParentStudent = await parentStudentService.createParentStudent(req.body);
+  const newParentStudent = await parentStudentService.createParentStudent(req.body, req.user);
   res.status(201).json({
     success: true,
     message: "Parent linked to student successfully",
@@ -11,7 +11,7 @@ exports.createParentStudent = asyncHandler(async (req, res) => {
 });
 
 exports.getAllParentStudents = asyncHandler(async (req, res) => {
-  const parentStudents = await parentStudentService.getAllParentStudents();
+  const parentStudents = await parentStudentService.getAllParentStudents(req.user);
   res.status(200).json({
     success: true,
     results: parentStudents.length,
@@ -20,7 +20,7 @@ exports.getAllParentStudents = asyncHandler(async (req, res) => {
 });
 
 exports.getOneParentStudent = asyncHandler(async (req, res) => {
-  const parentStudent = await parentStudentService.getOneParentStudent(req.params.id);
+  const parentStudent = await parentStudentService.getOneParentStudent(req.params.id, req.user);
   res.status(200).json({
     success: true,
     data: parentStudent,
@@ -28,7 +28,7 @@ exports.getOneParentStudent = asyncHandler(async (req, res) => {
 });
 
 exports.getParentStudents = asyncHandler(async (req, res) => {
-  const students = await parentStudentService.getParentStudents(req.params.parentId);
+  const students = await parentStudentService.getParentStudents(req.params.parentId, req.user);
   res.status(200).json({
     success: true,
     results: students.length,
@@ -37,7 +37,7 @@ exports.getParentStudents = asyncHandler(async (req, res) => {
 });
 
 exports.getStudentParents = asyncHandler(async (req, res) => {
-  const parents = await parentStudentService.getStudentParents(req.params.studentId);
+  const parents = await parentStudentService.getStudentParents(req.params.studentId, req.user);
   res.status(200).json({
     success: true,
     results: parents.length,
@@ -46,7 +46,7 @@ exports.getStudentParents = asyncHandler(async (req, res) => {
 });
 
 exports.deleteParentStudent = asyncHandler(async (req, res) => {
-  await parentStudentService.deleteParentStudent(req.params.id);
+  await parentStudentService.deleteParentStudent(req.params.id, req.user);
   res.status(200).json({
     success: true,
     message: "Student unlinked from parent successfully",

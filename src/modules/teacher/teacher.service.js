@@ -52,11 +52,25 @@ const createTeacher = async (data) => {
 };
 
 const getTeachers = async () => {
-  return await Teacher.find({ isActive: true }).populate("userId", "-password");
+  // This endpoint is admin-only, so its list must include inactive profiles as
+  // well. Deactivated accounts remain hidden from all protected routes.
+  return await Teacher.find({}).populate("userId", "-password");
 };
 
-const getTeacherById = async (id) => {
-  return await Teacher.findById(id).populate("userId", "-password");
+const getTeacherById = async (id, currentUser) => {
+  const teacher = await Teacher.findById(id).populate("userId", "-password");
+  const profileUserId = teacher?.userId?._id || teacher?.userId;
+
+  if (
+    teacher &&
+    currentUser?.role === "teacher" &&
+    (!profileUserId ||
+      profileUserId.toString() !== (currentUser._id || currentUser.id).toString())
+  ) {
+    throw new ApiError("You are not authorized to view this teacher profile", 403);
+  }
+
+  return teacher;
 };
 
 const getTeacherByUserId = async (userId) => {

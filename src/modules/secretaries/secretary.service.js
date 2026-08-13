@@ -32,7 +32,7 @@ const createSecretary = async (data) => {
           phone,
           password: hashedPassword,
           role: "secretary",
-          createdBy: assignedTeacherId,
+          createdBy: teacherExists.userId,
           isApproved: true,
           isActive: true,
         },
@@ -78,14 +78,20 @@ const getAllSecretaries = async (currentUser) => {
 
   return await Secretary.find(filter)
     .populate("userId", "name email phone role")
-    .populate("teacher", "name");
+    .populate({
+      path: "teacher",
+      populate: { path: "userId", select: "name email phone" },
+    });
 };
 
 // Get One Secretary
 const getOneSecretary = async (id, currentUser) => {
   const secretary = await Secretary.findById(id)
     .populate("userId", "name email phone role")
-    .populate("teacher");
+    .populate({
+      path: "teacher",
+      populate: { path: "userId", select: "name email phone" },
+    });
 
   if (!secretary) throw new ApiError("Secretary not found", 404);
 

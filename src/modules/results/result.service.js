@@ -3,6 +3,7 @@ const Exam = require("../exam/exam.model");
 const Student = require("../student/student.model");
 const Teacher = require("../teacher/teacher.model");
 const Parent = require("../parent/parent.model");
+const ParentStudent = require("../ParentStudent/parentStudent.model");
 const Group = require("../group/group.model");
 const Secretary = require("../secretaries/secretary.model");
 
@@ -21,6 +22,28 @@ const getStaffAssociatedTeacherId = async (user) => {
         return secretary.teacher;
     }
     return null;
+};
+
+const getParentChildIds = async (user) => {
+  const parent = await Parent.findOne({ user: user._id || user.id }).select("_id");
+  if (!parent) return [];
+
+  const relations = await ParentStudent.find({ parent: parent._id }).select("student");
+  return relations.map((relation) => relation.student);
+};
+
+const isSameId = (left, right) =>
+  Boolean(left && right && left.toString() === right.toString());
+
+const getPublishedExamIds = async () =>
+  Exam.find({ status: "published" }).distinct("_id");
+
+const assertPublishedForLearner = (result) => {
+  if (!result?.exam || result.exam.status !== "published") {
+    // Use the same response as an absent result so a learner cannot infer
+    // draft or closed exam data exists.
+    throw new ApiError("Result not found", 404);
+  }
 };
 
 const verifyExamOwnership = async (examId, user) => {
@@ -46,17 +69,24 @@ exports.createResult = async (data, user) => {
     throw new ApiError("Active student not found with this code", 404);
   }
 
-  const associatedTeacherId = await getStaffAssociatedTeacherId(user);
+  const isEnrolledInExamGroup = (student.groups || []).some((groupId) =>
+    isSameId(groupId, exam.group)
+  );
+  if (!isEnrolledInExamGroup) {
+    throw new ApiError("This student is not enrolled in the exam's group", 400);
+  }
 
-  const isDirectTeacher = student.teacher && student.teacher.toString() === associatedTeacherId.toString();
+  if (user.role !== "admin") {
+    const associatedTeacherId = await getStaffAssociatedTeacherId(user);
+    const isDirectTeacher = student.teacher && isSameId(student.teacher, associatedTeacherId);
+    const isGroupTeacher = await Group.exists({
+      _id: { $in: student.groups || [] },
+      teacherId: associatedTeacherId,
+    });
 
-  const isGroupTeacher = await Group.exists({
-    _id: { $in: student.groups || [] },
-    teacherId: associatedTeacherId,
-  });
-
-  if (!isDirectTeacher && !isGroupTeacher) {
-    throw new ApiError("This student does not belong to the teacher associated with this exam", 403);
+    if (!isDirectTeacher && !isGroupTeacher) {
+      throw new ApiError("This student does not belong to the teacher associated with this exam", 403);
+    }
   }
 
   if (data.marks > exam.totalMarks) {
@@ -94,13 +124,19 @@ exports.getAllResults = async (user) => {
   else if (user.role === "student") {
     const student = await Student.findOne({ userId: user._id || user.id });
     if (!student) return [];
-    filter = { student: student._id };
+    filter = {
+      student: student._id,
+      exam: { $in: await getPublishedExamIds() },
+    };
   } 
   else if (user.role === "parent") {
-    const parent = await Parent.findOne({ user: user._id || user.id });
-    if (!parent || !parent.students || parent.students.length === 0) return [];
+    const studentIds = await getParentChildIds(user);
+    if (studentIds.length === 0) return [];
 
-    filter = { student: { $in: parent.students } };
+    filter = {
+      student: { $in: studentIds },
+      exam: { $in: await getPublishedExamIds() },
+    };
   }
 
   return await Result.find(filter)
@@ -116,22 +152,28 @@ exports.getResultsByStudentCode = async (studentCode, user) => {
     throw new ApiError("Student not found", 404);
   }
 
-  if (user.role === "student") {
+  const filter = { student: student._id };
+
+  if (user.role === "teacher" || user.role === "secretary") {
+    const teacherId = await getStaffAssociatedTeacherId(user);
+    const teacherExams = await Exam.find({ teacher: teacherId }).select("_id");
+    filter.exam = { $in: teacherExams.map((exam) => exam._id) };
+  } else if (user.role === "student") {
     if (student.userId.toString() !== (user._id || user.id).toString()) {
       throw new ApiError("You can only view your own results", 403);
     }
+    filter.exam = { $in: await getPublishedExamIds() };
   } 
   else if (user.role === "parent") {
-    const parent = await Parent.findOne({ user: user._id || user.id });
-    if (!parent) throw new ApiError("Parent profile not found", 404);
-
-    const isChild = parent.students.some(sId => sId.toString() === student._id.toString());
+    const studentIds = await getParentChildIds(user);
+    const isChild = studentIds.some((id) => id.toString() === student._id.toString());
     if (!isChild) {
       throw new ApiError("You can only view results for your own children", 403);
     }
+    filter.exam = { $in: await getPublishedExamIds() };
   }
 
-  return await Result.find({ student: student._id })
+  return await Result.find(filter)
     .populate("exam", "title examDate totalMarks passingMarks")
     .sort("-createdAt")
     .lean();
@@ -152,6 +194,12 @@ exports.getResultById = async (id, user) => {
       if (result.student.userId.toString() !== (user._id || user.id).toString()) {
           throw new ApiError("Not authorized", 403);
       }
+      assertPublishedForLearner(result);
+  } else if (user.role === "parent") {
+      const studentIds = await getParentChildIds(user);
+      const isChild = studentIds.some((id) => id.toString() === result.student._id.toString());
+      if (!isChild) throw new ApiError("Not authorized", 403);
+      assertPublishedForLearner(result);
   }
 
   return result;
@@ -161,17 +209,19 @@ exports.updateResult = async (id, data, user) => {
   const existing = await Result.findById(id);
   if (!existing) throw new ApiError("Result not found", 404);
 
-  const examId = existing.exam;
-  const exam = await verifyExamOwnership(examId, user);
+  const exam = await verifyExamOwnership(existing.exam, user);
 
   const marks = data.marks !== undefined ? data.marks : existing.marks;
   if (marks > exam.totalMarks) {
     throw new ApiError(`Marks cannot exceed the exam's total marks (${exam.totalMarks})`, 400);
   }
 
-  data.isPassed = marks >= exam.passingMarks;
+  const updateData = {
+    ...(data.marks !== undefined && { marks }),
+    isPassed: marks >= exam.passingMarks,
+  };
 
-  return await Result.findByIdAndUpdate(id, data, { new: true, runValidators: true }).lean();
+  return await Result.findByIdAndUpdate(id, updateData, { new: true, runValidators: true }).lean();
 };
 
 exports.deleteResult = async (id, user) => {

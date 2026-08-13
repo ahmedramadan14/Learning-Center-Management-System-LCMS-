@@ -24,7 +24,7 @@ const getTeachers = asyncHandler(async (req, res) => {
 
 const getTeacherById = asyncHandler(async (req, res) => {
   const id = req.params.id;
-  const teacher = await teacherService.getTeacherById(id);
+  const teacher = await teacherService.getTeacherById(id, req.user);
   if (!teacher) throw new ApiError("Teacher not found", 404);
 
   res.status(200).json({

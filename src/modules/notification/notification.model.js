@@ -2,7 +2,19 @@ const mongoose = require("mongoose");
 
 // Fixed: no trailing spaces in enums
 const NOTIFICATION_TYPES = ["announcement", "payment", "exam", "attendance"];
-const TARGET_ROLES = ["all", "students", "parents", "teachers"];
+const TARGET_ROLES = [
+  "all",
+  "admin",
+  "teacher",
+  "student",
+  "parent",
+  "secretary",
+  "direct",
+  // Keep the original plural values readable for existing notifications.
+  "students",
+  "parents",
+  "teachers",
+];
 
 const notificationSchema = new mongoose.Schema(
   {
@@ -50,6 +62,10 @@ const notificationSchema = new mongoose.Schema(
 );
 
 notificationSchema.index({ targetRole: 1, type: 1, createdAt: -1 });
+// Notifications addressed to explicit users are intentionally treated as
+// direct deliveries. The service and socket layer use this to avoid leaking a
+// notification to an entire role when a producer also supplies target ids.
+notificationSchema.index({ targetUserIds: 1, createdAt: -1 });
 
 // Remove duplicate target user ids before saving
 notificationSchema.pre("validate", function removeDuplicateTargets() {

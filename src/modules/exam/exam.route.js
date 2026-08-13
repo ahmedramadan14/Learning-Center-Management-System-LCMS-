@@ -8,13 +8,21 @@ const examController = require("./exam.controller.js");
 router.use(authController.protect);
 
 router.route("/")
-  .get(examController.getAllExams)
+  .get(
+    authController.allowedTo("admin", "teacher", "secretary", "student", "parent"),
+    examController.getAllExams
+  )
   .post(authController.allowedTo("admin", "secretary", "teacher"), createExamRules, validate, examController.createExam);
 
 router.patch("/:id/publish", authController.allowedTo("admin", "secretary", "teacher"), idParamRule, validate, examController.publishExam);
 
 router.route("/:id")
-  .get(idParamRule, validate, examController.getExam)
+  .get(
+    authController.allowedTo("admin", "teacher", "secretary", "student", "parent"),
+    idParamRule,
+    validate,
+    examController.getExam
+  )
   .put(authController.allowedTo("admin", "secretary", "teacher"), [...idParamRule, ...updateExamRules], validate, examController.updateExam)
   .delete(authController.allowedTo("admin", "teacher","secretary"), idParamRule, validate, examController.deleteExam);
 

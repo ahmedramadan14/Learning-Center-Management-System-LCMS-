@@ -20,7 +20,7 @@ exports.getAllGrades = asyncHandler(async (req, res) => {
 });
 
 exports.getGradeById = asyncHandler(async (req, res) => {
-  const grade = await gradeService.getGradeById(req.params.id);
+  const grade = await gradeService.getGradeById(req.params.id, req.user);
   res.status(200).json({
     success: true,
     data: grade,

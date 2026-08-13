@@ -6,11 +6,16 @@ const ApiError = require("../../utils/ApiErrors");
 exports.createSecretary = asyncHandler(async (req, res) => {
   let teacherId = req.body.teacherId || req.body.teacher;
 
-  if (req.user.role === "teacher" && !teacherId) {
+  if (req.user.role === "teacher") {
     const teacherProfile = await Teacher.findOne({ userId: req.user.id || req.user._id });
     if (!teacherProfile) {
       throw new ApiError("Teacher profile not found for this user", 404);
     }
+
+    if (teacherId && teacherId.toString() !== teacherProfile._id.toString()) {
+      throw new ApiError("Teachers can only create secretaries for their own profile", 403);
+    }
+
     teacherId = teacherProfile._id;
   }
 

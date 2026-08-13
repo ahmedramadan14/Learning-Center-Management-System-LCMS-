@@ -5,6 +5,7 @@ const Student = require("../student/student.model");
 const Parent = require("../parent/parent.model");
 const ApiError = require("../../utils/ApiErrors");
 const Secretary = require("../secretaries/secretary.model");
+const ParentStudent = require("../ParentStudent/parentStudent.model");
 
 const getAuthorizedTeacherId = async (user) => {
   if (user.role === "teacher") {
@@ -20,6 +21,40 @@ const getAuthorizedTeacherId = async (user) => {
   }
   return null; 
 };
+
+const getParentChildIds = async (user) => {
+  const parent = await Parent.findOne({ user: user._id || user.id }).select("_id");
+  if (!parent) return [];
+
+  const relations = await ParentStudent.find({ parent: parent._id }).select("student");
+  return relations.map((relation) => relation.student);
+};
+
+const getVisibleGroupIds = async (user) => {
+  if (user.role === "student") {
+    const student = await Student.findOne({ userId: user._id || user.id }).select("groups");
+    return student?.groups || [];
+  }
+
+  if (user.role === "parent") {
+    const studentIds = await getParentChildIds(user);
+    if (studentIds.length === 0) return [];
+
+    const students = await Student.find({ _id: { $in: studentIds } }).select("groups");
+    const uniqueIds = new Map();
+
+    students.forEach((student) => {
+      (student.groups || []).forEach((groupId) => {
+        uniqueIds.set(groupId.toString(), groupId);
+      });
+    });
+
+    return [...uniqueIds.values()];
+  }
+
+  return [];
+};
+
 const verifyGroupScheduleAccess = async (groupId, user, teacherProfileId = null) => {
   const group = await Group.findById(groupId);
   if (!group) throw new ApiError("Group not found", 404);
@@ -30,6 +65,32 @@ const verifyGroupScheduleAccess = async (groupId, user, teacherProfileId = null)
 
   if (!authorizedTeacherId || group.teacherId.toString() !== authorizedTeacherId.toString()) {
     throw new ApiError("Not authorized to manage schedules for this group", 403);
+  }
+
+  return group;
+};
+
+const verifyGroupScheduleViewAccess = async (groupId, user) => {
+  if (user.role === "admin") {
+    const group = await Group.findById(groupId);
+    if (!group) throw new ApiError("Group not found", 404);
+    return group;
+  }
+
+  if (user.role === "teacher" || user.role === "secretary") {
+    return verifyGroupScheduleAccess(groupId, user);
+  }
+
+  const group = await Group.findById(groupId);
+  if (!group) throw new ApiError("Group not found", 404);
+
+  const visibleGroupIds = await getVisibleGroupIds(user);
+  const canView = visibleGroupIds.some(
+    (visibleGroupId) => visibleGroupId.toString() === group._id.toString()
+  );
+
+  if (!canView) {
+    throw new ApiError("You are not authorized to view this schedule", 403);
   }
 
   return group;
@@ -99,23 +160,15 @@ exports.getAllSchedules = async (user) => {
     groupIdsFilter = teacherGroups.map((g) => g._id);
   } 
   else if (user.role === "student") {
-    const student = await Student.findOne({ userId: user._id || user.id });
-    if (!student) return [];
-    
-    const studentGroups = await Group.find({ _id: { $in: student.groups || [] } }).select("_id");
-    groupIdsFilter = studentGroups.map(g => g._id);
+    groupIdsFilter = await getVisibleGroupIds(user);
   } 
   else if (user.role === "parent") {
-    const parent = await Parent.findOne({ user: user._id || user.id });
-    if (!parent || !parent.students || parent.students.length === 0) return [];
-
-    const linkedStudentsGroups = await Student.find({ _id: { $in: parent.students } }).select("groups");
-    const allGroups = linkedStudentsGroups.flatMap((s) => s.groups || []);
-    groupIdsFilter = [...new Set(allGroups.map((g) => g.toString()))]; 
+    groupIdsFilter = await getVisibleGroupIds(user);
   }
 
   if (user.role === "admin") {
-    return await Schedule.find({ isActive: true }).populate({
+    // Administrators retain visibility of inactive schedule records too.
+    return await Schedule.find({}).populate({
       path: "groupId",
       select: "groupName gradeLevelId teacherId",
       populate: { path: "gradeLevelId", select: "name" },
@@ -137,9 +190,11 @@ exports.getScheduleById = async (id, user) => {
     throw new ApiError("Schedule not found", 404);
   }
 
-  if (user.role === "teacher" || user.role === "secretary") {
-    await verifyGroupScheduleAccess(schedule.groupId._id || schedule.groupId, user);
-  } 
+  if ((user.role === "student" || user.role === "parent") && !schedule.isActive) {
+    throw new ApiError("Schedule not found", 404);
+  }
+
+  await verifyGroupScheduleViewAccess(schedule.groupId._id || schedule.groupId, user);
 
   return schedule;
 };
@@ -152,6 +207,9 @@ exports.updateSchedule = async (id, data, user) => {
   }
 
   const teacherProfileId = await getAuthorizedTeacherId(user);
+  // Verify the existing record first. Without this check a staff member could
+  // supply one of their own group IDs and move another teacher's schedule.
+  await verifyGroupScheduleAccess(schedule.groupId, user, teacherProfileId);
   const targetGroupId = data.groupId || schedule.groupId;
   const group = await verifyGroupScheduleAccess(targetGroupId, user, teacherProfileId);
 

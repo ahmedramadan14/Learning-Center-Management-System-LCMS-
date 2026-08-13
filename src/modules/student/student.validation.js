@@ -38,6 +38,10 @@ exports.createStudentValidation = [
   body("grade")
     .notEmpty()
     .withMessage("Grade is required"),
+  body("groupId")
+    .optional({ checkFalsy: true })
+    .isMongoId()
+    .withMessage("Invalid group ID"),
   handleValidationErrors,
 ];
 

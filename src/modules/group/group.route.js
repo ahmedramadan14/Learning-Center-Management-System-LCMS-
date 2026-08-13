@@ -24,7 +24,7 @@ router
     groupController.createGroup
   )
   .get(
-    authController.allowedTo("admin", "teacher", "secretary", "student"),
+    authController.allowedTo("admin", "teacher", "secretary", "student", "parent"),
     groupController.getAllGroups
   );
 
@@ -58,7 +58,7 @@ router.get(
 router
   .route("/:id")
   .get(
-    authController.allowedTo("admin", "teacher", "secretary"),
+    authController.allowedTo("admin", "teacher", "secretary", "student", "parent"),
     getGroupValidator,
     validatorMiddleware,
     groupController.getGroupById

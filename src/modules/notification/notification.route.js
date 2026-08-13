@@ -4,6 +4,8 @@ const {
   create,
   getAll,
   getOne,
+  markRead,
+  markAllRead,
   update,
   remove,
 } = require("./notification.controller");
@@ -16,12 +18,33 @@ const {
 
 const router = express.Router();
 
-router.route("/").get(validateNotificationList, getAll).post(validateCreateNotification, create);
+const authController = require("../auth/auth.controller");
+
+router.use(authController.protect);
+
+router
+  .route("/")
+  .get(validateNotificationList, getAll)
+  .post(
+    authController.allowedTo("admin", "teacher", "secretary"),
+    validateCreateNotification,
+    create
+  );
+
+// These static paths must stay above /:id so Express does not treat
+// "read-all" as an id.
+router.patch("/read-all", markAllRead);
+router.patch("/:id/read", validateNotificationId, markRead);
 
 router
   .route("/:id")
   .get(validateNotificationId, getOne)
-  .patch(validateNotificationId, validateUpdateNotification, update)
-  .delete(validateNotificationId, remove);
+  .patch(
+    authController.allowedTo("admin"),
+    validateNotificationId,
+    validateUpdateNotification,
+    update
+  )
+  .delete(authController.allowedTo("admin"), validateNotificationId, remove);
 
 module.exports = router;

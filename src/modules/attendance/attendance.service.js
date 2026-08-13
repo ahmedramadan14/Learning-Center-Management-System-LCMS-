@@ -4,6 +4,7 @@ const Group = require("../group/group.model");
 const Teacher = require("../teacher/teacher.model");
 const Secretary = require("../secretaries/secretary.model");
 const Parent = require("../parent/parent.model");
+const ParentStudent = require("../ParentStudent/parentStudent.model");
 const ApiError = require("../../utils/ApiErrors");
 
 const normalizeDate = (date) => {
@@ -25,6 +26,25 @@ const getStaffAssociatedTeacherId = async (user) => {
   }
   return null;
 };
+
+const getParentChildIds = async (user) => {
+  const parent = await Parent.findOne({ user: user._id || user.id }).select("_id");
+  if (!parent) return [];
+
+  const relations = await ParentStudent.find({ parent: parent._id }).select("student");
+  return relations.map((relation) => relation.student);
+};
+
+const getStaffGroupIds = async (user) => {
+  const teacherId = await getStaffAssociatedTeacherId(user);
+  if (!teacherId) return [];
+
+  const groups = await Group.find({ teacherId }).select("_id");
+  return groups.map((group) => group._id);
+};
+
+const isSameId = (left, right) =>
+  Boolean(left && right && left.toString() === right.toString());
 const verifyGroupOwnership = async (groupId, user) => {
   const group = await Group.findById(groupId);
   if (!group) throw new ApiError("Group not found", 404);
@@ -85,11 +105,8 @@ const getallattendance = async (user) => {
   let filter = {};
   if (!user) return [];
   if (user.role === "teacher" || user.role === "secretary") {
-    const teacherId = await getStaffAssociatedTeacherId(user);
-    if (!teacherId) return [];
-
-    const teacherGroups = await Group.find({ teacherId }).select("_id");
-    const groupIds = teacherGroups.map((g) => g._id);
+    const groupIds = await getStaffGroupIds(user);
+    if (groupIds.length === 0) return [];
 
     filter = { groupId: { $in: groupIds } };
   } 
@@ -99,10 +116,10 @@ const getallattendance = async (user) => {
     filter = { studentId: student._id };
   } 
   else if (user.role === "parent") {
-    const parent = await Parent.findOne({ user: user._id || user.id });
-    if (!parent || !parent.students || parent.students.length === 0) return [];
-    
-    filter = { studentId: { $in: parent.students } };
+    const studentIds = await getParentChildIds(user);
+    if (studentIds.length === 0) return [];
+
+    filter = { studentId: { $in: studentIds } };
   }
 
   return await attendanceModel.find(filter)
@@ -118,22 +135,37 @@ const getallattendance = async (user) => {
 const getbystudentattendance = async (studentCode, user) => {
   const student = await Student.findOne({ studentCode });
   if (!student) throw new ApiError("Student not found", 404);
+
+  const filter = { studentId: student._id };
+
+  if (user.role === "teacher" || user.role === "secretary") {
+    const groupIds = await getStaffGroupIds(user);
+    const studentGroups = student.groups || [];
+    const permittedGroupIds = groupIds.filter((groupId) =>
+      studentGroups.some((studentGroupId) => isSameId(studentGroupId, groupId))
+    );
+
+    if (permittedGroupIds.length === 0) {
+      throw new ApiError("You are not authorized to view this student's attendance records", 403);
+    }
+
+    filter.groupId = { $in: permittedGroupIds };
+  }
+
   if (user.role === "student") {
     const currentStudent = await Student.findOne({ userId: user._id || user.id });
     if (!currentStudent || currentStudent._id.toString() !== student._id.toString()) {
       throw new ApiError("You can only view your own attendance records", 403);
     }
   } else if (user.role === "parent") {
-    const parent = await Parent.findOne({ user: user._id || user.id });
-    if (!parent) throw new ApiError("Parent profile not found", 404);
-
-    const isChild = parent.students.some(sId => sId.toString() === student._id.toString());
+    const studentIds = await getParentChildIds(user);
+    const isChild = studentIds.some((id) => id.toString() === student._id.toString());
     if (!isChild) {
       throw new ApiError("You can only view attendance records for your children", 403);
     }
   }
 
-  return await attendanceModel.find({ studentId: student._id })
+  return await attendanceModel.find(filter)
     .populate("groupId", "groupName")
     .sort({ date: -1 });
 };

@@ -47,7 +47,11 @@ const getHandshakeToken = (socket) =>
   normalizeToken(socket.handshake.auth?.token || socket.handshake.headers?.authorization);
 
 const buildUserRooms = (user) => {
-  const rooms = [`user:${user._id.toString()}`, "targetRole:all"];
+  const rooms = [
+    `user:${user._id.toString()}`,
+    "targetRole:all",
+    `targetRole:${user.role}`,
+  ];
   const roleRoom = ROLE_TO_ROOM[user.role];
 
   if (roleRoom) {
@@ -59,17 +63,20 @@ const buildUserRooms = (user) => {
 
 const buildNotificationRooms = (notification) => {
   const rooms = new Set();
+  const directTargets = Array.isArray(notification?.targetUserIds)
+    ? notification.targetUserIds.filter(Boolean)
+    : [];
 
-  if (notification?.targetRole) {
+  // A notification addressed to explicit users is private even when old data
+  // also contains a role value. This prevents a legacy role broadcast from
+  // leaking a student's or parent's payment notification to every user with
+  // the same role.
+  if (directTargets.length === 0 && notification?.targetRole) {
     rooms.add(`targetRole:${notification.targetRole}`);
   }
 
-  if (Array.isArray(notification?.targetUserIds)) {
-    for (const targetUserId of notification.targetUserIds) {
-      if (targetUserId) {
-        rooms.add(`user:${targetUserId.toString()}`);
-      }
-    }
+  for (const targetUserId of directTargets) {
+    rooms.add(`user:${targetUserId.toString()}`);
   }
 
   return [...rooms];
@@ -89,7 +96,35 @@ const buildBroadcastOperator = (rooms) => {
   return rooms.reduce((operator, room) => operator.to(room), getIo());
 };
 
+const emitToRooms = (rooms, eventName, payload) => {
+  for (const room of rooms) {
+    getIo().to(room).emit(eventName, payload);
+  }
+};
+
+// Socket events can be delivered to several recipients at once. Never send
+// target user ids, author ids, or receipt data in that shared payload.
+const toClientNotification = (notification) => {
+  const source = notification?.toObject ? notification.toObject() : notification || {};
+  const id = source._id || source.id;
+
+  return {
+    _id: id,
+    id: id?.toString(),
+    title: source.title,
+    body: source.body,
+    type: source.type,
+    targetRole: source.targetRole,
+    createdAt: source.createdAt,
+    updatedAt: source.updatedAt,
+  };
+};
+
 const emitNotificationCreated = (notification) => {
+  if (!io) {
+    return;
+  }
+
   const rooms = buildNotificationRooms(notification);
   const broadcaster = buildBroadcastOperator(rooms);
 
@@ -97,29 +132,52 @@ const emitNotificationCreated = (notification) => {
     return;
   }
 
-  broadcaster.emit("notification:created", { notification });
-};
-
-const emitNotificationUpdated = (notification, previousNotification) => {
-  const rooms = [
-    ...new Set([
-      ...buildNotificationRooms(previousNotification),
-      ...buildNotificationRooms(notification),
-    ]),
-  ];
-  const broadcaster = buildBroadcastOperator(rooms);
-
-  if (!broadcaster) {
-    return;
-  }
-
-  broadcaster.emit("notification:updated", {
-    notification,
-    previousNotification,
+  broadcaster.emit("notification:created", {
+    notification: toClientNotification(notification),
   });
 };
 
+const emitNotificationUpdated = (notification, previousNotification) => {
+  if (!io) {
+    return;
+  }
+
+  const previousRooms = new Set(buildNotificationRooms(previousNotification));
+  const nextRooms = new Set(buildNotificationRooms(notification));
+  const removedRooms = [...previousRooms].filter((room) => !nextRooms.has(room));
+  const addedRooms = [...nextRooms].filter((room) => !previousRooms.has(room));
+  const retainedRooms = [...nextRooms].filter((room) => previousRooms.has(room));
+  const previousNotificationId =
+    previousNotification?._id?.toString() || previousNotification?.id;
+
+  // Recipient changes must not reveal the updated content to users who have
+  // been removed, nor historical content to newly added users. Express the
+  // change as delete/create for those groups and only send an update to the
+  // overlapping audience.
+  if (removedRooms.length > 0 && previousNotificationId) {
+    emitToRooms(removedRooms, "notification:deleted", {
+      notificationId: previousNotificationId,
+    });
+  }
+
+  if (addedRooms.length > 0) {
+    emitToRooms(addedRooms, "notification:created", {
+      notification: toClientNotification(notification),
+    });
+  }
+
+  if (retainedRooms.length > 0) {
+    emitToRooms(retainedRooms, "notification:updated", {
+      notification: toClientNotification(notification),
+    });
+  }
+};
+
 const emitNotificationDeleted = (notification) => {
+  if (!io) {
+    return;
+  }
+
   const rooms = buildNotificationRooms(notification);
   const broadcaster = buildBroadcastOperator(rooms);
 
@@ -129,11 +187,34 @@ const emitNotificationDeleted = (notification) => {
 
   broadcaster.emit("notification:deleted", {
     notificationId: notification._id?.toString() || notification.id,
-    notification,
+    notification: toClientNotification(notification),
   });
 };
 
+const emitNotificationRead = ({ userId, notificationId, readAt }) => {
+  if (!io || !userId || !notificationId) {
+    return;
+  }
+
+  io.to(`user:${userId.toString()}`).emit("notification:read", {
+    notificationId: notificationId.toString(),
+    readAt,
+  });
+};
+
+const emitNotificationsReadAll = ({ userId }) => {
+  if (!io || !userId) {
+    return;
+  }
+
+  io.to(`user:${userId.toString()}`).emit("notifications:read-all");
+};
+
 const emitPaymentEvent = (eventName, payload, audience) => {
+  if (!io) {
+    return;
+  }
+
   const rooms = buildAudienceRooms(audience);
   const broadcaster = buildBroadcastOperator(rooms);
 
@@ -177,8 +258,8 @@ const initializeSocket = (httpServer) => {
         return next(new Error("User not found."));
       }
 
-      if (!user.isApproved) {
-        return next(new Error("User is not approved yet."));
+      if (!user.isApproved || !user.isActive) {
+        return next(new Error("User is not allowed to connect."));
       }
 
       socket.data.token = token;
@@ -217,5 +298,7 @@ module.exports = {
   emitNotificationCreated,
   emitNotificationUpdated,
   emitNotificationDeleted,
+  emitNotificationRead,
+  emitNotificationsReadAll,
   emitPaymentEvent,
 };

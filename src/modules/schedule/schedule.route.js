@@ -23,11 +23,15 @@ router
     validatorMiddleware,
     scheduleController.createSchedule
   )
-  .get(scheduleController.getAllSchedules);
+  .get(
+    authController.allowedTo("admin", "teacher", "secretary", "student", "parent"),
+    scheduleController.getAllSchedules
+  );
 
 router
   .route("/:id")
   .get(
+    authController.allowedTo("admin", "teacher", "secretary", "student", "parent"),
     getScheduleValidator,
     validatorMiddleware,
     scheduleController.getScheduleById

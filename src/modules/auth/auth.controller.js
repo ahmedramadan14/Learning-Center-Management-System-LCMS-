@@ -24,12 +24,12 @@ exports.signup = asyncHandler(async (req, res, next) => {
   const {
     name,
     phone,
+    email,
     password,
     role,
     gender,
     grade,
     parentPhone,
-    teacherId,
   } = req.body;
 
   if (role === 'secretary' || role === 'admin') {
@@ -39,6 +39,13 @@ exports.signup = asyncHandler(async (req, res, next) => {
   const existingPhone = await User.findOne({ phone });
   if (existingPhone) {
     return next(new ApiError('This phone number is already registered', 400));
+  }
+
+  if (email) {
+    const existingEmail = await User.findOne({ email: email.toLowerCase() });
+    if (existingEmail) {
+      return next(new ApiError('This email address is already registered', 400));
+    }
   }
 
   const hashedPassword = await bcrypt.hash(password, 12);
@@ -53,6 +60,7 @@ exports.signup = asyncHandler(async (req, res, next) => {
         {
           name,
           phone,
+          email: email || undefined,
           password: hashedPassword,
           role,
           isApproved,
@@ -70,15 +78,6 @@ exports.signup = asyncHandler(async (req, res, next) => {
       );
       profile = teacher;
     } else if (role === "student") {
-      let teacherProfileId = null;
-
-      if (teacherId) {
-        const teacher = await Teacher.findById(teacherId).session(session);
-        if (teacher) {
-          teacherProfileId = teacher._id;
-        }
-      }
-
       const studentCode = await generateUniqueStudentCode();
 
       const [student] = await Student.create(
@@ -89,7 +88,10 @@ exports.signup = asyncHandler(async (req, res, next) => {
             parentPhone,
             gender,
             grade,
-            teacher: teacherProfileId,
+            // Public registration must not let a caller enroll themselves in
+            // an arbitrary teacher's records. Staff assignment happens only
+            // through the protected student-management endpoint.
+            teacher: null,
             createdById: req.user ? req.user._id : user._id,
           },
         ],
@@ -141,6 +143,10 @@ exports.login = asyncHandler(async (req, res, next) => {
     return next(new ApiError('Incorrect phone or password', 401));
   }
 
+  if (user.isActive === false) {
+    return next(new ApiError('Your account has been deactivated', 403));
+  }
+
   if (!user.isApproved) {
     return next(new ApiError('Your account is pending approval', 403));
   }
@@ -177,6 +183,14 @@ exports.protect = asyncHandler(async (req, res, next) => {
     return next(
       new ApiError('The user belonging to this token no longer exists', 401)
     );
+  }
+
+  if (currentUser.isActive === false) {
+    return next(new ApiError('Your account has been deactivated', 403));
+  }
+
+  if (currentUser.isApproved !== true) {
+    return next(new ApiError('Your account is pending admin approval', 403));
   }
 
   if (currentUser.passwordChangedAt) {

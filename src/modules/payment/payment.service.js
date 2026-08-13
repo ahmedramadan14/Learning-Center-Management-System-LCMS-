@@ -7,6 +7,8 @@ const Payment = require("./payment.model");
 const Teacher = require("../teacher/teacher.model");
 const Secretary = require("../secretaries/secretary.model"); 
 const Parent = require("../parent/parent.model"); 
+const ParentStudent = require("../ParentStudent/parentStudent.model");
+const { emitNotificationCreated } = require("../../socket");
 
 const roundCurrency = (value) =>
   Math.round((Number(value) + Number.EPSILON) * 100) / 100;
@@ -34,6 +36,14 @@ const getStaffAssociatedTeacherId = async (user) => {
   return null;
 };
 
+const getParentChildIds = async (user) => {
+  const parent = await Parent.findOne({ user: user._id || user.id }).select("_id");
+  if (!parent) return [];
+
+  const relations = await ParentStudent.find({ parent: parent._id }).select("student");
+  return relations.map((relation) => relation.student);
+};
+
 const verifyGroupAccess = async (groupId, user) => {
   const group = await Group.findById(groupId);
   if (!group) throw new ApiError("Group not found.", 404);
@@ -49,6 +59,30 @@ const verifyGroupAccess = async (groupId, user) => {
   return group;
 };
 
+const isSameId = (left, right) =>
+  Boolean(left && right && left.toString() === right.toString());
+
+const assertPaymentReadAccess = async (payment, user) => {
+  if (user.role === "admin") return;
+
+  if (user.role === "teacher" || user.role === "secretary") {
+    await verifyGroupAccess(payment.groupId._id || payment.groupId, user);
+    return;
+  }
+
+  if (user.role === "student") {
+    const student = await Student.findOne({ userId: user._id || user.id }).select("_id");
+    if (student && isSameId(payment.studentId, student._id)) return;
+  }
+
+  if (user.role === "parent") {
+    const childIds = await getParentChildIds(user);
+    if (childIds.some((studentId) => isSameId(payment.studentId, studentId))) return;
+  }
+
+  throw new ApiError("Not authorized to view this payment.", 403);
+};
+
 /* ---------- Payment Notifications ---------- */
 
 const paymentMessage = (event, payment) => {
@@ -59,23 +93,23 @@ const paymentMessage = (event, payment) => {
   switch (event) {
     case "created":
       return {
-        title: "دفعة حصة جديدة",
-        body: `تم تسجيل حصة بقيمة ${amount}. المتبقي: ${remaining}.`,
+        title: "New session payment",
+        body: `A payment session of ${amount} has been recorded. Remaining balance: ${remaining}.`,
       };
     case "partial":
       return {
-        title: "دفعة جزئية للحصة",
-        body: `تم استلام ${paid}. المتبقي: ${remaining}.`,
+        title: "Partial session payment",
+        body: `A payment of ${paid} has been received. Remaining balance: ${remaining}.`,
       };
     case "paid":
       return {
-        title: "تم دفع الحصة بالكامل",
-        body: `تم سداد مبلغ الحصة (${amount}) بالكامل. شكراً لك!`,
+        title: "Session paid in full",
+        body: `The full session amount of ${amount} has been paid. Thank you!`,
       };
     default:
       return {
-        title: "تحديث حالة الدفع",
-        body: `حالة الدفع الآن: ${payment.status}.`,
+        title: "Payment status updated",
+        body: `The payment status is now ${payment.status}.`,
       };
   }
 };
@@ -87,17 +121,17 @@ const getPaymentAudience = async (studentId) => {
   const userIds = new Set();
   if (student.userId) userIds.add(student.userId.toString());
 
-  const parents = await Parent.find({ students: studentId }).lean();
+  const parentLinks = await ParentStudent.find({ student: studentId })
+    .populate("parent", "user")
+    .lean();
 
-  let hasParents = false;
-  parents.forEach((p) => {
-    if (p.user) {
-      userIds.add(p.user.toString());
-      hasParents = true;
+  parentLinks.forEach((link) => {
+    if (link.parent?.user) {
+      userIds.add(link.parent.user.toString());
     }
   });
 
-  return { userIds: [...userIds], hasParents };
+  return { userIds: [...userIds] };
 };
 
 const notifyPayment = async (payment, event, actorId) => {
@@ -107,14 +141,18 @@ const notifyPayment = async (payment, event, actorId) => {
 
     const { title, body } = paymentMessage(event, payment);
 
-    return await Notification.create({
+    const notification = await Notification.create({
       title,
       body,
       type: "payment",
-      targetRole: audience.hasParents ? "parents" : "students",
+      // Explicit recipients are private delivery. Do not role-broadcast a
+      // family's payment update to unrelated parents or students.
+      targetRole: "direct",
       targetUserIds: audience.userIds,
       createdBy: actorId || null,
     });
+    emitNotificationCreated(notification);
+    return notification;
   } catch (error) {
     console.error("[notifyPayment] failed:", error.message);
     return null;
@@ -129,9 +167,7 @@ const findPaymentById = async (id, user) => {
     throw new ApiError("Payment not found.", 404);
   }
 
-  if (user) {
-    await verifyGroupAccess(payment.groupId._id || payment.groupId, user);
-  }
+  if (user) await assertPaymentReadAccess(payment, user);
 
   return payment;
 };
@@ -150,6 +186,12 @@ const createPayment = async (data, user) => {
 
   const student = await Student.findById(paymentData.studentId);
   if (!student) throw new ApiError("Student not found.", 404);
+
+  const isEnrolled = Array.isArray(student.groups) &&
+    student.groups.some((groupId) => isSameId(groupId, group._id));
+  if (!isEnrolled) {
+    throw new ApiError("This student is not enrolled in this group.", 400);
+  }
 
   if (paymentData.amountDue === undefined) {
     if (group.sessionPrice === undefined) {
@@ -232,13 +274,31 @@ const listPayments = async (query, user) => {
   } 
   else if (user.role === "parent") {
     const parent = await Parent.findOne({ user: user._id || user.id });
-    if (!parent || !parent.students || parent.students.length === 0) {
+    if (!parent) {
       return { payments: [], total: 0, page: 1, limit: 20, pages: 1 };
     }
-    filter.studentId = { $in: parent.students };
+    const relations = await ParentStudent.find({ parent: parent._id }).select("student");
+    const studentIds = relations.map((relation) => relation.student);
+    if (studentIds.length === 0) {
+      return { payments: [], total: 0, page: 1, limit: 20, pages: 1 };
+    }
+    filter.studentId = { $in: studentIds };
   }
 
-  if (query.studentId) filter.studentId = query.studentId;
+  if (query.studentId) {
+    if (user.role === "student") {
+      if (!isSameId(filter.studentId, query.studentId)) {
+        throw new ApiError("Not authorized to view payments for this student.", 403);
+      }
+    } else if (user.role === "parent") {
+      const allowedStudentIds = filter.studentId?.$in || [];
+      if (!allowedStudentIds.some((studentId) => isSameId(studentId, query.studentId))) {
+        throw new ApiError("Not authorized to view payments for this student.", 403);
+      }
+    } else {
+      filter.studentId = query.studentId;
+    }
+  }
   if (query.groupId) {
     if (filter.groupId && filter.groupId.$in) {
       const isAllowed = filter.groupId.$in.some((id) => id.toString() === query.groupId);
@@ -264,7 +324,11 @@ const listPayments = async (query, user) => {
 
   const [payments, total] = await Promise.all([
     Payment.find(filter)
-      .populate("studentId", "studentCode")
+      .populate({
+        path: "studentId",
+        select: "studentCode userId",
+        populate: { path: "userId", select: "name email phone" },
+      })
       .populate("groupId", "groupName")
       .sort({ sessionDate: -1, createdAt: -1 })
       .skip(skip)

@@ -20,6 +20,11 @@ const ValidationSignup = [
         .notEmpty().withMessage('Phone number is required')
         .isMobilePhone('ar-EG').withMessage('Invalid Egyptian phone number format'),
 
+    check('email')
+        .optional({ checkFalsy: true })
+        .isEmail().withMessage('Invalid email address')
+        .normalizeEmail(),
+
     check('password')
         .notEmpty().withMessage('Password is required')
         .isLength({ min: 6 }).withMessage('Password must be at least 6 characters long'),
@@ -41,10 +46,6 @@ const ValidationSignup = [
         .if((value, { req }) => req.body.role === 'student')
         .notEmpty().withMessage('Parent phone is required for students')
         .isMobilePhone('ar-EG').withMessage('Invalid Egyptian phone number format for parent'),
-
-    check('teacherId')
-        .optional()
-        .isMongoId().withMessage('Invalid teacherId format'),
 
     handleValidationErrors
 ];

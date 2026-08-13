@@ -22,15 +22,19 @@ const router = express.Router();
 router.use(authController.protect);
 
 router.get("/", validatePaymentList, getAll);
+router.get(
+  "/:id",
+  authController.allowedTo("admin", "secretary", "teacher", "student", "parent"),
+  validatePaymentId,
+  getOne
+);
+
 router.use(authController.allowedTo("admin", "secretary", "teacher"));
 
 router.post("/", validateCreatePayment, create);
 router.post("/by-code", validateCreateByCode, createByCode);
 router.post("/:id/record", validatePaymentId, validateRecordPayment, record);
 
-router
-  .route("/:id")
-  .get(validatePaymentId, getOne)
-  .patch(validatePaymentId, validateUpdatePayment, update);
+router.patch("/:id", validatePaymentId, validateUpdatePayment, update);
 
 module.exports = router;

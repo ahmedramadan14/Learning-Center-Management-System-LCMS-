@@ -27,6 +27,12 @@ router
 
 router.post("/code", studentController.getStudentByCode);
 
+router.patch(
+  "/:studentCode/activate",
+  allowedTo("admin"),
+  studentController.activateStudent
+);
+
 router
   .route("/:studentCode")
   .get(studentController.getStudentByCode)

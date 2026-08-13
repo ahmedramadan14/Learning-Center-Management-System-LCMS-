@@ -53,7 +53,7 @@ const validateNotificationData = (body, requireContent) => {
   }
 
   if (body.targetRole !== undefined && !TARGET_ROLES.includes(body.targetRole)) {
-    return new ApiError("targetRole must be all, students, parents, or teachers.", 400);
+    return new ApiError("targetRole must be a supported audience role.", 400);
   }
 
   const targetsError = validateTargets(body.targetUserIds);
@@ -61,7 +61,15 @@ const validateNotificationData = (body, requireContent) => {
     return targetsError;
   }
 
-  return validateObjectId(body.createdBy, "createdBy");
+  if (
+    requireContent &&
+    body.targetRole === "direct" &&
+    (!Array.isArray(body.targetUserIds) || body.targetUserIds.length === 0)
+  ) {
+    return new ApiError("targetRole direct requires at least one targetUserId.", 400);
+  }
+
+  return null;
 };
 
 const validateNotificationId = (req, res, next) => {
@@ -77,7 +85,6 @@ const validateCreateNotification = (req, res, next) => {
     "type",
     "targetRole",
     "targetUserIds",
-    "createdBy",
   ]);
 
   if (fieldError) {
@@ -120,7 +127,7 @@ const validateNotificationList = (req, res, next) => {
   }
 
   if (targetRole !== undefined && !TARGET_ROLES.includes(targetRole)) {
-    return next(new ApiError("targetRole must be all, students, parents, or teachers.", 400));
+    return next(new ApiError("targetRole must be a supported audience role.", 400));
   }
 
   for (const [fieldName, value] of [
