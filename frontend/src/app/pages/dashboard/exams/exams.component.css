@@ -78,6 +78,11 @@
     transform 0.2s ease;
 }
 
+.btn--primary .bi {
+  font-size: 16px;
+  line-height: 1;
+}
+
 .btn--primary:hover {
   background-color: #eff6ff;
   transform: translateY(-1px);
@@ -299,7 +304,7 @@
   width: 210px;
 }
 
-.search-box svg {
+.search-box .bi {
   position: absolute;
 
   left: 12px;
@@ -308,6 +313,8 @@
   transform: translateY(-50%);
 
   color: var(--text-light);
+  font-size: 16px;
+  line-height: 1;
 }
 
 .search-box input {

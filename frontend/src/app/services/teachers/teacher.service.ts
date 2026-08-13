@@ -1,59 +1,42 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { ApiService } from '../api/api.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class TeacherService {
-
-  private apiUrl = 'http://localhost:3000/api/v1/teachers';
-
-  constructor(private http: HttpClient) {}
+  constructor(private readonly api: ApiService) {}
 
   getAllTeachers(): Observable<any> {
-    return this.http.get(this.apiUrl);
+    return this.api.get('/teachers');
   }
 
   getTeacherById(id: string): Observable<any> {
-    return this.http.get(`${this.apiUrl}/${id}`);
+    return this.api.get(`/teachers/${id}`);
   }
 
   createTeacher(teacher: any): Observable<any> {
-    return this.http.post(this.apiUrl, teacher);
+    return this.api.post('/teachers', teacher);
   }
 
   updateTeacher(id: string, teacher: any): Observable<any> {
-    return this.http.patch(
-      `${this.apiUrl}/${id}`,
-      teacher
-    );
+    return this.api.patch(`/teachers/${id}`, teacher);
   }
 
   deleteTeacher(id: string): Observable<any> {
-    return this.http.delete(
-      `${this.apiUrl}/${id}`
-    );
+    return this.api.delete(`/teachers/${id}`);
   }
 
   approveTeacher(id: string): Observable<any> {
-    return this.http.patch(
-      `${this.apiUrl}/${id}/approve`,
-      {}
-    );
+    return this.api.patch(`/teachers/${id}/approve`, {});
   }
 
   activateTeacher(id: string): Observable<any> {
-    return this.http.patch(
-      `${this.apiUrl}/${id}/activate`,
-      {}
-    );
+    return this.api.patch(`/teachers/${id}/activate`, {});
   }
 
   deactivateTeacher(id: string): Observable<any> {
-    return this.http.patch(
-      `${this.apiUrl}/${id}/deactivate`,
-      {}
-    );
+    return this.api.patch(`/teachers/${id}/deactivate`, {});
   }
 }

@@ -25,7 +25,7 @@
           class="btn btn--primary"
           (click)="openAddResult()"
         >
-          <i class="fa-solid fa-plus"></i>
+          <i class="bi bi-plus-lg" aria-hidden="true"></i>
 
           Add Result
         </button>
@@ -48,7 +48,7 @@
     <div class="stat-card">
 
       <div class="stat-icon stat-icon--blue">
-        <i class="fa-solid fa-chart-column"></i>
+        <i class="bi bi-bar-chart-line" aria-hidden="true"></i>
       </div>
 
       <div class="stat-content">
@@ -75,7 +75,7 @@
     <div class="stat-card">
 
       <div class="stat-icon stat-icon--green">
-        <i class="fa-solid fa-circle-check"></i>
+        <i class="bi bi-check-circle" aria-hidden="true"></i>
       </div>
 
       <div class="stat-content">
@@ -102,7 +102,7 @@
     <div class="stat-card">
 
       <div class="stat-icon stat-icon--orange">
-        <i class="fa-solid fa-circle-exclamation"></i>
+        <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
       </div>
 
       <div class="stat-content">
@@ -129,7 +129,7 @@
     <div class="stat-card">
 
       <div class="stat-icon stat-icon--purple">
-        <i class="fa-solid fa-percent"></i>
+        <i class="bi bi-percent" aria-hidden="true"></i>
       </div>
 
       <div class="stat-content">
@@ -205,26 +205,7 @@
 
         <div class="search-box">
 
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-          >
-
-            <circle
-              cx="11"
-              cy="11"
-              r="8"
-            ></circle>
-
-            <path
-              d="m21 21-4.3-4.3"
-            ></path>
-
-          </svg>
+          <i class="bi bi-search" aria-hidden="true"></i>
 
           <input
             type="text"
@@ -248,7 +229,7 @@
       *ngIf="loading"
     >
 
-      <i class="fa-solid fa-spinner fa-spin"></i>
+      <i class="bi bi-arrow-repeat spinning" aria-hidden="true"></i>
 
       Loading results...
 
@@ -264,7 +245,7 @@
       *ngIf="!loading && errorMessage"
     >
 
-      <i class="fa-solid fa-circle-exclamation"></i>
+      <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
 
       {{ errorMessage }}
 
@@ -375,7 +356,7 @@
 
                 <div class="exam-avatar">
 
-                  <i class="fa-solid fa-file-lines"></i>
+                  <i class="bi bi-file-earmark-text" aria-hidden="true"></i>
 
                 </div>
 
@@ -457,10 +438,11 @@
                 <button
                   type="button"
                   title="View"
+                  aria-label="View result"
                   (click)="viewResult(result)"
                 >
 
-                  <i class="fa-regular fa-eye"></i>
+                  <i class="bi bi-eye" aria-hidden="true"></i>
 
                 </button>
 
@@ -470,10 +452,11 @@
                 <button
                   type="button"
                   title="Edit"
+                  aria-label="Edit result"
                   (click)="editResult(result)"
                 >
 
-                  <i class="fa-solid fa-pen"></i>
+                  <i class="bi bi-pencil" aria-hidden="true"></i>
 
                 </button>
 
@@ -483,10 +466,11 @@
                 <button
                   type="button"
                   title="Delete"
+                  aria-label="Delete result"
                   (click)="deleteResult(result)"
                 >
 
-                  <i class="fa-regular fa-trash-can"></i>
+                  <i class="bi bi-trash3" aria-hidden="true"></i>
 
                 </button>
 
@@ -512,7 +496,7 @@
 
               <div class="empty-state__icon">
 
-                <i class="fa-solid fa-chart-column"></i>
+                <i class="bi bi-bar-chart-line" aria-hidden="true"></i>
 
               </div>
 

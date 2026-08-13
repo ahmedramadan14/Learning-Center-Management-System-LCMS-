@@ -1,0 +1,685 @@
+<section class="dashboard-home">
+
+  <!-- ===================================================== -->
+  <!-- Welcome Banner -->
+  <!-- ===================================================== -->
+
+  <header class="welcome-card">
+
+    <div class="welcome-copy">
+
+      <span class="eyebrow">
+        <i class="bi bi-calendar3" aria-hidden="true"></i>
+        Welcome to your dashboard
+      </span>
+
+      <h1>
+        Welcome back, {{ currentUser?.name }}! 👋
+      </h1>
+
+      <p>
+        Here's what's happening in your learning center today.
+      </p>
+
+    </div>
+
+
+    <div class="role-chip">
+
+      <span class="role-chip__icon">
+        <i class="bi bi-shield-check" aria-hidden="true"></i>
+      </span>
+
+      <span>
+        <small>System Status</small>
+        <strong>
+          <span class="status-dot"></span>
+          Active
+        </strong>
+      </span>
+
+    </div>
+
+  </header>
+
+
+  <!-- ===================================================== -->
+  <!-- Statistics -->
+  <!-- ===================================================== -->
+
+  <section class="statistics-section">
+
+    <div class="section-heading">
+
+      <div>
+        <span class="section-kicker">
+          OVERVIEW
+        </span>
+
+        <h2>
+          Dashboard Overview
+        </h2>
+
+        <p>
+          A quick summary of your learning center.
+        </p>
+      </div>
+
+    </div>
+
+
+    <div class="stats-grid">
+
+
+      <!-- ================= Total Students ================= -->
+
+      <div
+        class="stat-card"
+        *ngIf="isStaff"
+      >
+
+        <div class="stat-icon stat-icon--green">
+          <i class="bi bi-mortarboard" aria-hidden="true"></i>
+        </div>
+
+        <div class="stat-info">
+
+          <span class="stat-label">
+            Total Students
+          </span>
+
+          <strong class="stat-value">
+            {{ stats.totalStudents | number }}
+          </strong>
+
+          <span class="stat-trend positive">
+            ↑ 12% this month
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <!-- ================= Payments ================= -->
+
+      <div
+        class="stat-card"
+        *ngIf="isTeacherOrAdmin"
+      >
+
+        <div class="stat-icon stat-icon--blue">
+          <i class="bi bi-wallet2" aria-hidden="true"></i>
+        </div>
+
+        <div class="stat-info">
+
+          <span class="stat-label">
+            Total Collected / Payments
+          </span>
+
+          <strong class="stat-value">
+            {{ stats.totalRevenue }}
+          </strong>
+
+          <span class="stat-subtext">
+            Recorded Payments
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <!-- ================= Courses ================= -->
+
+      <div
+        class="stat-card"
+        *ngIf="!isParent"
+      >
+
+        <div class="stat-icon stat-icon--orange">
+          <i class="bi bi-book" aria-hidden="true"></i>
+        </div>
+
+        <div class="stat-info">
+
+          <span class="stat-label">
+            {{ isStudent ? 'Enrolled Courses' : 'Active Courses' }}
+          </span>
+
+          <strong class="stat-value">
+            {{ stats.activeCourses }}
+          </strong>
+
+          <span
+            class="stat-trend positive"
+            *ngIf="!isStudent"
+          >
+            ↑ 4 new
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <!-- ================= Student Sessions ================= -->
+
+      <div
+        class="stat-card"
+        *ngIf="isStudent"
+      >
+
+        <div class="stat-icon stat-icon--cyan">
+          <i class="bi bi-clock" aria-hidden="true"></i>
+        </div>
+
+        <div class="stat-info">
+
+          <span class="stat-label">
+            Today's Sessions
+          </span>
+
+          <strong class="stat-value">
+            2 Classes
+          </strong>
+
+          <span class="stat-subtext">
+            Scheduled for today
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <!-- ================================================= -->
+      <!-- Parent Children -->
+      <!-- ================================================= -->
+
+      <ng-container *ngIf="isParent">
+
+        <div
+          class="stat-card child-card"
+          *ngFor="let child of children"
+        >
+
+          <div class="stat-icon stat-icon--green">
+            <i class="bi bi-person-hearts" aria-hidden="true"></i>
+          </div>
+
+          <div class="stat-info">
+
+            <span class="stat-label">
+              My Child
+            </span>
+
+            <strong class="child-name">
+              {{ child.name }}
+            </strong>
+
+            <span class="code-badge">
+              Code: {{ child.code }}
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <!-- Add Child -->
+
+        <button
+          type="button"
+          class="stat-card add-child-card"
+          (click)="openAddChildModal()"
+        >
+
+          <span class="add-child-icon">
+            <i class="bi bi-plus-lg" aria-hidden="true"></i>
+          </span>
+
+          <span class="add-child-content">
+
+            <strong>
+              Add Child
+            </strong>
+
+            <small>
+              Link a student account
+            </small>
+
+          </span>
+
+        </button>
+
+      </ng-container>
+
+    </div>
+
+  </section>
+
+
+  <!-- ===================================================== -->
+  <!-- Main Overview -->
+  <!-- ===================================================== -->
+
+  <section
+    class="overview-grid"
+    [class.single-column]="isStudent || isParent"
+  >
+
+
+    <!-- =================================================== -->
+    <!-- Overview Card -->
+    <!-- =================================================== -->
+
+    <div class="overview-card">
+
+      <div class="card-header">
+
+        <div class="card-header-icon">
+
+          <i
+            class="bi"
+            [ngClass]="isStudent ? 'bi-calendar3' : 'bi-graph-up-arrow'"
+            aria-hidden="true"
+          ></i>
+
+        </div>
+
+        <div>
+
+          <h3>
+            {{ isStudent ? "Today's Schedule & Classes" : "Quick Overview" }}
+          </h3>
+
+          <p>
+            {{
+              isStudent
+                ? "Your registered sessions for today"
+                : "System Highlights"
+            }}
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <!-- ================================================= -->
+      <!-- Student Classes -->
+      <!-- ================================================= -->
+
+      <div
+        class="today-classes-list"
+        *ngIf="isStudent"
+      >
+
+
+        <!-- Class 1 -->
+
+        <div class="class-item-card">
+
+          <div class="class-time">
+
+            <div class="class-time-icon">
+              <i class="bi bi-clock" aria-hidden="true"></i>
+            </div>
+
+            <div>
+              <strong>
+                04:00 PM
+              </strong>
+
+              <span>
+                2 Hours
+              </span>
+            </div>
+
+          </div>
+
+
+          <div class="class-details">
+
+            <h4>
+              Mathematics - Physics Prep
+            </h4>
+
+            <p>
+              <i class="bi bi-person-workspace" aria-hidden="true"></i>
+              Mr. Ahmed
+            </p>
+
+            <p>
+              <i class="bi bi-geo-alt" aria-hidden="true"></i>
+              Hall 3
+            </p>
+
+          </div>
+
+
+          <span class="upcoming-badge">
+            <i class="bi bi-clock" aria-hidden="true"></i>
+            Upcoming
+          </span>
+
+        </div>
+
+
+        <!-- Class 2 -->
+
+        <div class="class-item-card">
+
+          <div class="class-time">
+
+            <div class="class-time-icon">
+              <i class="bi bi-clock" aria-hidden="true"></i>
+            </div>
+
+            <div>
+
+              <strong>
+                06:30 PM
+              </strong>
+
+              <span>
+                1.5 Hours
+              </span>
+
+            </div>
+
+          </div>
+
+
+          <div class="class-details">
+
+            <h4>
+              Chemistry Group B
+            </h4>
+
+            <p>
+              <i class="bi bi-person-workspace" aria-hidden="true"></i>
+              Dr. Hassan
+            </p>
+
+            <p>
+              <i class="bi bi-geo-alt" aria-hidden="true"></i>
+              Lab 1
+            </p>
+
+          </div>
+
+
+          <span class="upcoming-badge">
+            <i class="bi bi-clock" aria-hidden="true"></i>
+            Upcoming
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <!-- ================================================= -->
+      <!-- Staff / Parent Overview -->
+      <!-- ================================================= -->
+
+      <div
+        class="overview-list"
+        *ngIf="!isStudent"
+      >
+
+
+        <!-- Today's Classes -->
+
+        <div class="overview-item">
+
+          <div class="overview-item-icon overview-item-icon--blue">
+            <i class="bi bi-calendar2-check" aria-hidden="true"></i>
+          </div>
+
+          <div class="overview-item-content">
+
+            <strong>
+              Today's Classes
+            </strong>
+
+            <span>
+              Sessions scheduled for today
+            </span>
+
+          </div>
+
+          <span class="badge-pill">
+            {{ stats.todaysClasses }} Sessions
+          </span>
+
+        </div>
+
+
+        <!-- Pending Attendance -->
+
+        <div
+          class="overview-item"
+          *ngIf="isStaff"
+        >
+
+          <div class="overview-item-icon overview-item-icon--green">
+            <i class="bi bi-clipboard2-check" aria-hidden="true"></i>
+          </div>
+
+          <div class="overview-item-content">
+
+            <strong>
+              Pending Attendance
+            </strong>
+
+            <span>
+              Groups waiting for attendance
+            </span>
+
+          </div>
+
+          <span class="badge-pill">
+            {{ stats.pendingAttendance }} Groups
+          </span>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- =================================================== -->
+    <!-- Quick Actions -->
+    <!-- =================================================== -->
+
+    <div
+      class="actions-card"
+      *ngIf="quickActions.length"
+    >
+
+      <div class="card-header">
+
+        <div class="card-header-icon">
+          <i class="bi bi-lightning-charge" aria-hidden="true"></i>
+        </div>
+
+        <div>
+
+          <h3>
+            Quick Actions
+          </h3>
+
+          <p>
+            Frequently used actions
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <div class="actions-body">
+
+        <button
+          type="button"
+          class="action-button"
+          *ngFor="let action of quickActions"
+          [routerLink]="action.route"
+          [queryParams]="action.queryParams"
+        >
+
+          <span class="action-button-icon">
+            <i class="bi" [ngClass]="action.icon" aria-hidden="true"></i>
+          </span>
+
+          <span class="action-button-text">
+
+            <strong>
+              {{ action.title }}
+            </strong>
+
+            <small>
+              {{ action.description }}
+            </small>
+
+          </span>
+
+          <i class="bi bi-arrow-right action-arrow" aria-hidden="true"></i>
+
+        </button>
+
+      </div>
+
+    </div>
+
+  </section>
+
+</section>
+
+
+<!-- ========================================================= -->
+<!-- Add Child Modal -->
+<!-- ========================================================= -->
+
+<div
+  class="modal-overlay"
+  *ngIf="isAddChildModalOpen"
+  (click)="closeAddChildModal()"
+>
+
+  <div
+    class="modal-card"
+    (click)="$event.stopPropagation()"
+  >
+
+
+    <!-- Modal Header -->
+
+    <div class="modal-header">
+
+      <div class="modal-title">
+
+        <span class="modal-title-icon">
+          <i class="bi bi-person-hearts" aria-hidden="true"></i>
+        </span>
+
+        <div>
+
+          <h3>
+            Add Child
+          </h3>
+
+          <span>
+            Link a student account
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <button
+        type="button"
+        class="close-btn"
+        (click)="closeAddChildModal()"
+        aria-label="Close"
+      >
+        <i class="bi bi-x-lg" aria-hidden="true"></i>
+      </button>
+
+    </div>
+
+
+    <!-- Modal Body -->
+
+    <div class="modal-body">
+
+      <p class="modal-desc">
+        Enter your child's student code to link their account
+        to yours.
+      </p>
+
+
+      <div class="form-group">
+
+        <label for="studentCode">
+          Student Code
+        </label>
+
+
+        <div class="input-with-icon">
+
+          <i class="bi bi-person-vcard" aria-hidden="true"></i>
+
+          <input
+            id="studentCode"
+            type="text"
+            [(ngModel)]="studentCodeInput"
+            [disabled]="isLinkingChild"
+            placeholder="e.g. STU-1024"
+          />
+
+        </div>
+
+      </div>
+
+      <p *ngIf="childLinkError" class="form-error" role="alert">
+        {{ childLinkError }}
+      </p>
+
+    </div>
+
+
+    <!-- Modal Actions -->
+
+    <div class="modal-actions">
+
+      <button
+        type="button"
+        class="btn btn-secondary"
+        (click)="closeAddChildModal()"
+      >
+        Cancel
+      </button>
+
+
+      <button
+        type="button"
+        class="btn btn-primary"
+        (click)="addChildByCode()"
+        [disabled]="isLinkingChild"
+      >
+        <i class="bi bi-link-45deg" aria-hidden="true"></i>
+        {{ isLinkingChild ? 'Linking...' : 'Link Student' }}
+      </button>
+
+    </div>
+
+  </div>
+
+</div>

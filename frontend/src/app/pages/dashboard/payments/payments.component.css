@@ -33,6 +33,10 @@
 }
 
 .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
     padding: 10px 20px;
     border-radius: 8px;
     cursor: pointer;
@@ -134,6 +138,13 @@
 .icon-btn:hover {
     color: #0062ff;
     background-color: #e6f0ff;
+}
+
+.icon-btn > .bi,
+.pagination__btn > .bi {
+    display: inline-block;
+    font-size: 18px;
+    line-height: 1;
 }
 
 .badge {

@@ -33,7 +33,7 @@ export class ScheduleComponent implements OnInit {
       day: 'Saturday',
       time: '09:00 AM',
       room: 'Room 101',
-      icon: 'fa-book'
+      icon: 'bi-book'
     },
     {
       className: 'English',
@@ -44,7 +44,7 @@ export class ScheduleComponent implements OnInit {
       day: 'Sunday',
       time: '11:00 AM',
       room: 'Room 202',
-      icon: 'fa-language'
+      icon: 'bi-translate'
     },
     {
       className: 'Physics',
@@ -55,7 +55,7 @@ export class ScheduleComponent implements OnInit {
       day: 'Monday',
       time: '01:00 PM',
       room: 'Room 103',
-      icon: 'fa-atom'
+      icon: 'bi-radioactive'
     },
     {
       className: 'Chemistry',
@@ -66,7 +66,7 @@ export class ScheduleComponent implements OnInit {
       day: 'Tuesday',
       time: '10:00 AM',
       room: 'Room 105',
-      icon: 'fa-flask'
+      icon: 'bi-flask'
     },
     {
       className: 'Arabic',
@@ -77,7 +77,7 @@ export class ScheduleComponent implements OnInit {
       day: 'Wednesday',
       time: '02:00 PM',
       room: 'Room 201',
-      icon: 'fa-book-open'
+      icon: 'bi-journal-bookmark'
     }
   ];
 
@@ -126,7 +126,7 @@ export class ScheduleComponent implements OnInit {
     day: '',
     time: '',
     room: '',
-    icon: 'fa-calendar-days'
+    icon: 'bi-calendar-week'
   };
 
   isEditMode: boolean = false;
@@ -282,7 +282,7 @@ export class ScheduleComponent implements OnInit {
       day: '',
       time: '',
       room: '',
-      icon: 'fa-calendar-days'
+      icon: 'bi-calendar-week'
     };
 
     this.isModalOpen = true;

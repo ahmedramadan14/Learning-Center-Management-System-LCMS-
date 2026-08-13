@@ -1,3 +1,241 @@
-<section class="page"><header><span class="page-icon"><i class="bi" [ngClass]="config.icon"></i></span><div><h1>{{ config.title }}</h1><p>{{ config.description }}</p></div><button *ngIf="config.create" class="primary" type="button" (click)="open = true"><i class="bi bi-plus-lg"></i> Add {{ config.title.slice(0, -1) }}</button></header><section class="stats"><article><small>Total {{ config.title }}</small><strong>{{ rows.length }}</strong></article><article><small>Matching search</small><strong>{{ filtered.length }}</strong></article><article><small>Data status</small><strong>{{ loading ? 'Loading' : 'Live' }}</strong></article></section><div class="tools"><label><i class="bi bi-search"></i><input [(ngModel)]="search" placeholder="Search {{ config.title.toLowerCase() }}"></label><button type="button" class="secondary" (click)="load()"><i class="bi bi-arrow-clockwise"></i> Refresh</button></div><p *ngIf="error" class="notice error">{{ error }}</p><p *ngIf="message" class="notice success">{{ message }}</p><section class="table-card"><div class="table-heading"><i class="bi" [ngClass]="config.icon"></i><h2>{{ config.title }}</h2><small>({{ filtered.length }})</small></div><div class="table-wrap"><table><thead><tr><th *ngFor="let column of config.columns">{{ label(column) }}</th><th *ngIf="config.remove">Actions</th></tr></thead><tbody><tr *ngIf="loading"><td class="empty" [attr.colspan]="config.columns.length + (config.remove ? 1 : 0)">Loading records...</td></tr><tr *ngIf="!loading && filtered.length === 0"><td class="empty" [attr.colspan]="config.columns.length + (config.remove ? 1 : 0)">No records found.</td></tr><tr *ngFor="let row of filtered"><td *ngFor="let column of config.columns"><span [class.status]="column === 'status' || column === 'isActive'" [class.inactive]="value(row, column) === 'Inactive'">{{ value(row, column) }}</span></td><td *ngIf="config.remove"><button class="delete" type="button" (click)="requestDelete(row)"><i class="bi bi-trash3"></i> Delete</button></td></tr></tbody></table></div></section></section>
-<div class="backdrop" *ngIf="open" (click)="open = false"><section class="dialog" (click)="$event.stopPropagation()"><div class="dialog-head"><div><h2>Add {{ config.title.slice(0, -1) }}</h2><p>Enter the required details below.</p></div><button type="button" aria-label="Close" (click)="open = false"><i class="bi bi-x-lg"></i></button></div><form (ngSubmit)="save()" #recordForm="ngForm"><div class="form-grid"><label *ngFor="let field of config.fields" [class.wide]="field.type === 'textarea'">{{ field.label }}<span *ngIf="field.required"> *</span><select *ngIf="field.type === 'select'" [name]="field.key" [(ngModel)]="form[field.key]" [required]="field.required || false"><option value="">Select an option</option><option *ngFor="let option of field.options" [value]="option">{{ option }}</option></select><textarea *ngIf="field.type === 'textarea'" [name]="field.key" [(ngModel)]="form[field.key]" [required]="field.required || false"></textarea><input *ngIf="field.type !== 'select' && field.type !== 'textarea'" [type]="field.type || 'text'" [name]="field.key" [(ngModel)]="form[field.key]" [required]="field.required || false"></label></div><p *ngIf="error" class="notice error">{{ error }}</p><footer><button type="button" class="secondary" (click)="open = false">Cancel</button><button type="submit" class="primary" [disabled]="recordForm.invalid || saving">{{ saving ? 'Saving...' : 'Save record' }}</button></footer></form></section></div>
-<div class="backdrop confirm-backdrop" *ngIf="pendingDelete" (click)="cancelDelete()"><section class="dialog confirm-dialog" role="alertdialog" aria-modal="true" aria-labelledby="delete-dialog-title" (click)="$event.stopPropagation()"><span class="confirm-icon"><i class="bi bi-trash3"></i></span><div><h2 id="delete-dialog-title">Delete this record?</h2><p>This action cannot be undone.</p></div><footer><button type="button" class="secondary" (click)="cancelDelete()" [disabled]="deleting">Cancel</button><button type="button" class="delete-confirm" (click)="confirmDelete()" [disabled]="deleting"><i class="bi bi-trash3"></i> {{ deleting ? 'Deleting...' : 'Delete record' }}</button></footer></section></div>
+<section class="page">
+  <header>
+    <span class="page-icon"><i class="bi" [ngClass]="config.icon"></i></span>
+    <div>
+      <h1>{{ config.title }}</h1>
+      <p>{{ config.description }}</p>
+    </div>
+    <button *ngIf="canCreate" class="primary" type="button" (click)="openCreate()">
+      <i class="bi bi-plus-lg"></i> Add {{ config.title.slice(0, -1) }}
+    </button>
+  </header>
+
+  <section class="stats">
+    <article><small>Total {{ config.title }}</small><strong>{{ rows.length }}</strong></article>
+    <article><small>Matching search</small><strong>{{ filtered.length }}</strong></article>
+    <article><small>Data status</small><strong>{{ loading ? 'Loading' : 'Live' }}</strong></article>
+  </section>
+
+  <div class="tools">
+    <label>
+      <i class="bi bi-search"></i>
+      <input [(ngModel)]="search" placeholder="Search {{ config.title.toLowerCase() }}">
+    </label>
+    <button type="button" class="secondary" (click)="load()"><i class="bi bi-arrow-clockwise"></i> Refresh</button>
+  </div>
+
+  <p *ngIf="error" class="notice error">{{ error }}</p>
+  <p *ngIf="message" class="notice success">{{ message }}</p>
+
+  <section class="table-card">
+    <div class="table-heading">
+      <i class="bi" [ngClass]="config.icon"></i>
+      <h2>{{ config.title }}</h2>
+      <small>({{ filtered.length }})</small>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th *ngFor="let column of config.columns">{{ label(column) }}</th>
+            <th *ngIf="hasActions">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngIf="loading">
+            <td class="empty" [attr.colspan]="config.columns.length + (hasActions ? 1 : 0)">Loading records...</td>
+          </tr>
+          <tr *ngIf="!loading && filtered.length === 0">
+            <td class="empty" [attr.colspan]="config.columns.length + (hasActions ? 1 : 0)">{{ emptyStateMessage }}</td>
+          </tr>
+          <tr *ngFor="let row of filtered">
+            <td *ngFor="let column of config.columns">
+              <span [class.status]="column === 'status' || column === 'isActive'" [class.inactive]="value(row, column) === 'Inactive'">
+                {{ value(row, column) }}
+              </span>
+            </td>
+            <td *ngIf="hasActions" class="actions">
+              <button *ngIf="canEnrollStudent(row)" class="enroll" type="button" (click)="openEnrollment(row)">
+                <i class="bi bi-person-plus"></i> Enroll
+              </button>
+              <button *ngIf="canPublishExam(row)" class="publish" type="button" (click)="publishExam(row)" [disabled]="isPublishingExam(row)">
+                <i class="bi" [ngClass]="isPublishingExam(row) ? 'bi-arrow-repeat' : 'bi-send-check'"></i>
+                {{ isPublishingExam(row) ? 'Publishing...' : 'Publish' }}
+              </button>
+              <button *ngIf="canActivateStudent(row)" class="edit" type="button" (click)="activateStudent(row)" [disabled]="isActivatingStudent(row)">
+                <i class="bi bi-person-check"></i> {{ isActivatingStudent(row) ? 'Activating...' : 'Activate' }}
+              </button>
+              <button *ngIf="canEditRow(row)" class="edit" type="button" (click)="edit(row)"><i class="bi bi-pencil-square"></i> Edit</button>
+              <button *ngIf="canDelete" class="delete" type="button" (click)="requestDelete(row)"><i class="bi bi-trash3"></i> Delete</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</section>
+
+<div class="backdrop" *ngIf="open && (canCreate || canUpdate)" (click)="closeForm()">
+  <section class="dialog" (click)="$event.stopPropagation()">
+    <div class="dialog-head">
+      <div>
+        <h2>{{ isEditing ? 'Edit' : 'Add' }} {{ config.title.slice(0, -1) }}</h2>
+        <p>{{ isEditing ? 'Update the fields that this account is allowed to change.' : 'Enter the required details below.' }}</p>
+      </div>
+      <button type="button" aria-label="Close" (click)="closeForm()"><i class="bi bi-x-lg"></i></button>
+    </div>
+
+    <form (ngSubmit)="save()" #recordForm="ngForm">
+      <div class="form-grid">
+        <ng-container *ngFor="let field of dialogFields">
+          <label *ngIf="isDialogFieldVisible(field)" [class.wide]="field.type === 'textarea'">
+            {{ field.label }}<span *ngIf="isDialogFieldRequired(field)"> *</span>
+            <select
+              *ngIf="field.type === 'select'"
+              [name]="field.key"
+              [(ngModel)]="form[field.key]"
+              [required]="isDialogFieldRequired(field)"
+              (ngModelChange)="onDialogFieldChange(field, $event)"
+            >
+              <option value="">Select an option</option>
+              <option *ngFor="let option of field.options" [value]="option">{{ option }}</option>
+            </select>
+            <select
+              *ngIf="field.type === 'group-select'"
+              [name]="field.key"
+              [(ngModel)]="form[field.key]"
+              [required]="isDialogFieldRequired(field)"
+              [disabled]="loadingFormGroups || formGroups.length === 0"
+            >
+              <option value="">
+                {{ loadingFormGroups ? 'Loading available classes...' : 'Select a class' }}
+              </option>
+              <option *ngFor="let group of formGroups" [value]="group['_id']">
+                {{ value(group, 'groupName') }}
+              </option>
+            </select>
+            <select
+              *ngIf="field.type === 'exam-select'"
+              [name]="field.key"
+              [(ngModel)]="form[field.key]"
+              [required]="isDialogFieldRequired(field)"
+              [disabled]="loadingFormExams || formExams.length === 0"
+              (ngModelChange)="onDialogFieldChange(field, $event)"
+            >
+              <option value="">
+                {{ loadingFormExams ? 'Loading available exams...' : 'Select an exam' }}
+              </option>
+              <option *ngFor="let exam of formExams" [value]="exam['_id']">
+                {{ examOptionLabel(exam) }}
+              </option>
+            </select>
+            <select
+              *ngIf="field.type === 'student-select'"
+              [name]="field.key"
+              [(ngModel)]="form[field.key]"
+              [required]="isDialogFieldRequired(field)"
+              [disabled]="loadingFormStudents || !form['exam'] || eligibleFormStudents.length === 0"
+            >
+              <option value="">
+                {{ loadingFormStudents ? 'Loading students...' : (!form['exam'] ? 'Select an exam first' : 'Select a student') }}
+              </option>
+              <option *ngFor="let student of eligibleFormStudents" [value]="student['studentCode']">
+                {{ studentOptionLabel(student) }}
+              </option>
+            </select>
+            <small *ngIf="resource === 'students' && field.key === 'groupId'" class="form-help">
+              The selected class schedule will be available to the student after saving.
+            </small>
+            <small *ngIf="resource === 'exams' && field.key === 'group'" class="form-help">
+              Only students enrolled in this class can receive results for this exam.
+            </small>
+            <small *ngIf="resource === 'results' && field.key === 'studentCode' && form['exam'] && !loadingFormStudents && eligibleFormStudents.length === 0" class="form-help form-help--error">
+              No enrolled students are available for the selected exam.
+            </small>
+            <textarea *ngIf="field.type === 'textarea'" [name]="field.key" [(ngModel)]="form[field.key]" [required]="isDialogFieldRequired(field)"></textarea>
+            <input *ngIf="field.type !== 'select' && field.type !== 'textarea' && field.type !== 'group-select' && field.type !== 'exam-select' && field.type !== 'student-select'" [type]="field.type || 'text'" [name]="field.key" [(ngModel)]="form[field.key]" [required]="isDialogFieldRequired(field)">
+          </label>
+        </ng-container>
+      </div>
+
+      <p *ngIf="formReferencesError" class="notice error" role="alert">{{ formReferencesError }}</p>
+      <p *ngIf="error" class="notice error">{{ error }}</p>
+      <footer>
+        <button type="button" class="secondary" (click)="closeForm()">Cancel</button>
+        <button type="submit" class="primary" [disabled]="recordForm.invalid || saving || requiresLoadedReferences">{{ saving ? 'Saving...' : (isEditing ? 'Save changes' : 'Save record') }}</button>
+      </footer>
+    </form>
+  </section>
+</div>
+
+<div class="backdrop" *ngIf="enrollmentStudent && canManageEnrollment" (click)="closeEnrollment()">
+  <section class="dialog enrollment-dialog" role="dialog" aria-modal="true" aria-labelledby="enrollment-dialog-title" (click)="$event.stopPropagation()">
+    <div class="dialog-head">
+      <div>
+        <h2 id="enrollment-dialog-title">Enroll {{ enrollmentStudentName }}</h2>
+        <p>Assign student code <strong>{{ enrollmentStudentCode }}</strong> to one of the classes you are authorized to manage.</p>
+      </div>
+      <button type="button" aria-label="Close" (click)="closeEnrollment()" [disabled]="enrolling"><i class="bi bi-x-lg"></i></button>
+    </div>
+
+    <form (ngSubmit)="enrollStudent()" #enrollmentForm="ngForm">
+      <div class="form-grid enrollment-form-grid">
+        <label class="wide">
+          Class <span>*</span>
+          <select
+            name="enrollmentGroupId"
+            [(ngModel)]="enrollmentGroupId"
+            [disabled]="enrolling || loadingEnrollmentGroups || !hasEnrollmentGroups"
+            (ngModelChange)="onEnrollmentGroupChange()"
+            required
+          >
+            <option value="">
+              {{ loadingEnrollmentGroups ? 'Loading available classes...' : 'Select a class' }}
+            </option>
+            <option *ngFor="let group of enrollmentGroups" [value]="group['_id']">
+              {{ value(group, 'groupName') }}
+            </option>
+          </select>
+        </label>
+      </div>
+
+      <section *ngIf="enrollmentGroupId" class="schedule-preview" aria-live="polite">
+        <strong>The student will receive this class schedule automatically:</strong>
+        <span *ngIf="loadingEnrollmentSchedules">Loading class schedule...</span>
+        <ul *ngIf="!loadingEnrollmentSchedules && hasEnrollmentSchedules">
+          <li *ngFor="let schedule of enrollmentSchedules">{{ enrollmentScheduleDescription(schedule) }}</li>
+        </ul>
+        <span *ngIf="!loadingEnrollmentSchedules && !hasEnrollmentSchedules && !enrollmentScheduleError">
+          No active schedule entries are set for this class yet.
+        </span>
+        <span *ngIf="enrollmentScheduleError" class="schedule-preview__error">{{ enrollmentScheduleError }}</span>
+      </section>
+
+      <p *ngIf="enrollmentError" class="notice error" role="alert">{{ enrollmentError }}</p>
+      <footer>
+        <button type="button" class="secondary" (click)="closeEnrollment()" [disabled]="enrolling">Cancel</button>
+        <button type="submit" class="primary" [disabled]="enrollmentForm.invalid || enrolling || loadingEnrollmentGroups || !hasEnrollmentGroups">
+          <i class="bi" [ngClass]="enrolling ? 'bi-arrow-repeat' : 'bi-person-plus'"></i>
+          {{ enrolling ? 'Enrolling...' : 'Enroll student' }}
+        </button>
+      </footer>
+    </form>
+  </section>
+</div>
+
+<div class="backdrop confirm-backdrop" *ngIf="pendingDelete && canDelete" (click)="cancelDelete()">
+  <section class="dialog confirm-dialog" role="alertdialog" aria-modal="true" aria-labelledby="delete-dialog-title" (click)="$event.stopPropagation()">
+    <span class="confirm-icon"><i class="bi bi-trash3"></i></span>
+    <div>
+      <h2 id="delete-dialog-title">Delete this record?</h2>
+      <p>This action cannot be undone.</p>
+    </div>
+    <footer>
+      <button type="button" class="secondary" (click)="cancelDelete()" [disabled]="deleting">Cancel</button>
+      <button type="button" class="delete-confirm" (click)="confirmDelete()" [disabled]="deleting">
+        <i class="bi bi-trash3"></i> {{ deleting ? 'Deleting...' : 'Delete record' }}
+      </button>
+    </footer>
+  </section>
+</div>

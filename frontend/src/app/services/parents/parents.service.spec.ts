@@ -1,13 +1,16 @@
 import { TestBed } from '@angular/core/testing';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 
-import { ParentsService } from './parents.service';
+import { ParentService } from './parents.service';
 
-describe('ParentsService', () => {
-  let service: ParentsService;
+describe('ParentService', () => {
+  let service: ParentService;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({});
-    service = TestBed.inject(ParentsService);
+    TestBed.configureTestingModule({
+      imports: [HttpClientTestingModule]
+    });
+    service = TestBed.inject(ParentService);
   });
 
   it('should be created', () => {

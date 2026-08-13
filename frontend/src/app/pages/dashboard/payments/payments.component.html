@@ -6,16 +6,12 @@
 
             <div class="payments-page__actions">
                 <button type="button" class="btn btn--ghost" (click)="onFilterClick()">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M4 6h16M7 12h10M10 18h4" stroke-linecap="round" />
-                    </svg>
+                    <i class="bi bi-funnel" aria-hidden="true"></i>
                     Filter
                 </button>
 
                 <button type="button" class="btn btn--primary" (click)="onRecordPaymentClick()">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M12 5v14M5 12h14" stroke-linecap="round" />
-                    </svg>
+                    <i class="bi bi-plus-lg" aria-hidden="true"></i>
                     Record Payment
                 </button>
             </div>
@@ -53,12 +49,8 @@
                     <td class="text-muted">{{ payment.dueDate }}</td>
                     <td class="text-muted">{{ payment.paymentDate ?? '–' }}</td>
                     <td class="text-right">
-                        <button type="button" class="icon-btn" (click)="onDownloadClick(payment)">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2">
-                                <path d="M12 3v12m0 0l-4-4m4 4l4-4M4 19h16" stroke-linecap="round"
-                                    stroke-linejoin="round" />
-                            </svg>
+                        <button type="button" class="icon-btn" (click)="onDownloadClick(payment)" aria-label="Download payment receipt">
+                            <i class="bi bi-download" aria-hidden="true"></i>
                         </button>
                     </td>
                 </tr>
@@ -70,17 +62,17 @@
     <div class="payments_page">
 
         <nav class="pagination" aria-label="Payments pagination">
-            <button type="button" class="pagination__btn" [disabled]="currentPage === 1"
+            <button type="button" class="pagination__btn" aria-label="Previous page" [disabled]="currentPage === 1"
                 (click)="goToPage(currentPage - 1)">
-                &lt;
+                <i class="bi bi-chevron-left" aria-hidden="true"></i>
             </button>
             <span class="text-muted pagination-info">
                 {{ currentPage }} / {{ totalPages }}
             </span>
 
-            <button type="button" class="pagination__btn" [disabled]="currentPage === totalPages"
+            <button type="button" class="pagination__btn" aria-label="Next page" [disabled]="currentPage === totalPages"
                 (click)="goToPage(currentPage + 1)">
-                &gt;
+                <i class="bi bi-chevron-right" aria-hidden="true"></i>
             </button>
         </nav>
     </div>

@@ -31,7 +31,7 @@
       <div class="settings-section__header">
 
         <div class="settings-section__icon settings-section__icon--blue">
-          <i class="fa-solid fa-palette"></i>
+          <i class="bi bi-palette" aria-hidden="true"></i>
         </div>
 
         <div>
@@ -56,9 +56,10 @@
           <div class="setting-item__title">
 
             <i
-              class="fa-solid"
-              [class.fa-moon]="!isDarkMode"
-              [class.fa-sun]="isDarkMode"
+              class="bi"
+              [class.bi-moon]="!isDarkMode"
+              [class.bi-sun]="isDarkMode"
+              aria-hidden="true"
             ></i>
 
             {{ isDarkMode ? 'Dark Mode' : 'Light Mode' }}
@@ -101,7 +102,7 @@
       <div class="settings-section__header">
 
         <div class="settings-section__icon settings-section__icon--purple">
-          <i class="fa-solid fa-language"></i>
+          <i class="bi bi-translate" aria-hidden="true"></i>
         </div>
 
         <div>
@@ -125,7 +126,7 @@
 
           <div class="setting-item__title">
 
-            <i class="fa-solid fa-globe"></i>
+            <i class="bi bi-globe2" aria-hidden="true"></i>
 
             Application Language
 
@@ -146,11 +147,11 @@
           >
 
             <option value="en">
-              🇬🇧 English
+              English
             </option>
 
             <option value="ar">
-              🇪🇬 العربية
+              العربية
             </option>
 
           </select>
@@ -168,7 +169,7 @@
 
       <div class="current-settings">
 
-        <i class="fa-solid fa-circle-check"></i>
+        <i class="bi bi-check-circle-fill" aria-hidden="true"></i>
 
         <span>
           Settings are saved automatically.

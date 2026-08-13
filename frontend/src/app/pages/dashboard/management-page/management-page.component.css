@@ -2,3 +2,17 @@
 .confirm-backdrop { z-index: 50; }.confirm-dialog { width: min(410px, 100%); text-align: center; padding: 28px 25px 24px; }.confirm-icon { display: grid; place-items: center; width: 50px; height: 50px; margin: 0 auto 14px; border-radius: 50%; background: #fff1f2; color: #df1d49; font-size: 22px; }.confirm-dialog h2 { margin-bottom: 6px; }.confirm-dialog p { font-size: 13px; }.confirm-dialog footer { justify-content: center; }.delete-confirm { padding: 10px 15px; border-radius: 8px; background: #df1d49; color: #fff; font-size: 13px; font-weight: 700; }.delete-confirm:hover { background: #be123c; }.delete-confirm:disabled, .confirm-dialog .secondary:disabled { opacity: .6; cursor: not-allowed; }
 @media (max-width: 720px) { .page > header { flex-wrap: wrap; }.page > header .primary { margin-left: 0; }.stats, .form-grid { grid-template-columns: 1fr; }.wide { grid-column: auto; } }
 @media (max-width: 520px) { .page > header { align-items: flex-start; gap: 10px; margin-bottom: 18px; }.page-icon { flex: 0 0 48px; width: 48px; height: 48px; font-size: 23px; }.page > header > div { flex: 1; min-width: 0; }.page h1 { font-size: 24px; }.page > header .primary { width: 100%; padding: 12px 14px; }.stats { gap: 10px; margin-bottom: 16px; }.stats article { padding: 14px; }.tools { flex-direction: column; margin-bottom: 14px; }.tools label, .tools .secondary { width: 100%; }.tools .secondary { padding: 11px; }.table-heading { padding: 14px; }.dialog { max-height: calc(100vh - 24px); padding: 18px 14px; border-radius: 12px; }.backdrop { padding: 12px; }.dialog-head { gap: 12px; }.dialog footer { flex-direction: column-reverse; }.dialog footer .primary, .dialog footer .secondary { width: 100%; padding: 12px; }.confirm-dialog footer { flex-direction: column-reverse; }.confirm-dialog .secondary, .confirm-dialog .delete-confirm { width: 100%; padding: 12px; } }
+
+.actions { display: flex; gap: 7px; }
+.enroll { background: #ecfdf3; color: #087c40; border-radius: 6px; padding: 6px 9px; font-size: 11px; font-weight: 700; }
+.enroll:hover { background: #d9f8e5; }
+.publish { background: #fff7e6; color: #a15c00; border-radius: 6px; padding: 6px 9px; font-size: 11px; font-weight: 700; }
+.publish:hover { background: #ffedc2; }
+.publish:disabled { opacity: .65; cursor: not-allowed; }
+.publish .bi-arrow-repeat { display: inline-block; animation: enrollment-spin 1s linear infinite; }
+.edit { background: #eaf1ff; color: #1764f8; border-radius: 6px; padding: 6px 9px; font-size: 11px; font-weight: 700; }
+.edit:hover { background: #dce8ff; }
+.enrollment-dialog { width: min(520px, 100%); }.enrollment-dialog .dialog-head p strong { color: #17234b; }.enrollment-dialog .primary i.bi-arrow-repeat { display: inline-block; animation: enrollment-spin 1s linear infinite; }@keyframes enrollment-spin { to { transform: rotate(360deg); } }
+.schedule-preview { display: grid; gap: 6px; margin-top: 14px; padding: 12px; border: 1px solid #dbe7fd; border-radius: 8px; background: #f7faff; color: #344565; font-size: 12px; }.schedule-preview strong { color: #17234b; }.schedule-preview ul { margin: 0; padding-left: 20px; }.schedule-preview__error { color: #bd1740; }
+.form-help { display: block; margin-top: 5px; color: #6d7b9c; font-size: 11px; line-height: 1.35; }
+.form-help--error { color: #bd1740; }

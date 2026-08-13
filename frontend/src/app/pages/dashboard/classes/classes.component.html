@@ -1,130 +1,225 @@
 <section class="groups-page">
 
   <!-- ==================== Header ==================== -->
+
   <div class="groups-header-banner">
+
     <div class="groups-page__header">
 
       <div>
-        <h2 class="groups-page__title">Groups</h2>
+        <h2 class="groups-page__title">
+          Groups
+        </h2>
 
         <p class="groups-page__subtitle">
           Manage and monitor all groups in your learning center.
         </p>
       </div>
 
+
       <div class="groups-page__actions">
+
         <button
           type="button"
           class="btn btn--primary"
           (click)="onAddGroupClick()"
         >
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-          >
-            <path
-              d="M12 5v14M5 12h14"
-              stroke-linecap="round"
-            ></path>
-          </svg>
+
+          <i
+            class="bi bi-plus-lg"
+            aria-hidden="true"
+          ></i>
 
           Add Group
+
         </button>
+
       </div>
 
     </div>
+
   </div>
 
 
   <!-- ==================== Statistics ==================== -->
+
   <div class="stats-grid">
 
+
     <!-- Total Groups -->
+
     <div class="stat-card">
+
       <div class="stat-icon stat-icon--blue">
-        <i class="fa-solid fa-layer-group"></i>
+
+        <i
+          class="bi bi-collection"
+          aria-hidden="true"
+        ></i>
+
       </div>
 
+
       <div class="stat-content">
-        <span class="stat-title">Total Groups</span>
-        <strong>{{ groups.length }}</strong>
-        <span class="stat-description">All groups</span>
+
+        <span class="stat-title">
+          Total Groups
+        </span>
+
+        <strong>
+          {{ groups.length }}
+        </strong>
+
+        <span class="stat-description">
+          All groups
+        </span>
+
       </div>
+
     </div>
+
 
 
     <!-- Total Students -->
+
     <div class="stat-card">
+
       <div class="stat-icon stat-icon--green">
-        <i class="fa-solid fa-user-graduate"></i>
+
+        <i
+          class="bi bi-mortarboard"
+          aria-hidden="true"
+        ></i>
+
       </div>
 
+
       <div class="stat-content">
-        <span class="stat-title">Total Students</span>
-        <strong>{{ totalStudentsCount }}</strong>
-        <span class="stat-description">Across all groups</span>
+
+        <span class="stat-title">
+          Total Students
+        </span>
+
+        <strong>
+          {{ totalStudentsCount }}
+        </strong>
+
+        <span class="stat-description">
+          Across all groups
+        </span>
+
       </div>
+
     </div>
+
 
 
     <!-- Grade Levels -->
+
     <div class="stat-card">
+
       <div class="stat-icon stat-icon--orange">
-        <i class="fa-solid fa-graduation-cap"></i>
+
+        <i
+          class="bi bi-bar-chart"
+          aria-hidden="true"
+        ></i>
+
       </div>
 
+
       <div class="stat-content">
-        <span class="stat-title">Grade Levels</span>
-        <strong>{{ gradeLevelsCount }}</strong>
-        <span class="stat-description">Different levels</span>
+
+        <span class="stat-title">
+          Grade Levels
+        </span>
+
+        <strong>
+          {{ gradeLevelsCount }}
+        </strong>
+
+        <span class="stat-description">
+          Different levels
+        </span>
+
       </div>
+
     </div>
 
 
+
     <!-- Teachers -->
+
     <div class="stat-card">
+
       <div class="stat-icon stat-icon--purple">
-        <i class="fa-solid fa-chalkboard-user"></i>
+
+        <i
+          class="bi bi-person-workspace"
+          aria-hidden="true"
+        ></i>
+
       </div>
 
+
       <div class="stat-content">
-        <span class="stat-title">Teachers</span>
-        <strong>{{ teachersCount }}</strong>
-        <span class="stat-description">Assigned teachers</span>
+
+        <span class="stat-title">
+          Teachers
+        </span>
+
+        <strong>
+          {{ teachersCount }}
+        </strong>
+
+        <span class="stat-description">
+          Assigned teachers
+        </span>
+
       </div>
+
     </div>
 
   </div>
 
 
   <!-- ==================== Groups List ==================== -->
+
   <div class="groups-card">
 
+
     <!-- Card Header -->
+
     <div class="groups-card__header">
 
       <div>
-        <h3>Groups List</h3>
+
+        <h3>
+          Groups List
+        </h3>
 
         <p>
           {{ filteredGroups.length }} groups found
         </p>
+
       </div>
 
 
       <!-- Filters -->
+
       <div class="groups-filters">
 
+
         <!-- Grade Filter -->
+
         <select
           [(ngModel)]="selectedGradeLevel"
           (change)="applyFilters()"
         >
-          <option value="">All Grade Levels</option>
+
+          <option value="">
+            All Grade Levels
+          </option>
 
           <option
             *ngFor="let level of gradeLevels"
@@ -132,15 +227,21 @@
           >
             {{ level }}
           </option>
+
         </select>
 
 
+
         <!-- Teacher Filter -->
+
         <select
           [(ngModel)]="selectedTeacher"
           (change)="applyFilters()"
         >
-          <option value="">All Teachers</option>
+
+          <option value="">
+            All Teachers
+          </option>
 
           <option
             *ngFor="let teacher of teachers"
@@ -148,30 +249,19 @@
           >
             {{ teacher }}
           </option>
+
         </select>
 
 
+
         <!-- Search -->
+
         <div class="search-box">
 
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-          >
-            <circle
-              cx="11"
-              cy="11"
-              r="8"
-            ></circle>
-
-            <path
-              d="m21 21-4.3-4.3"
-            ></path>
-          </svg>
+          <i
+            class="bi bi-search"
+            aria-hidden="true"
+          ></i>
 
           <input
             type="text"
@@ -187,121 +277,219 @@
     </div>
 
 
+
     <!-- ==================== Groups Table ==================== -->
+
     <div class="table-wrapper">
 
       <table class="groups-table">
 
+
         <thead>
+
           <tr>
-            <th>GROUP</th>
-            <th>GRADE LEVEL</th>
-            <th>STUDENTS</th>
-            <th>SCHEDULE</th>
-            <th>TEACHER</th>
-            <th>ACTIONS</th>
+
+            <th>
+              GROUP
+            </th>
+
+            <th>
+              GRADE LEVEL
+            </th>
+
+            <th>
+              STUDENTS
+            </th>
+
+            <th>
+              SCHEDULE
+            </th>
+
+            <th>
+              TEACHER
+            </th>
+
+            <th>
+              ACTIONS
+            </th>
+
           </tr>
+
         </thead>
+
 
 
         <tbody>
 
+
           <!-- Group Rows -->
+
           <tr
             *ngFor="let group of filteredGroups"
           >
 
+
             <!-- Group -->
+
             <td>
 
               <div class="group-cell">
 
                 <div class="group-avatar">
+
                   {{ getInitial(group.name) }}
+
                 </div>
 
+
                 <div class="group-info">
-                  <strong>{{ group.name }}</strong>
-                  <span>Learning Group</span>
+
+                  <strong>
+                    {{ group.name }}
+                  </strong>
+
+                  <span>
+                    Learning Group
+                  </span>
+
                 </div>
 
               </div>
 
             </td>
+
 
 
             <!-- Grade Level -->
+
             <td>
+
               <span class="grade-badge">
+
                 {{ group.gradelevel }}
+
               </span>
+
             </td>
+
 
 
             <!-- Students -->
+
             <td>
+
               <div class="students-count">
-                <i class="fa-solid fa-user-graduate"></i>
-                <strong>{{ group.studentsCount }}</strong>
-                <span>Students</span>
+
+                <i
+                  class="bi bi-mortarboard"
+                  aria-hidden="true"
+                ></i>
+
+                <strong>
+                  {{ group.studentsCount }}
+                </strong>
+
+                <span>
+                  Students
+                </span>
+
               </div>
+
             </td>
+
 
 
             <!-- Schedule -->
+
             <td>
+
               <span class="text-muted">
+
                 {{ group.schedule }}
+
               </span>
+
             </td>
 
 
+
             <!-- Teacher -->
+
             <td>
+
               <div class="teacher-cell">
+
                 <div class="teacher-avatar">
+
                   {{ getInitials(group.teacher) }}
+
                 </div>
 
                 <span>
                   {{ group.teacher }}
                 </span>
+
               </div>
+
             </td>
 
 
+
             <!-- Actions -->
+
             <td>
 
               <div class="actions">
 
+
                 <!-- View -->
+
                 <button
                   type="button"
                   title="View"
                   (click)="viewGroup(group)"
                 >
-                  <i class="fa-regular fa-eye"></i>
+
+                  <i
+                    class="bi bi-eye"
+                    aria-hidden="true"
+                  ></i>
+
                 </button>
 
 
+
                 <!-- Edit -->
+
                 <button
                   type="button"
                   title="Edit"
                   (click)="editGroup(group)"
                 >
-                  <i class="fa-solid fa-pen"></i>
+
+                  <i
+                    class="bi bi-pencil"
+                    aria-hidden="true"
+                  ></i>
+
                 </button>
 
 
+
                 <!-- Delete -->
+
                 <button
                   type="button"
                   title="Delete"
+                  class="delete-btn"
                   (click)="deleteGroup(group)"
                 >
-                  <i class="fa-regular fa-trash-can"></i>
+
+                  <i
+                    class="bi bi-trash3"
+                    aria-hidden="true"
+                  ></i>
+
                 </button>
 
               </div>
@@ -311,8 +499,12 @@
           </tr>
 
 
-          <!-- ==================== Empty State ==================== -->
-          <tr *ngIf="filteredGroups.length === 0">
+
+          <!-- Empty State -->
+
+          <tr
+            *ngIf="filteredGroups.length === 0"
+          >
 
             <td
               colspan="6"
@@ -320,10 +512,17 @@
             >
 
               <div class="empty-state__icon">
-                <i class="fa-solid fa-layer-group"></i>
+
+                <i
+                  class="bi bi-collection"
+                  aria-hidden="true"
+                ></i>
+
               </div>
 
-              <strong>No groups found</strong>
+              <strong>
+                No groups found
+              </strong>
 
               <span>
                 Try changing your search or filters.
@@ -344,6 +543,7 @@
 </section>
 
 
+
 <!-- ========================================================= -->
 <!-- Add / Edit Group Modal -->
 <!-- ========================================================= -->
@@ -355,15 +555,20 @@
 
   <div class="modal-card">
 
+
     <h3>
       {{ isEditMode ? 'Edit Group' : 'New Group' }}
     </h3>
 
 
+
     <!-- Group Name -->
+
     <div class="form-group">
 
-      <label>Group Name</label>
+      <label>
+        Group Name
+      </label>
 
       <input
         type="text"
@@ -374,10 +579,14 @@
     </div>
 
 
+
     <!-- Grade Level -->
+
     <div class="form-group">
 
-      <label>Grade Level</label>
+      <label>
+        Grade Level
+      </label>
 
       <input
         type="text"
@@ -388,10 +597,14 @@
     </div>
 
 
+
     <!-- Students Count -->
+
     <div class="form-group">
 
-      <label>Students Count</label>
+      <label>
+        Students Count
+      </label>
 
       <input
         type="number"
@@ -403,10 +616,14 @@
     </div>
 
 
+
     <!-- Schedule -->
+
     <div class="form-group">
 
-      <label>Schedule</label>
+      <label>
+        Schedule
+      </label>
 
       <input
         type="text"
@@ -417,10 +634,14 @@
     </div>
 
 
+
     <!-- Teacher -->
+
     <div class="form-group">
 
-      <label>Teacher</label>
+      <label>
+        Teacher
+      </label>
 
       <input
         type="text"
@@ -431,7 +652,9 @@
     </div>
 
 
+
     <!-- Modal Actions -->
+
     <div class="modal-actions">
 
       <button
@@ -442,12 +665,15 @@
         Cancel
       </button>
 
+
       <button
         type="button"
         class="btn btn--primary modal-save-btn"
         (click)="saveGroup()"
       >
+
         {{ isEditMode ? 'Update Group' : 'Save Group' }}
+
       </button>
 
     </div>
@@ -455,6 +681,7 @@
   </div>
 
 </div>
+
 
 
 <!-- ========================================================= -->
@@ -468,40 +695,75 @@
 
   <div class="modal-card">
 
-    <h3>Group Details</h3>
+
+    <h3>
+      Group Details
+    </h3>
 
 
     <div class="group-details">
 
+
       <div>
-        <strong>Group Name:</strong>
+
+        <strong>
+          Group Name:
+        </strong>
+
         {{ selectedGroup.name }}
+
       </div>
 
+
       <div>
-        <strong>Grade Level:</strong>
+
+        <strong>
+          Grade Level:
+        </strong>
+
         {{ selectedGroup.gradelevel }}
+
       </div>
 
+
       <div>
-        <strong>Students Count:</strong>
+
+        <strong>
+          Students Count:
+        </strong>
+
         {{ selectedGroup.studentsCount }}
+
       </div>
 
+
       <div>
-        <strong>Schedule:</strong>
+
+        <strong>
+          Schedule:
+        </strong>
+
         {{ selectedGroup.schedule }}
+
       </div>
 
+
       <div>
-        <strong>Teacher:</strong>
+
+        <strong>
+          Teacher:
+        </strong>
+
         {{ selectedGroup.teacher }}
+
       </div>
 
     </div>
 
 
+
     <!-- Modal Actions -->
+
     <div class="modal-actions">
 
       <button

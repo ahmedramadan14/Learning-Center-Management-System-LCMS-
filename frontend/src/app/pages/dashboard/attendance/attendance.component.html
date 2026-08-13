@@ -1,31 +1,21 @@
 <section class="attendance-page">
 
-  <!-- ==================== Header ==================== -->
-
   <div class="attendance-header-banner">
     <div class="attendance-page__header">
-
       <div>
         <h2 class="attendance-page__title">Attendance</h2>
-
         <p class="attendance-page__subtitle">
           Monitor and manage student attendance records.
         </p>
       </div>
-
     </div>
   </div>
 
-
-  <!-- ==================== Statistics ==================== -->
-
   <div class="stats-grid">
 
-    <!-- Total Students -->
     <div class="stat-card">
-
       <div class="stat-icon stat-icon--blue">
-        <i class="fa-solid fa-users"></i>
+        <i class="bi bi-people" aria-hidden="true"></i>
       </div>
 
       <div class="stat-content">
@@ -33,15 +23,11 @@
         <strong>{{ totalStudents }}</strong>
         <span class="stat-description">Attendance records</span>
       </div>
-
     </div>
 
-
-    <!-- Present -->
     <div class="stat-card">
-
       <div class="stat-icon stat-icon--green">
-        <i class="fa-solid fa-user-check"></i>
+        <i class="bi bi-person-check" aria-hidden="true"></i>
       </div>
 
       <div class="stat-content">
@@ -49,15 +35,11 @@
         <strong>{{ presentCount }}</strong>
         <span class="stat-description">Students present</span>
       </div>
-
     </div>
 
-
-    <!-- Absent -->
     <div class="stat-card">
-
       <div class="stat-icon stat-icon--red">
-        <i class="fa-solid fa-user-xmark"></i>
+        <i class="bi bi-person-x" aria-hidden="true"></i>
       </div>
 
       <div class="stat-content">
@@ -65,15 +47,11 @@
         <strong>{{ absentCount }}</strong>
         <span class="stat-description">Students absent</span>
       </div>
-
     </div>
 
-
-    <!-- Late -->
     <div class="stat-card">
-
       <div class="stat-icon stat-icon--orange">
-        <i class="fa-solid fa-clock"></i>
+        <i class="bi bi-clock" aria-hidden="true"></i>
       </div>
 
       <div class="stat-content">
@@ -81,15 +59,11 @@
         <strong>{{ lateCount }}</strong>
         <span class="stat-description">Late arrivals</span>
       </div>
-
     </div>
 
-
-    <!-- Excused -->
     <div class="stat-card">
-
       <div class="stat-icon stat-icon--purple">
-        <i class="fa-solid fa-circle-check"></i>
+        <i class="bi bi-check-circle" aria-hidden="true"></i>
       </div>
 
       <div class="stat-content">
@@ -97,46 +71,27 @@
         <strong>{{ excusedCount }}</strong>
         <span class="stat-description">Excused absences</span>
       </div>
-
     </div>
 
   </div>
 
-
-  <!-- ==================== Attendance List ==================== -->
-
   <div class="attendance-card">
-
-    <!-- Card Header -->
 
     <div class="attendance-card__header">
 
       <div>
         <h3>Attendance Records</h3>
-
-        <p>
-          {{ filteredRecords.length }} records found
-        </p>
+        <p>{{ filteredRecords.length }} records found</p>
       </div>
 
-
-      <!-- Filters -->
-
       <div class="attendance-filters">
-
-        <!-- Date -->
 
         <input
           type="date"
           [(ngModel)]="selectedDate"
         />
 
-
-        <!-- Group -->
-
-        <select
-          [(ngModel)]="selectedGroup"
-        >
+        <select [(ngModel)]="selectedGroup">
 
           <option value="All Groups">
             All Groups
@@ -151,12 +106,7 @@
 
         </select>
 
-
-        <!-- Status -->
-
-        <select
-          [(ngModel)]="selectedStatus"
-        >
+        <select [(ngModel)]="selectedStatus">
 
           <option value="All Status">
             All Status
@@ -180,31 +130,9 @@
 
         </select>
 
-
-        <!-- Search -->
-
         <div class="search-box">
 
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-          >
-
-            <circle
-              cx="11"
-              cy="11"
-              r="8"
-            ></circle>
-
-            <path
-              d="m21 21-4.3-4.3"
-            ></path>
-
-          </svg>
+          <i class="bi bi-search" aria-hidden="true"></i>
 
           <input
             type="text"
@@ -218,15 +146,11 @@
 
     </div>
 
-
-    <!-- ==================== Table ==================== -->
-
     <div class="table-wrapper">
 
       <table class="attendance-table">
 
         <thead>
-
           <tr>
             <th>STUDENT</th>
             <th>GROUP</th>
@@ -235,19 +159,11 @@
             <th>TIME</th>
             <th>ACTIONS</th>
           </tr>
-
         </thead>
-
 
         <tbody>
 
-          <!-- Attendance Rows -->
-
-          <tr
-            *ngFor="let record of filteredRecords"
-          >
-
-            <!-- Student -->
+          <tr *ngFor="let record of filteredRecords">
 
             <td>
 
@@ -258,34 +174,19 @@
                 </div>
 
                 <div class="student-info">
-
-                  <strong>
-                    {{ record.studentName }}
-                  </strong>
-
-                  <span>
-                    {{ record.studentId }}
-                  </span>
-
+                  <strong>{{ record.studentName }}</strong>
+                  <span>{{ record.studentId }}</span>
                 </div>
 
               </div>
 
             </td>
 
-
-            <!-- Group -->
-
             <td>
-
               <span class="group-badge">
                 {{ record.group }}
               </span>
-
             </td>
-
-
-            <!-- Date -->
 
             <td>
               <span class="text-muted">
@@ -293,41 +194,20 @@
               </span>
             </td>
 
-
-            <!-- Status -->
-
             <td>
 
               <span
                 class="status-badge"
-
-                [class.status-badge--present]="
-                  record.status === 'Present'
-                "
-
-                [class.status-badge--absent]="
-                  record.status === 'Absent'
-                "
-
-                [class.status-badge--late]="
-                  record.status === 'Late'
-                "
-
-                [class.status-badge--excused]="
-                  record.status === 'Excused'
-                "
+                [class.status-badge--present]="record.status === 'Present'"
+                [class.status-badge--absent]="record.status === 'Absent'"
+                [class.status-badge--late]="record.status === 'Late'"
+                [class.status-badge--excused]="record.status === 'Excused'"
               >
-
                 <span></span>
-
                 {{ record.status }}
-
               </span>
 
             </td>
-
-
-            <!-- Time -->
 
             <td>
               <span class="text-muted">
@@ -335,32 +215,24 @@
               </span>
             </td>
 
-
-            <!-- Actions -->
-
             <td>
 
               <div class="actions">
-
-                <!-- View -->
 
                 <button
                   type="button"
                   title="View"
                   (click)="viewAttendance(record)"
                 >
-                  <i class="fa-regular fa-eye"></i>
+                  <i class="bi bi-eye" aria-hidden="true"></i>
                 </button>
-
-
-                <!-- Edit -->
 
                 <button
                   type="button"
                   title="Edit"
                   (click)="editAttendance(record)"
                 >
-                  <i class="fa-solid fa-pen"></i>
+                  <i class="bi bi-pencil" aria-hidden="true"></i>
                 </button>
 
               </div>
@@ -369,12 +241,7 @@
 
           </tr>
 
-
-          <!-- ==================== Empty State ==================== -->
-
-          <tr
-            *ngIf="filteredRecords.length === 0"
-          >
+          <tr *ngIf="filteredRecords.length === 0">
 
             <td
               colspan="6"
@@ -382,7 +249,7 @@
             >
 
               <div class="empty-state__icon">
-                <i class="fa-solid fa-calendar-xmark"></i>
+                <i class="bi bi-calendar-x" aria-hidden="true"></i>
               </div>
 
               <strong>
@@ -408,10 +275,6 @@
 </section>
 
 
-<!-- ========================================================= -->
-<!-- Edit Attendance Modal -->
-<!-- ========================================================= -->
-
 <div
   class="modal-overlay"
   *ngIf="isModalOpen && selectedRecord"
@@ -419,15 +282,9 @@
 
   <div class="modal-card">
 
-    <h3>
-      Edit Attendance
-    </h3>
-
-
-    <!-- Student -->
+    <h3>Edit Attendance</h3>
 
     <div class="form-group">
-
       <label>Student</label>
 
       <input
@@ -435,14 +292,9 @@
         [value]="selectedRecord.studentName"
         disabled
       />
-
     </div>
 
-
-    <!-- Group -->
-
     <div class="form-group">
-
       <label>Group</label>
 
       <input
@@ -450,59 +302,29 @@
         [value]="selectedRecord.group"
         disabled
       />
-
     </div>
 
-
-    <!-- Date -->
-
     <div class="form-group">
-
       <label>Date</label>
 
       <input
         type="date"
         [(ngModel)]="selectedRecord.date"
       />
-
     </div>
 
-
-    <!-- Status -->
-
     <div class="form-group">
-
       <label>Status</label>
 
-      <select
-        [(ngModel)]="selectedRecord.status"
-      >
-
-        <option value="Present">
-          Present
-        </option>
-
-        <option value="Absent">
-          Absent
-        </option>
-
-        <option value="Late">
-          Late
-        </option>
-
-        <option value="Excused">
-          Excused
-        </option>
-
+      <select [(ngModel)]="selectedRecord.status">
+        <option value="Present">Present</option>
+        <option value="Absent">Absent</option>
+        <option value="Late">Late</option>
+        <option value="Excused">Excused</option>
       </select>
-
     </div>
 
-
-    <!-- Time -->
-
     <div class="form-group">
-
       <label>Time</label>
 
       <input
@@ -510,11 +332,7 @@
         [(ngModel)]="selectedRecord.time"
         placeholder="Example: 08:15 AM"
       />
-
     </div>
-
-
-    <!-- Modal Actions -->
 
     <div class="modal-actions">
 
@@ -541,10 +359,6 @@
 </div>
 
 
-<!-- ========================================================= -->
-<!-- Attendance Details Modal -->
-<!-- ========================================================= -->
-
 <div
   class="modal-overlay"
   *ngIf="isDetailsModalOpen && selectedRecord"
@@ -552,10 +366,7 @@
 
   <div class="modal-card">
 
-    <h3>
-      Attendance Details
-    </h3>
-
+    <h3>Attendance Details</h3>
 
     <div class="attendance-details">
 
@@ -590,7 +401,6 @@
       </div>
 
     </div>
-
 
     <div class="modal-actions">
 

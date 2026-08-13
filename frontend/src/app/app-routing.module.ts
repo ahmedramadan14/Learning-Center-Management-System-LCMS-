@@ -18,7 +18,10 @@ import { SettingsComponent } from './pages/dashboard/settings/settings.component
 import { ResultsComponent } from './pages/dashboard/results/results.component';
 import { ScheduleComponent } from './pages/dashboard/schedule/schedule.component';
 import { ManagementPageComponent } from './pages/dashboard/management-page/management-page.component';
+import { NotificationsComponent } from './pages/dashboard/notifications/notifications.component';
+import { ProfileComponent } from './pages/dashboard/profile/profile.component';
 import { AuthGuard } from './services/auth/auth.guard';
+import { RoleGuard } from './services/auth/role.guard';
 const routes: Routes = [
   {
     path: '',
@@ -39,10 +42,12 @@ const routes: Routes = [
     path: 'dashboard',
     component: DashboardLayoutComponent,
     canActivate: [AuthGuard],
+    canActivateChild: [RoleGuard],
     children: [
       {
         path: '',
-        component: DashboardHomeComponent
+        component: DashboardHomeComponent,
+        data: { resource: 'dashboard' }
       },
       {
         path: 'students',
@@ -63,6 +68,11 @@ const routes: Routes = [
         path: 'classes',
         component: ManagementPageComponent,
         data: { resource: 'classes' }
+      },
+      {
+        path: 'grades',
+        component: ManagementPageComponent,
+        data: { resource: 'grades' }
       },
       {
         path: 'schedule',
@@ -100,8 +110,19 @@ const routes: Routes = [
         data: { resource: 'results' }
       },
       {
+        path: 'notifications',
+        component: NotificationsComponent,
+        data: { resource: 'notifications' }
+      },
+      {
+        path: 'profile',
+        component: ProfileComponent,
+        data: { resource: 'profile' }
+      },
+      {
         path: 'settings',
-        component: SettingsComponent
+        component: SettingsComponent,
+        data: { resource: 'settings' }
       }
     ]
   },

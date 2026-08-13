@@ -23,20 +23,7 @@
       class="btn btn--primary"
       (click)="onAddTeacherClick()">
 
-      <svg
-        width="16"
-        height="16"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2">
-
-        <path
-          d="M12 5v14M5 12h14"
-          stroke-linecap="round">
-        </path>
-
-      </svg>
+      <i class="bi bi-plus-lg" aria-hidden="true"></i>
 
       Add Teacher
 
@@ -58,7 +45,7 @@
 <div class="stat-card">
 
   <div class="stat-icon stat-icon--blue">
-    <i class="fa-solid fa-user-tie"></i>
+    <i class="bi bi-person-workspace" aria-hidden="true"></i>
   </div>
 
   <div class="stat-content">
@@ -84,7 +71,7 @@
 <div class="stat-card">
 
   <div class="stat-icon stat-icon--green">
-    <i class="fa-solid fa-user-check"></i>
+    <i class="bi bi-person-check" aria-hidden="true"></i>
   </div>
 
   <div class="stat-content">
@@ -110,7 +97,7 @@
 <div class="stat-card">
 
   <div class="stat-icon stat-icon--orange">
-    <i class="fa-solid fa-user-clock"></i>
+    <i class="bi bi-person-dash" aria-hidden="true"></i>
   </div>
 
   <div class="stat-content">
@@ -136,7 +123,7 @@
 <div class="stat-card">
 
   <div class="stat-icon stat-icon--purple">
-    <i class="fa-solid fa-book-open"></i>
+    <i class="bi bi-journal-bookmark" aria-hidden="true"></i>
   </div>
 
   <div class="stat-content">
@@ -207,25 +194,7 @@
     <!-- Search -->
     <div class="search-box">
 
-      <svg
-        width="16"
-        height="16"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2">
-
-        <circle
-          cx="11"
-          cy="11"
-          r="8">
-        </circle>
-
-        <path
-          d="m21 21-4.3-4.3">
-        </path>
-
-      </svg>
+      <i class="bi bi-search" aria-hidden="true"></i>
 
 
       <input
@@ -368,7 +337,7 @@
               title="View"
               (click)="viewTeacher(teacher)">
 
-              <i class="fa-regular fa-eye"></i>
+              <i class="bi bi-eye" aria-hidden="true"></i>
 
             </button>
 
@@ -378,7 +347,7 @@
               title="Edit"
               (click)="editTeacher(teacher)">
 
-              <i class="fa-solid fa-pen"></i>
+              <i class="bi bi-pencil" aria-hidden="true"></i>
 
             </button>
 
@@ -388,7 +357,7 @@
               title="Delete"
               (click)="deleteTeacher(teacher)">
 
-              <i class="fa-regular fa-trash-can"></i>
+              <i class="bi bi-trash3" aria-hidden="true"></i>
 
             </button>
 
@@ -409,7 +378,7 @@
 
           <div class="empty-state__icon">
 
-            <i class="fa-solid fa-user-tie"></i>
+            <i class="bi bi-person-workspace" aria-hidden="true"></i>
 
           </div>
 

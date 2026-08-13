@@ -12,19 +12,19 @@
 
             <div class="quick-icons">
                 <div class="icon-box">
-                    <span class="icon-circle"><i class="fa-regular fa-user"></i></span>Students
+                    <span class="icon-circle"><i class="bi bi-person"></i></span>Students
                 </div>
                 <div class="icon-box">
-                    <span class="icon-circle"><i class="fa-regular fa-credit-card"></i></span>Parents
+                    <span class="icon-circle"><i class="bi bi-credit-card"></i></span>Parents
                 </div>
                 <div class="icon-box">
-                    <span class="icon-circle"><i class="fa-regular fa-file-lines"></i></span>Attendance
+                    <span class="icon-circle"><i class="bi bi-file-earmark-text"></i></span>Attendance
                 </div>
                 <div class="icon-box">
-                    <span class="icon-circle"><i class="fa-solid fa-chart-column"></i></span>Grades
+                    <span class="icon-circle"><i class="bi bi-bar-chart-line"></i></span>Grades
                 </div>
                 <div class="icon-box">
-                    <span class="icon-circle"><i class="fa-solid fa-chart-column"></i></span>Payments
+                    <span class="icon-circle"><i class="bi bi-bar-chart-line"></i></span>Payments
                 </div>
             </div>
 
@@ -40,12 +40,23 @@
                     <p>Sign in to your account</p>
                 </div>
 
-                <form (ngSubmit)="onSubmit()" #loginForm="ngForm">
+                <form (ngSubmit)="onLogin()" #loginForm="ngForm">
+                    <div *ngIf="errorMessage" class="error-banner">
+                        {{ errorMessage }}
+                    </div>
+
+                    <!-- تم التغيير من email إلى phone ليتوافق مع الباك إند -->
                     <div class="form-group">
-                        <label for="phone">Phone</label>
+                        <label for="phone">Phone Number</label>
                         <div class="input-with-icon">
-                            <i class="fa-solid fa-phone"></i>
-                            <input type="tel" id="phone" name="phone" [(ngModel)]="credentials.phone" required placeholder="01012345678">
+                            <i class="bi bi-telephone"></i>
+                            <input
+                                type="text"
+                                id="phone"
+                                name="phone"
+                                [(ngModel)]="credentials.phone"
+                                required
+                                placeholder="01xxxxxxxxx">
                         </div>
                     </div>
 
@@ -55,12 +66,12 @@
                             <a href="#" class="forgot-pass">Forgot password?</a>
                         </div>
                         <div class="input-with-icon">
-                            <i class="fa-regular fa-lock"></i>
+                            <i class="bi bi-lock"></i>
 
-                            <input [type]="showPassword ? 'text' : 'password'" id="password" name="password" [(ngModel)]="credentials.password"
-                                required placeholder="Enter your password">
+                            <input [type]="showPassword ? 'text' : 'password'" id="password" name="password"
+                                [(ngModel)]="credentials.password" required placeholder="Enter your password">
 
-                            <i class="fa-regular toggle-password" [ngClass]="showPassword ? 'fa-eye' : 'fa-eye-slash'"
+                            <i class="bi toggle-password" [ngClass]="showPassword ? 'bi-eye' : 'bi-eye-slash'"
                                 (click)="showPassword = !showPassword" tabindex="0"
                                 (keydown.enter)="showPassword = !showPassword"></i>
                         </div>
@@ -73,14 +84,12 @@
                         </label>
                     </div>
 
-                    <button type="submit" class="btn btn-primary" [disabled]="!loginForm.valid || loading">
-                        {{ loading ? 'Signing in...' : 'Sign in' }}
+                    <button type="submit" class="btn btn-primary" [disabled]="!loginForm.valid || isLoading">
+                        {{ isLoading ? 'Signing in...' : 'Sign in' }}
                     </button>
 
-                    <p class="form-error" *ngIf="error">{{ error }}</p>
-
                     <div class="signup-link">
-                        New to LCMS? <a href="/register">Create an account</a>
+                        New to LCMS? <a routerLink="/register">Create an account</a>
                     </div>
                 </form>
             </div>

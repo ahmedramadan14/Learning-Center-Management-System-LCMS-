@@ -45,6 +45,11 @@
   gap: 10px;
 }
 
+.teachers-page__actions .bi {
+  font-size: 16px;
+  line-height: 1;
+}
+
 /* ========================================
    BUTTONS
 ======================================== */
@@ -235,7 +240,7 @@
   width: 210px;
 }
 
-.search-box svg {
+.search-box .bi {
   position: absolute;
 
   left: 12px;
@@ -244,6 +249,8 @@
   transform: translateY(-50%);
 
   color: var(--text-light);
+  font-size: 16px;
+  line-height: 1;
 
   pointer-events: none;
 }

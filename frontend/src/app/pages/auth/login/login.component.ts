@@ -8,30 +8,37 @@ import { AuthService } from '../../../services/auth/auth.service';
   styleUrls: ['./login.component.css']
 })
 export class LoginComponent {
-  showPassword = false;
-  loading = false;
-  error = '';
   credentials = {
     phone: '',
     password: ''
   };
 
-  constructor(private readonly auth: AuthService, private readonly router: Router) {}
+  showPassword = false;
+  isLoading = false;
+  errorMessage = '';
 
-  onSubmit(): void {
-    if (this.loading) return;
+  constructor(
+    private authService: AuthService,
+    private router: Router
+  ) {}
 
-    this.loading = true;
-    this.error = '';
+  onLogin(): void {
+    if (!this.credentials.phone || !this.credentials.password) {
+      this.errorMessage = 'Please enter phone number and password.';
+      return;
+    }
 
-    this.auth.login(this.credentials.phone.trim(), this.credentials.password).subscribe({
+    this.isLoading = true;
+    this.errorMessage = '';
+
+    this.authService.login(this.credentials.phone, this.credentials.password).subscribe({
       next: () => {
-        this.loading = false;
+        this.isLoading = false;
         this.router.navigate(['/dashboard']);
       },
-      error: (error) => {
-        this.loading = false;
-        this.error = error.error?.message || 'Unable to sign in. Please verify your phone and password.';
+      error: (err: any) => {
+        this.isLoading = false;
+        this.errorMessage = err.error?.message || 'Login failed. Please check your credentials.';
       }
     });
   }

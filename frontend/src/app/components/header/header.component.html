@@ -1,51 +1,65 @@
-<header class="header">
-
-  <!-- Left Side -->
+<header class="top-header">
   <div class="header-left">
-
-    <button class="menu-button">
-      ☰
+    <button type="button" class="menu-toggle-btn" aria-label="Toggle navigation" (click)="toggleMenu()">
+      <i class="bi bi-list" aria-hidden="true"></i>
     </button>
-
     <div class="search-box">
-      <span class="search-icon">⌕</span>
-
-      <input
-        type="text"
-        [(ngModel)]="searchText"
-        placeholder="Search anything..."
-      />
-
-      <span class="search-shortcut">
-        Ctrl + K
-      </span>
+      <i class="bi bi-search search-icon" aria-hidden="true"></i>
+      <input type="text" [(ngModel)]="searchText" placeholder="Search anything..." />
+      <span class="search-shortcut">Ctrl + K</span>
     </div>
-
   </div>
 
-  <!-- Right Side -->
   <div class="header-right">
-
-    <button class="notification-button">
-      ♧
-      <span class="notification-badge">5</span>
-    </button>
-
-    <div class="user-profile">
-
-      <div class="user-avatar">
-        AA
-      </div>
-
-      <div class="user-info">
-        <span class="user-name">{{ userName }}</span>
-        <span class="user-role">{{ userRole }}</span>
-      </div>
-
-      <span class="dropdown-arrow">⌄</span>
-
+    <div class="notification-icon" aria-label="Notifications">
+      <i class="bi bi-bell" aria-hidden="true"></i>
+      <span *ngIf="unreadCount > 0" class="badge notification-badge">{{ unreadCount }}</span>
     </div>
 
-  </div>
+    <!-- أضفنا الكليك على كارت البروفايل بالكامل -->
+    <div class="user-profile-dropdown" *ngIf="currentUser">
+      <div
+        class="user-profile-info"
+        (click)="openProfileModal()"
+        style="display: flex; align-items: center; gap: 10px; cursor: pointer;"
+        title="View Profile">
+        <div class="avatar-circle">
+          {{ getInitials(currentUser.name) }}
+        </div>
+        <div class="user-info">
+          <span class="user-name">{{ currentUser.name }}</span>
+          <span class="user-role">{{ currentUser.role | titlecase }}</span>
+        </div>
+      </div>
 
+      <button class="logout-btn" (click)="logout()" title="Logout">
+        <i class="bi bi-box-arrow-right" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
 </header>
+
+<!-- User Profile Modal -->
+<div class="modal-overlay" *ngIf="isProfileModalOpen && currentUser" (click)="closeProfileModal()">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>User Profile</h3>
+      <button type="button" class="close-btn" (click)="closeProfileModal()">✕</button>
+    </div>
+
+    <div class="profile-details-content">
+      <div class="profile-avatar-large">
+        {{ getInitials(currentUser.name) }}
+      </div>
+      <div class="profile-info-list">
+        <p><strong>Name:</strong> {{ currentUser.name }}</p>
+        <p><strong>Role:</strong> {{ currentUser.role | titlecase }}</p>
+        <!-- تقدر تضيف ايميل أو تلفون لو موجودين في الـ User Interface -->
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button type="button" class="btn btn--primary" (click)="closeProfileModal()">Close</button>
+    </div>
+  </div>
+</div>

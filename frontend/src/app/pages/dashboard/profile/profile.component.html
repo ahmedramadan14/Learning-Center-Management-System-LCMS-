@@ -1,0 +1,105 @@
+<section class="profile-page">
+  <header class="profile-header">
+    <div>
+      <span class="page-kicker">ACCOUNT</span>
+      <h1>My profile</h1>
+      <p>Review the information associated with your account.</p>
+    </div>
+
+    <button class="refresh-button" type="button" (click)="loadProfile()" [disabled]="loading">
+      <i class="bi" [ngClass]="loading ? 'bi-arrow-repeat spinning' : 'bi-arrow-clockwise'" aria-hidden="true"></i>
+      {{ loading ? 'Refreshing...' : 'Refresh' }}
+    </button>
+  </header>
+
+  <p *ngIf="error" class="notice notice--error" role="alert">{{ error }}</p>
+
+  <section class="profile-card" [class.is-loading]="loading" aria-live="polite">
+    <div class="profile-summary">
+      <div class="profile-avatar">{{ initials }}</div>
+      <div class="profile-identity">
+        <h2>{{ profile?.name || 'Loading profile...' }}</h2>
+        <span class="role-badge"><i class="bi bi-shield-check" aria-hidden="true"></i>{{ roleLabel }}</span>
+        <p>{{ roleDescription }}</p>
+      </div>
+    </div>
+
+    <div class="status-card" [class.status-card--inactive]="accountStatus !== 'Active'">
+      <span class="status-dot"></span>
+      <span>
+        <small>Account status</small>
+        <strong>{{ accountStatus }}</strong>
+      </span>
+    </div>
+
+    <div class="details-grid">
+      <article class="detail-item">
+        <span class="detail-icon detail-icon--blue"><i class="bi bi-person" aria-hidden="true"></i></span>
+        <div>
+          <small>Full name</small>
+          <strong>{{ profile?.name || 'Not available' }}</strong>
+        </div>
+      </article>
+
+      <article class="detail-item">
+        <span class="detail-icon detail-icon--green"><i class="bi bi-telephone" aria-hidden="true"></i></span>
+        <div>
+          <small>Phone number</small>
+          <strong>{{ profile?.phone || 'Not provided' }}</strong>
+        </div>
+      </article>
+
+      <article class="detail-item">
+        <span class="detail-icon detail-icon--violet"><i class="bi bi-envelope" aria-hidden="true"></i></span>
+        <div>
+          <small>Email address</small>
+          <strong>{{ profile?.email || 'Not provided' }}</strong>
+        </div>
+      </article>
+
+      <article class="detail-item">
+        <span class="detail-icon detail-icon--orange"><i class="bi bi-calendar3" aria-hidden="true"></i></span>
+        <div>
+          <small>Member since</small>
+          <strong>{{ joinedOn }}</strong>
+        </div>
+      </article>
+    </div>
+
+    <footer class="profile-note">
+      <i class="bi bi-lock" aria-hidden="true"></i>
+      <span>This page only displays the account associated with your current sign-in.</span>
+    </footer>
+  </section>
+
+  <section *ngIf="canLinkChild" class="child-link-card" aria-labelledby="link-child-title">
+    <div class="child-link-card__icon"><i class="bi bi-person-hearts" aria-hidden="true"></i></div>
+    <div class="child-link-card__content">
+      <span class="page-kicker">PARENT ACCESS</span>
+      <h2 id="link-child-title">Link a child</h2>
+      <p>Enter the student code shared by the learning center. The link is verified securely against your parent account.</p>
+
+      <form class="child-link-form" (ngSubmit)="linkChild()" #childLinkForm="ngForm">
+        <label for="student-code">Student code</label>
+        <div class="child-link-form__controls">
+          <input
+            id="student-code"
+            name="studentCode"
+            type="text"
+            [(ngModel)]="childCode"
+            [disabled]="linkingChild"
+            autocomplete="off"
+            required
+            placeholder="e.g. STU-12345">
+          <button type="submit" class="link-child-button" [disabled]="childLinkForm.invalid || linkingChild">
+            <i class="bi" [ngClass]="linkingChild ? 'bi-arrow-repeat spinning' : 'bi-link-45deg'" aria-hidden="true"></i>
+            {{ linkingChild ? 'Linking...' : 'Link child' }}
+          </button>
+        </div>
+      </form>
+
+      <p *ngIf="childLinkError" class="notice notice--error" role="alert">{{ childLinkError }}</p>
+      <p *ngIf="childLinkMessage" class="notice notice--success" role="status">{{ childLinkMessage }}</p>
+    </div>
+  </section>
+</section>

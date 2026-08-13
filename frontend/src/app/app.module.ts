@@ -28,6 +28,8 @@ import { ResultsComponent } from './pages/dashboard/results/results.component';
 import { LoginComponent } from './pages/auth/login/login.component';
 import { RegisterComponent } from './pages/auth/register/register.component';
 import { ScheduleComponent } from './pages/dashboard/schedule/schedule.component';
+import { NotificationsComponent } from './pages/dashboard/notifications/notifications.component';
+import { ProfileComponent } from './pages/dashboard/profile/profile.component';
 import { AuthInterceptor } from './services/auth/auth.interceptor';
 
 
@@ -57,6 +59,8 @@ import { AuthInterceptor } from './services/auth/auth.interceptor';
     ManagementPageComponent,
     ResultsComponent,
     ScheduleComponent,
+    NotificationsComponent,
+    ProfileComponent,
 
   ],
   imports: [

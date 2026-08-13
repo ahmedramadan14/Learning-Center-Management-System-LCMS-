@@ -1,10 +1,7 @@
 <aside class="sidebar">
 
-  <!-- Logo -->
   <div class="sidebar-brand">
-    <div class="brand-logo">
-      LC
-    </div>
+    <div class="brand-logo">LC</div>
 
     <div class="brand-text">
       <span class="brand-name">LCMS</span>
@@ -12,88 +9,74 @@
     </div>
   </div>
 
-  <!-- Main Navigation -->
   <nav class="sidebar-nav">
-
-    <div class="nav-section">
+    <div class="nav-section" *ngIf="visibleMenuItems.length">
       <span class="section-title">MANAGEMENT</span>
 
       <a
-        *ngFor="let item of menuItems"
+        *ngFor="let item of visibleMenuItems"
         [routerLink]="item.route"
         routerLinkActive="active"
         [routerLinkActiveOptions]="{ exact: item.route === '/dashboard' }"
         class="nav-item"
       >
-        <span class="nav-icon">{{ item.icon }}</span>
+        <i class="nav-icon bi" [ngClass]="item.icon" aria-hidden="true"></i>
         <span class="nav-label">{{ item.label }}</span>
       </a>
     </div>
 
-    <!-- Administration -->
-    <div class="nav-section">
+    <div class="nav-section" *ngIf="visibleAdministrationItems.length">
       <span class="section-title">ADMINISTRATION</span>
 
       <a
-        *ngFor="let item of administrationItems"
+        *ngFor="let item of visibleAdministrationItems"
         [routerLink]="item.route"
         routerLinkActive="active"
         class="nav-item"
       >
-        <span class="nav-icon">{{ item.icon }}</span>
+        <i class="nav-icon bi" [ngClass]="item.icon" aria-hidden="true"></i>
         <span class="nav-label">{{ item.label }}</span>
       </a>
     </div>
 
-    <!-- System -->
-    <div class="nav-section">
+    <div class="nav-section" *ngIf="visibleSystemItems.length">
       <span class="section-title">SYSTEM</span>
 
       <a
-        *ngFor="let item of systemItems"
+        *ngFor="let item of visibleSystemItems"
         [routerLink]="item.route"
         routerLinkActive="active"
         class="nav-item"
       >
-        <span class="nav-icon">{{ item.icon }}</span>
+        <i class="nav-icon bi" [ngClass]="item.icon" aria-hidden="true"></i>
         <span class="nav-label">{{ item.label }}</span>
       </a>
     </div>
-
   </nav>
 
-  <!-- User Permissions -->
-  <div class="permissions-card">
-
+  <div class="permissions-card" *ngIf="permissionItems.length">
     <div class="permissions-header">
-      <span class="permission-icon">✓</span>
-      <span>Your Permissions</span>
+      <i class="permission-icon bi bi-shield-check" aria-hidden="true"></i>
+      <span>{{ roleLabel }} permissions</span>
     </div>
 
-    <div class="permission-item">
-      <span>✓</span>
-      manage_students
+    <div class="permission-item" *ngFor="let permission of permissionItems | slice:0:4">
+      <i class="bi bi-check2" aria-hidden="true"></i>
+      {{ permission }}
     </div>
 
-    <div class="permission-item">
-      <span>✓</span>
-      manage_payments
-    </div>
+    <span class="view-permissions" *ngIf="permissionItems.length > 4">+{{ permissionItems.length - 4 }} more</span>
+  </div>
 
-    <div class="permission-item">
-      <span>✓</span>
-      manage_attendance
-    </div>
-
-    <div class="permission-item">
-      <span>✓</span>
-      view_reports
-    </div>
-
-    <button class="view-permissions">
-      View all
+  <div class="sidebar-footer">
+    <a class="sidebar-profile-link" routerLink="/dashboard/profile" routerLinkActive="active">
+      <i class="bi bi-person-circle" aria-hidden="true"></i>
+      <span>My profile</span>
+    </a>
+    <button class="logout-button" type="button" (click)="logout()" [disabled]="loggingOut">
+      <i class="bi bi-box-arrow-right" aria-hidden="true"></i>
+      <span>{{ loggingOut ? 'Signing out...' : 'Logout' }}</span>
     </button>
-
   </div>
 
 </aside>

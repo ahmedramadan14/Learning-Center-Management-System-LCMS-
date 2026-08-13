@@ -18,19 +18,7 @@
           class="btn btn--primary"
           (click)="onAddScheduleClick()"
         >
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-          >
-            <path
-              d="M12 5v14M5 12h14"
-              stroke-linecap="round"
-            ></path>
-          </svg>
+          <i class="bi bi-plus-lg" aria-hidden="true"></i>
 
           Add Schedule
         </button>
@@ -47,7 +35,7 @@
     <div class="stat-card">
 
       <div class="stat-icon stat-icon--blue">
-        <i class="fa-solid fa-calendar-days"></i>
+        <i class="bi bi-calendar-week" aria-hidden="true"></i>
       </div>
 
       <div class="stat-content">
@@ -65,7 +53,7 @@
     <div class="stat-card">
 
       <div class="stat-icon stat-icon--green">
-        <i class="fa-solid fa-calendar-check"></i>
+        <i class="bi bi-calendar2-check" aria-hidden="true"></i>
       </div>
 
       <div class="stat-content">
@@ -83,7 +71,7 @@
     <div class="stat-card">
 
       <div class="stat-icon stat-icon--orange">
-        <i class="fa-solid fa-chalkboard-user"></i>
+        <i class="bi bi-easel2" aria-hidden="true"></i>
       </div>
 
       <div class="stat-content">
@@ -101,7 +89,7 @@
     <div class="stat-card">
 
       <div class="stat-icon stat-icon--purple">
-        <i class="fa-solid fa-users"></i>
+        <i class="bi bi-people" aria-hidden="true"></i>
       </div>
 
       <div class="stat-content">
@@ -186,24 +174,7 @@
         <!-- Search -->
         <div class="search-box">
 
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-          >
-            <circle
-              cx="11"
-              cy="11"
-              r="8"
-            ></circle>
-
-            <path
-              d="m21 21-4.3-4.3"
-            ></path>
-          </svg>
+          <i class="bi bi-search" aria-hidden="true"></i>
 
           <input
             type="text"
@@ -252,8 +223,9 @@
 
                 <div class="class-avatar">
                   <i
-                    class="fa-solid"
+                    class="bi"
                     [ngClass]="schedule.icon"
+                    aria-hidden="true"
                   ></i>
                 </div>
 
@@ -335,9 +307,10 @@
                 <button
                   type="button"
                   title="View"
+                  aria-label="View schedule"
                   (click)="viewSchedule(schedule)"
                 >
-                  <i class="fa-regular fa-eye"></i>
+                  <i class="bi bi-eye" aria-hidden="true"></i>
                 </button>
 
 
@@ -345,9 +318,10 @@
                 <button
                   type="button"
                   title="Edit"
+                  aria-label="Edit schedule"
                   (click)="editSchedule(schedule)"
                 >
-                  <i class="fa-solid fa-pen"></i>
+                  <i class="bi bi-pencil" aria-hidden="true"></i>
                 </button>
 
 
@@ -355,9 +329,10 @@
                 <button
                   type="button"
                   title="Delete"
+                  aria-label="Delete schedule"
                   (click)="deleteSchedule(schedule)"
                 >
-                  <i class="fa-regular fa-trash-can"></i>
+                  <i class="bi bi-trash3" aria-hidden="true"></i>
                 </button>
 
               </div>
@@ -376,7 +351,7 @@
             >
 
               <div class="empty-state__icon">
-                <i class="fa-solid fa-calendar-days"></i>
+                <i class="bi bi-calendar-week" aria-hidden="true"></i>
               </div>
 
               <strong>No schedules found</strong>
