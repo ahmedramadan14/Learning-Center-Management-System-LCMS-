@@ -165,7 +165,7 @@ const pages: Record<string, Config> = {
     fields: [
       { key: 'groupName', label: 'Class name', required: true },
       { key: 'gradeLevelId', label: 'Grade', type: 'grade-select', required: true },
-      { key: 'teacherId', label: 'Teacher profile ID' },
+      { key: 'teacherId', label: 'Teacher', type: 'teacher-select', required: true },
       { key: 'maxCapacity', label: 'Capacity', type: 'number' },
       { key: 'sessionPrice', label: 'Session price', type: 'number', required: true },
       { key: 'sessionsPerCycle', label: 'Sessions per cycle', type: 'number' }
@@ -355,6 +355,9 @@ export class ManagementPageComponent implements OnInit, OnDestroy {
   formGrades: Record<string, unknown>[] = [];
   loadingFormGrades = false;
   formGradesError = '';
+  formTeachers: Record<string, unknown>[] = [];
+  loadingFormTeachers = false;
+  formTeachersError = '';
   formExams: Record<string, unknown>[] = [];
   loadingFormExams = false;
   formExamsError = '';
@@ -497,6 +500,9 @@ export class ManagementPageComponent implements OnInit, OnDestroy {
     const requiresGrades = this.dialogFields.some(
       (field) => field.type === 'grade-select' && this.isDialogFieldRequired(field)
     );
+    const requiresTeachers = this.dialogFields.some(
+      (field) => field.type === 'teacher-select' && this.isDialogFieldRequired(field)
+    );
     const requiresExams = this.dialogFields.some(
       (field) => field.type === 'exam-select' && this.isDialogFieldRequired(field)
     );
@@ -506,13 +512,18 @@ export class ManagementPageComponent implements OnInit, OnDestroy {
 
     return (requiresGroups && (this.loadingFormGroups || this.formGroups.length === 0))
       || (requiresGrades && (this.loadingFormGrades || this.formGrades.length === 0))
+      || (requiresTeachers && (this.loadingFormTeachers || this.formTeachers.length === 0))
       || (requiresExams && (this.loadingFormExams || this.formExams.length === 0))
       || (requiresStudents && Boolean(this.form['exam'])
         && (this.loadingFormStudents || this.eligibleFormStudents.length === 0));
   }
 
   get formReferencesError(): string {
-    return this.formGroupsError || this.formGradesError || this.formExamsError || this.formStudentsError;
+    return this.formGroupsError
+      || this.formGradesError
+      || this.formTeachersError
+      || this.formExamsError
+      || this.formStudentsError;
   }
 
   get eligibleFormStudents(): Record<string, unknown>[] {
@@ -549,6 +560,11 @@ export class ManagementPageComponent implements OnInit, OnDestroy {
   }
 
   isDialogFieldVisible(field: Field): boolean {
+    if (this.resource === 'classes' && field.type === 'teacher-select') {
+      // The API assigns staff-created classes to their linked teacher profile.
+      return this.access.currentRole === 'admin';
+    }
+
     if (this.resource !== 'schedule') return true;
 
     if (field.key === 'dayOfWeek') return this.form['type'] === 'weekly';
@@ -558,6 +574,8 @@ export class ManagementPageComponent implements OnInit, OnDestroy {
   }
 
   isDialogFieldRequired(field: Field): boolean {
+    if (field.type === 'teacher-select') return this.access.currentRole === 'admin';
+
     if (field.required) return true;
 
     return this.resource === 'schedule'
@@ -998,6 +1016,15 @@ export class ManagementPageComponent implements OnInit, OnDestroy {
       .join(' · ');
   }
 
+  teacherOptionLabel(teacher: Record<string, unknown>): string {
+    const name = this.value(teacher, 'userId.name');
+    const subject = this.value(teacher, 'subject');
+
+    return [name !== '-' ? name : '', subject !== '-' ? subject : '']
+      .filter(Boolean)
+      .join(' - ') || this.entityId(teacher) || 'Unnamed teacher';
+  }
+
   private create(): void {
     if (!this.canCreate || !this.config.create) return;
 
@@ -1093,6 +1120,35 @@ export class ManagementPageComponent implements OnInit, OnDestroy {
     });
   }
 
+  private loadFormTeachers(): void {
+    const needsTeachers = this.dialogFields.some(
+      (field) => field.type === 'teacher-select' && this.isDialogFieldVisible(field)
+    );
+    if (!needsTeachers || this.loadingFormTeachers) return;
+
+    this.loadingFormTeachers = true;
+    this.formTeachersError = '';
+    this.api.list('/teachers').subscribe({
+      next: (teachers) => {
+        this.formTeachers = teachers.filter((teacher) =>
+          Boolean(this.entityId(teacher))
+          && teacher['isActive'] !== false
+          && this.readValue(teacher, 'userId.isActive') !== false
+          && this.teacherApprovalStatus(teacher) === 'approved'
+        );
+        this.loadingFormTeachers = false;
+        if (this.formTeachers.length === 0) {
+          this.formTeachersError = 'Create, approve, or activate a teacher before creating a class.';
+        }
+      },
+      error: (error: { error?: { message?: string } }) => {
+        this.formTeachers = [];
+        this.loadingFormTeachers = false;
+        this.formTeachersError = error.error?.message || 'Could not load available teachers.';
+      }
+    });
+  }
+
   private loadFormExams(): void {
     const needsExams = this.dialogFields.some((field) => field.type === 'exam-select');
     if (!needsExams || this.loadingFormExams) return;
@@ -1142,6 +1198,7 @@ export class ManagementPageComponent implements OnInit, OnDestroy {
   private loadFormReferences(): void {
     this.loadFormGroups();
     this.loadFormGrades();
+    this.loadFormTeachers();
     this.loadFormExams();
     this.loadFormStudents();
   }
@@ -1153,6 +1210,9 @@ export class ManagementPageComponent implements OnInit, OnDestroy {
     this.formGrades = [];
     this.loadingFormGrades = false;
     this.formGradesError = '';
+    this.formTeachers = [];
+    this.loadingFormTeachers = false;
+    this.formTeachersError = '';
     this.formExams = [];
     this.loadingFormExams = false;
     this.formExamsError = '';

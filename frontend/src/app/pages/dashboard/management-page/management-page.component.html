@@ -141,6 +141,20 @@
               </option>
             </select>
             <select
+              *ngIf="field.type === 'teacher-select'"
+              [name]="field.key"
+              [(ngModel)]="form[field.key]"
+              [required]="isDialogFieldRequired(field)"
+              [disabled]="loadingFormTeachers || formTeachers.length === 0"
+            >
+              <option value="">
+                {{ loadingFormTeachers ? 'Loading available teachers...' : 'Select a teacher' }}
+              </option>
+              <option *ngFor="let teacher of formTeachers" [value]="teacher['_id']">
+                {{ teacherOptionLabel(teacher) }}
+              </option>
+            </select>
+            <select
               *ngIf="field.type === 'exam-select'"
               [name]="field.key"
               [(ngModel)]="form[field.key]"
@@ -178,11 +192,14 @@
             <small *ngIf="resource === 'classes' && field.key === 'gradeLevelId'" class="form-help">
               Select the grade level for this class.
             </small>
+            <small *ngIf="resource === 'classes' && field.type === 'teacher-select'" class="form-help">
+              Select the teacher responsible for this class.
+            </small>
             <small *ngIf="resource === 'results' && field.key === 'studentCode' && form['exam'] && !loadingFormStudents && eligibleFormStudents.length === 0" class="form-help form-help--error">
               No enrolled students are available for the selected exam.
             </small>
             <textarea *ngIf="field.type === 'textarea'" [name]="field.key" [(ngModel)]="form[field.key]" [required]="isDialogFieldRequired(field)"></textarea>
-            <input *ngIf="field.type !== 'select' && field.type !== 'textarea' && field.type !== 'group-select' && field.type !== 'grade-select' && field.type !== 'exam-select' && field.type !== 'student-select'" [type]="field.type || 'text'" [name]="field.key" [(ngModel)]="form[field.key]" [required]="isDialogFieldRequired(field)">
+            <input *ngIf="field.type !== 'select' && field.type !== 'textarea' && field.type !== 'group-select' && field.type !== 'grade-select' && field.type !== 'teacher-select' && field.type !== 'exam-select' && field.type !== 'student-select'" [type]="field.type || 'text'" [name]="field.key" [(ngModel)]="form[field.key]" [required]="isDialogFieldRequired(field)">
           </label>
         </ng-container>
       </div>
