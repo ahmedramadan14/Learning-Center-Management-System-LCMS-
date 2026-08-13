@@ -1,0 +1,259 @@
+<section class="teachers-page">
+
+  <!-- Header Banner -->
+  <div class="teachers-header-banner">
+    <div class="teachers-page__header">
+      <div>
+        <h2 class="teachers-page__title">Teachers</h2>
+        <p class="teachers-page__subtitle">
+          Manage teachers, their information, and assigned classes.
+        </p>
+      </div>
+
+      <div class="teachers-page__actions">
+        <button
+          type="button"
+          class="btn btn--primary"
+          (click)="onAddTeacherClick()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 5v14M5 12h14" stroke-linecap="round"></path>
+          </svg>
+          Add Teacher
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Statistics -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon stat-icon--blue">
+        <i class="fa-solid fa-user-tie"></i>
+      </div>
+      <div class="stat-content">
+        <span class="stat-title">Total Teachers</span>
+        <strong>{{ totalTeachers }}</strong>
+        <span class="stat-description">All registered teachers</span>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon stat-icon--green">
+        <i class="fa-solid fa-user-check"></i>
+      </div>
+      <div class="stat-content">
+        <span class="stat-title">Active Teachers</span>
+        <strong>{{ activeTeachers }}</strong>
+        <span class="stat-description">Currently active</span>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon stat-icon--orange">
+        <i class="fa-solid fa-user-clock"></i>
+      </div>
+      <div class="stat-content">
+        <span class="stat-title">Inactive Teachers</span>
+        <strong>{{ inactiveTeachers }}</strong>
+        <span class="stat-description">Currently inactive</span>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon stat-icon--purple">
+        <i class="fa-solid fa-book-open"></i>
+      </div>
+      <div class="stat-content">
+        <span class="stat-title">Specializations</span>
+        <strong>{{ totalSpecializations }}</strong>
+        <span class="stat-description">Different subjects</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Teachers List -->
+  <div class="teachers-card">
+    <div class="teachers-card__header">
+      <div>
+        <h3>Teachers List</h3>
+        <p>{{ filteredTeachers.length }} teachers found</p>
+      </div>
+
+      <div class="teachers-filters">
+        <select [(ngModel)]="selectedStatus" (change)="applyFilters()">
+          <option value="">All Status</option>
+          <option value="Active">Active</option>
+          <option value="Inactive">Inactive</option>
+        </select>
+
+        <div class="search-box">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <path d="m21 21-4.3-4.3"></path>
+          </svg>
+          <input
+            type="text"
+            [(ngModel)]="searchText"
+            (input)="applyFilters()"
+            placeholder="Search teachers...">
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="empty-state">
+      <p>Loading teachers...</p>
+    </div>
+
+    <!-- Table -->
+    <div class="table-wrapper" *ngIf="!isLoading">
+      <table class="teachers-table">
+        <thead>
+          <tr>
+            <th>TEACHER</th>
+            <th>PHONE</th>
+            <th>SPECIALIZATION</th>
+            <th>GROUPS / CLASSES</th>
+            <th>STATUS</th>
+            <th>ACTIONS</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let teacher of filteredTeachers">
+            <td>
+              <div class="teacher-cell">
+                <div
+                  class="teacher-avatar"
+                  (click)="viewTeacher(teacher)"
+                  style="cursor: pointer;"
+                  title="View Profile">
+                  {{ getInitials(teacher.name) }}
+                </div>
+
+                <div class="teacher-info">
+                  <strong
+                    (click)="viewTeacher(teacher)"
+                    style="cursor: pointer;"
+                    title="View Profile">
+                    {{ teacher.name }}
+                  </strong>
+                  <span>{{ teacher.email }}</span>
+                </div>
+              </div>
+            </td>
+
+            <td><span class="text-muted">{{ teacher.phone }}</span></td>
+            <td><span class="specialization-badge">{{ teacher.specialization }}</span></td>
+            <td><span class="classes-text">{{ teacher.classes }}</span></td>
+
+            <td>
+              <span
+                class="status-badge"
+                [class.status-badge--active]="teacher.status === 'Active'"
+                [class.status-badge--inactive]="teacher.status === 'Inactive'">
+                <span></span>
+                {{ teacher.status }}
+              </span>
+            </td>
+
+            <td>
+              <div class="actions">
+                <button
+                  type="button"
+                  title="View"
+                  (click)="$event.stopPropagation(); viewTeacher(teacher)">
+                  <i class="fa-regular fa-eye"></i>
+                </button>
+
+                <button
+                  type="button"
+                  title="Edit"
+                  (click)="$event.stopPropagation(); editTeacher(teacher)">
+                  <i class="fa-solid fa-pen"></i>
+                </button>
+
+                <button
+                  type="button"
+                  title="Delete"
+                  (click)="$event.stopPropagation(); deleteTeacher(teacher)">
+                  <i class="fa-regular fa-trash-can"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+
+          <tr *ngIf="filteredTeachers.length === 0">
+            <td colspan="6" class="empty-state">
+              <div class="empty-state__icon"><i class="fa-solid fa-user-tie"></i></div>
+              <strong>No teachers found</strong>
+              <span>Try changing your search or filter.</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</section>
+
+<!-- Add / Edit Teacher Modal -->
+<div class="modal-overlay" *ngIf="isModalOpen">
+  <div class="modal-card">
+    <h3>{{ editingTeacher ? 'Edit Teacher' : 'New Teacher' }}</h3>
+
+    <div class="form-group" *ngIf="!editingTeacher">
+      <label>Teacher Name</label>
+      <input type="text" [(ngModel)]="newTeacher.name" placeholder="Enter teacher name">
+    </div>
+
+    <div class="form-group" *ngIf="!editingTeacher">
+      <label>Phone (Egyptian Format)</label>
+      <input type="text" [(ngModel)]="newTeacher.phone" placeholder="010xxxxxxxx">
+    </div>
+
+    <div class="form-group" *ngIf="!editingTeacher">
+      <label>Password</label>
+      <input type="password" [(ngModel)]="newTeacher.password" placeholder="••••••••">
+    </div>
+
+    <div class="form-group">
+      <label>Specialization / Subject</label>
+      <input type="text" [(ngModel)]="newTeacher.subject" placeholder="e.g. Mathematics, Physics">
+    </div>
+
+    <div class="form-group">
+      <label>Groups / Classes / Description</label>
+      <input type="text" [(ngModel)]="newTeacher.description" placeholder="e.g. Grade 10, Grade 11">
+    </div>
+
+    <div class="modal-actions">
+      <button type="button" class="btn btn--ghost-dark" (click)="closeModal()">Cancel</button>
+      <button type="button" class="btn btn--primary modal-save-btn" (click)="saveTeacher()" [disabled]="isSubmitting">
+        {{ isSubmitting ? 'Saving...' : (editingTeacher ? 'Update Teacher' : 'Save Teacher') }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Teacher Details Modal -->
+<div class="modal-overlay" *ngIf="isDetailsModalOpen && selectedTeacher">
+  <div class="modal-card">
+    <h3>Teacher Details</h3>
+
+    <div class="teacher-details">
+      <div><strong>Teacher Name:</strong> {{ selectedTeacher.name }}</div>
+      <div><strong>Email:</strong> {{ selectedTeacher.email }}</div>
+      <div><strong>Phone:</strong> {{ selectedTeacher.phone }}</div>
+      <div><strong>Specialization:</strong> {{ selectedTeacher.specialization }}</div>
+      <div><strong>Groups / Classes:</strong> {{ selectedTeacher.classes }}</div>
+      <div><strong>Status:</strong> {{ selectedTeacher.status }}</div>
+    </div>
+
+    <div class="modal-actions">
+      <button type="button" class="btn btn--primary modal-save-btn" (click)="closeDetailsModal()">
+        Close
+      </button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,225 @@
+<section class="groups-page">
+  <!-- Header Banner -->
+  <div class="groups-header-banner">
+    <div class="groups-page__header">
+      <div>
+        <h2 class="groups-page__title">Groups</h2>
+        <p class="groups-page__subtitle">
+          Manage and monitor all groups in your learning center.
+        </p>
+      </div>
+
+      <div class="groups-page__actions">
+        <button
+          type="button"
+          class="btn btn--primary"
+          (click)="onAddGroupClick()"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 5v14M5 12h14" stroke-linecap="round"></path>
+          </svg>
+          Add Group
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Statistics -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon stat-icon--blue">
+        <i class="fa-solid fa-layer-group"></i>
+      </div>
+      <div class="stat-content">
+        <span class="stat-title">Total Groups</span>
+        <strong>{{ groups.length }}</strong>
+        <span class="stat-description">All groups</span>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon stat-icon--green">
+        <i class="fa-solid fa-user-graduate"></i>
+      </div>
+      <div class="stat-content">
+        <span class="stat-title">Total Students</span>
+        <strong>{{ totalStudentsCount }}</strong>
+        <span class="stat-description">Across all groups</span>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon stat-icon--orange">
+        <i class="fa-solid fa-graduation-cap"></i>
+      </div>
+      <div class="stat-content">
+        <span class="stat-title">Grade Levels</span>
+        <strong>{{ gradeLevelsCount }}</strong>
+        <span class="stat-description">Different levels</span>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon stat-icon--purple">
+        <i class="fa-solid fa-chalkboard-user"></i>
+      </div>
+      <div class="stat-content">
+        <span class="stat-title">Teachers</span>
+        <strong>{{ teachersCount }}</strong>
+        <span class="stat-description">Assigned teachers</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Groups Table Card -->
+  <div class="groups-card">
+    <div class="groups-card__header">
+      <div>
+        <h3>Groups List</h3>
+        <p>{{ filteredGroups.length }} groups found</p>
+      </div>
+
+      <div class="groups-filters">
+        <select [(ngModel)]="selectedGradeLevel" (change)="applyFilters()">
+          <option value="">All Grade Levels</option>
+          <option *ngFor="let level of gradeLevels" [value]="level">{{ level }}</option>
+        </select>
+
+        <select [(ngModel)]="selectedTeacher" (change)="applyFilters()">
+          <option value="">All Teachers</option>
+          <option *ngFor="let teacher of teachers" [value]="teacher">{{ teacher }}</option>
+        </select>
+
+        <div class="search-box">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <path d="m21 21-4.3-4.3"></path>
+          </svg>
+          <input type="text" placeholder="Search groups..." [(ngModel)]="searchValue" (input)="applyFilters()" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="table-wrapper">
+      <table class="groups-table">
+        <thead>
+          <tr>
+            <th>GROUP</th>
+            <th>GRADE LEVEL</th>
+            <th>STUDENTS</th>
+            <th>SCHEDULE</th>
+            <th>TEACHER</th>
+            <th>ACTIONS</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let group of filteredGroups">
+            <td>
+              <div class="group-cell">
+                <div class="group-avatar">{{ getInitial(group.name) }}</div>
+                <div class="group-info">
+                  <strong>{{ group.name }}</strong>
+                  <span>Learning Group</span>
+                </div>
+              </div>
+            </td>
+            <td><span class="grade-badge">{{ group.gradelevel }}</span></td>
+            <td>
+              <div class="students-count">
+                <i class="fa-solid fa-user-graduate"></i>
+                <strong>{{ group.studentsCount }}</strong>
+                <span>Students</span>
+              </div>
+            </td>
+            <td><span class="text-muted">{{ group.schedule }}</span></td>
+            <td>
+              <div class="teacher-cell">
+                <div class="teacher-avatar">{{ getInitials(group.teacher) }}</div>
+                <span>{{ group.teacher }}</span>
+              </div>
+            </td>
+            <td>
+              <div class="actions">
+                <button type="button" title="View" (click)="viewGroup(group)"><i class="fa-regular fa-eye"></i></button>
+                <button type="button" title="Edit" (click)="editGroup(group)"><i class="fa-solid fa-pen"></i></button>
+                <button type="button" title="Delete" (click)="deleteGroup(group)"><i class="fa-regular fa-trash-can"></i></button>
+              </div>
+            </td>
+          </tr>
+
+          <tr *ngIf="filteredGroups.length === 0">
+            <td colspan="6" class="empty-state">
+              <div class="empty-state__icon"><i class="fa-solid fa-layer-group"></i></div>
+              <strong>No groups found</strong>
+              <span>Try changing your search or filters.</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- Add / Edit Modal -->
+<div class="modal-overlay" *ngIf="isModalOpen">
+  <div class="modal-card">
+    <h3>{{ isEditMode ? 'Edit Group' : 'New Group' }}</h3>
+
+    <div class="form-group">
+      <label>Group Name</label>
+      <input type="text" [(ngModel)]="newGroup.name" placeholder="Enter group name" />
+    </div>
+
+    <div class="form-group">
+      <label>Grade Level</label>
+      <select [(ngModel)]="newGroup.gradeLevelId">
+        <option *ngFor="let level of gradeLevelOptions" [value]="level.id">
+          {{ level.name }}
+        </option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Teacher</label>
+      <select [(ngModel)]="newGroup.teacherId">
+        <option value="">Select Teacher (Optional)</option>
+        <option *ngFor="let teacher of teacherOptions" [value]="teacher.id">
+          {{ teacher.name }}
+        </option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Session Price</label>
+      <input type="number" [(ngModel)]="newGroup.sessionPrice" placeholder="Enter price per session" min="0" />
+    </div>
+
+    <div class="modal-actions">
+      <button type="button" class="btn btn--ghost-dark" (click)="closeModal()" [disabled]="isSaving">
+        Cancel
+      </button>
+      <button type="button" class="btn btn--primary modal-save-btn" (click)="saveGroup()" [disabled]="isSaving">
+        {{ isSaving ? 'Saving...' : (isEditMode ? 'Update Group' : 'Save Group') }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Details Modal -->
+<div class="modal-overlay" *ngIf="isDetailsModalOpen && selectedGroup">
+  <div class="modal-card">
+    <h3>Group Details</h3>
+    <div class="group-details">
+      <div><strong>Group Name:</strong> {{ selectedGroup.name }}</div>
+      <div><strong>Grade Level:</strong> {{ selectedGroup.gradelevel }}</div>
+      <div><strong>Students Count:</strong> {{ selectedGroup.studentsCount }}</div>
+      <div><strong>Schedule:</strong> {{ selectedGroup.schedule }}</div>
+      <div><strong>Teacher:</strong> {{ selectedGroup.teacher }}</div>
+      <div><strong>Session Price:</strong> ${{ selectedGroup.sessionPrice || 0 }}</div>
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="btn btn--primary modal-save-btn" (click)="closeDetailsModal()">Close</button>
+    </div>
+  </div>
+</div>

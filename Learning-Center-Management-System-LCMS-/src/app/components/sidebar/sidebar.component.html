@@ -1,0 +1,22 @@
+<div class="sidebar-container">
+  <!-- Logo Section -->
+  <div class="logo-section">
+    <div class="logo-icon">LC</div>
+    <div class="logo-text">
+      <h2>LCMS</h2>
+      <p>Learning Center</p>
+    </div>
+  </div>
+
+  <!-- Navigation Links -->
+  <ul class="nav-links">
+    <ng-container *ngFor="let item of menuItems">
+      <li *ngIf="hasAccess(item.roles)">
+        <a [routerLink]="item.link" routerLinkActive="active" [routerLinkActiveOptions]="{exact: item.link === '/dashboard'}">
+          <i [class]="item.icon"></i>
+          <span>{{ item.label }}</span>
+        </a>
+      </li>
+    </ng-container>
+  </ul>
+</div>

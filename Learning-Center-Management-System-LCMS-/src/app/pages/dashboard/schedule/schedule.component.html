@@ -1,0 +1,480 @@
+<section class="schedule-page">
+
+  <!-- ==================== Header ==================== -->
+  <div class="schedule-header-banner">
+    <div class="schedule-page__header">
+      <div>
+        <h2 class="schedule-page__title">Schedule</h2>
+        <p class="schedule-page__subtitle">
+          Manage classes, lessons, and schedules.
+        </p>
+      </div>
+
+      <div class="schedule-page__actions">
+        <button
+          type="button"
+          class="btn btn--primary"
+          (click)="onAddScheduleClick()"
+        >
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path
+              d="M12 5v14M5 12h14"
+              stroke-linecap="round"
+            ></path>
+          </svg>
+          Add Schedule
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== Statistics ==================== -->
+  <div class="stats-grid">
+    <!-- Total Classes -->
+    <div class="stat-card">
+      <div class="stat-icon stat-icon--blue">
+        <i class="fa-solid fa-calendar-days"></i>
+      </div>
+      <div class="stat-content">
+        <span class="stat-title">Total Classes</span>
+        <strong>{{ schedules.length }}</strong>
+        <span class="stat-description">
+          All scheduled classes
+        </span>
+      </div>
+    </div>
+
+    <!-- Today's Classes -->
+    <div class="stat-card">
+      <div class="stat-icon stat-icon--green">
+        <i class="fa-solid fa-calendar-check"></i>
+      </div>
+      <div class="stat-content">
+        <span class="stat-title">Today's Classes</span>
+        <strong>{{ todaysClassesCount }}</strong>
+        <span class="stat-description">
+          Classes today
+        </span>
+      </div>
+    </div>
+
+    <!-- Teachers -->
+    <div class="stat-card">
+      <div class="stat-icon stat-icon--orange">
+        <i class="fa-solid fa-chalkboard-user"></i>
+      </div>
+      <div class="stat-content">
+        <span class="stat-title">Teachers</span>
+        <strong>{{ teachersCount }}</strong>
+        <span class="stat-description">
+          Active teachers
+        </span>
+      </div>
+    </div>
+
+    <!-- Groups -->
+    <div class="stat-card">
+      <div class="stat-icon stat-icon--purple">
+        <i class="fa-solid fa-users"></i>
+      </div>
+      <div class="stat-content">
+        <span class="stat-title">Groups</span>
+        <strong>{{ groupsCount }}</strong>
+        <span class="stat-description">
+          Active groups
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== Schedule List ==================== -->
+  <div class="schedule-card">
+    <!-- Card Header -->
+    <div class="schedule-card__header">
+      <div>
+        <h3>Schedule List</h3>
+        <p>
+          {{ filteredSchedules.length }} classes found
+        </p>
+      </div>
+
+      <!-- Filters -->
+      <div class="schedule-filters">
+        <!-- Day Filter -->
+        <select
+          [(ngModel)]="selectedDay"
+          (change)="applyFilters()"
+        >
+          <option value="">All Days</option>
+          <option
+            *ngFor="let day of days"
+            [value]="day"
+          >
+            {{ day }}
+          </option>
+        </select>
+
+        <!-- Group Filter -->
+        <select
+          [(ngModel)]="selectedGroup"
+          (change)="applyFilters()"
+        >
+          <option value="">All Groups</option>
+          <option
+            *ngFor="let group of groups"
+            [value]="group"
+          >
+            {{ group }}
+          </option>
+        </select>
+
+        <!-- Teacher Filter -->
+        <select
+          [(ngModel)]="selectedTeacher"
+          (change)="applyFilters()"
+        >
+          <option value="">All Teachers</option>
+          <option
+            *ngFor="let teacher of teachers"
+            [value]="teacher"
+          >
+            {{ teacher }}
+          </option>
+        </select>
+
+        <!-- Search -->
+        <div class="search-box">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <circle
+              cx="11"
+              cy="11"
+              r="8"
+            ></circle>
+            <path
+              d="m21 21-4.3-4.3"
+            ></path>
+          </svg>
+          <input
+            type="text"
+            placeholder="Search schedules..."
+            [(ngModel)]="searchValue"
+            (input)="applyFilters()"
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== Schedule Table ==================== -->
+    <div class="table-wrapper">
+      <table class="schedule-table">
+        <thead>
+          <tr>
+            <th>CLASS</th>
+            <th>SUBJECT</th>
+            <th>TEACHER</th>
+            <th>GROUP</th>
+            <th>DAY</th>
+            <th>TIME</th>
+            <th>ROOM</th>
+            <th>ACTIONS</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <!-- Schedule Rows -->
+          <tr
+            *ngFor="let schedule of filteredSchedules"
+          >
+            <!-- Class -->
+            <td>
+              <div class="class-cell">
+                <div class="class-avatar">
+                  <i
+                    class="fa-solid"
+                    [ngClass]="schedule.icon"
+                  ></i>
+                </div>
+                <div class="class-info">
+                  <strong>
+                    {{ schedule.className }}
+                  </strong>
+                  <span>
+                    {{ schedule.classNumber }}
+                  </span>
+                </div>
+              </div>
+            </td>
+
+            <!-- Subject -->
+            <td>
+              <span class="text-muted">
+                {{ schedule.subject }}
+              </span>
+            </td>
+
+            <!-- Teacher -->
+            <td>
+              <div class="teacher-cell">
+                <div class="teacher-avatar">
+                  {{ getInitials(schedule.teacher) }}
+                </div>
+                <span>
+                  {{ schedule.teacher }}
+                </span>
+              </div>
+            </td>
+
+            <!-- Group -->
+            <td>
+              <span class="group-badge">
+                {{ schedule.group }}
+              </span>
+            </td>
+
+            <!-- Day -->
+            <td>
+              {{ schedule.day }}
+            </td>
+
+            <!-- Time -->
+            <td>
+              <span class="time-badge">
+                {{ schedule.time }}
+              </span>
+            </td>
+
+            <!-- Room -->
+            <td>
+              {{ schedule.room }}
+            </td>
+
+            <!-- Actions -->
+            <td>
+              <div class="actions">
+                <!-- View -->
+                <button
+                  type="button"
+                  title="View"
+                  (click)="viewSchedule(schedule)"
+                >
+                  <i class="fa-regular fa-eye"></i>
+                </button>
+
+                <!-- Edit -->
+                <button
+                  type="button"
+                  title="Edit"
+                  (click)="editSchedule(schedule)"
+                >
+                  <i class="fa-solid fa-pen"></i>
+                </button>
+
+                <!-- Delete -->
+                <button
+                  type="button"
+                  title="Delete"
+                  (click)="deleteSchedule(schedule)"
+                >
+                  <i class="fa-regular fa-trash-can"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+
+          <!-- ==================== Empty State ==================== -->
+          <tr *ngIf="filteredSchedules.length === 0">
+            <td
+              colspan="8"
+              class="empty-state"
+            >
+              <div class="empty-state__icon">
+                <i class="fa-solid fa-calendar-days"></i>
+              </div>
+              <strong>No schedules found</strong>
+              <span>
+                Try changing your search or filters.
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ========================================================= -->
+<!-- Add / Edit Schedule Modal -->
+<!-- ========================================================= -->
+<div
+  class="modal-overlay"
+  *ngIf="isModalOpen"
+>
+  <div class="modal-card">
+    <h3>
+      {{ isEditMode ? 'Edit Schedule' : 'New Schedule' }}
+    </h3>
+
+    <!-- Class Name -->
+    <div class="form-group">
+      <label>Class Name</label>
+      <input
+        type="text"
+        [(ngModel)]="newSchedule.className"
+        placeholder="Enter class name"
+      />
+    </div>
+
+    <!-- Subject -->
+    <div class="form-group">
+      <label>Subject</label>
+      <input
+        type="text"
+        [(ngModel)]="newSchedule.subject"
+        placeholder="Enter subject"
+      />
+    </div>
+
+    <!-- Teacher Dropdown -->
+    <div class="form-group">
+      <label>Teacher</label>
+      <select [(ngModel)]="newSchedule.teacherId">
+        <option value="" disabled>Select teacher</option>
+        <option *ngFor="let t of teacherOptions" [value]="t.id">
+          {{ t.name }}
+        </option>
+      </select>
+    </div>
+
+    <!-- Group Dropdown -->
+    <div class="form-group">
+      <label>Group</label>
+<select [(ngModel)]="newSchedule.groupId" name="groupId">
+  <option *ngFor="let group of groupOptions" [value]="group.id">
+    {{ group.name }}
+  </option>
+</select>
+    </div>
+
+    <!-- Day -->
+    <div class="form-group">
+      <label>Day</label>
+      <select [(ngModel)]="newSchedule.day">
+        <option value="">Select day</option>
+        <option
+          *ngFor="let day of days"
+          [value]="day"
+        >
+          {{ day }}
+        </option>
+      </select>
+    </div>
+
+    <!-- Time -->
+    <div class="form-group">
+      <label>Time</label>
+      <input
+        type="text"
+        [(ngModel)]="newSchedule.time"
+        placeholder="e.g. 09:00 AM"
+      />
+    </div>
+
+    <!-- Room -->
+    <div class="form-group">
+      <label>Room</label>
+      <input
+        type="text"
+        [(ngModel)]="newSchedule.room"
+        placeholder="Enter room"
+      />
+    </div>
+
+    <!-- Modal Actions -->
+    <div class="modal-actions">
+      <button
+        type="button"
+        class="btn btn--ghost-dark"
+        (click)="closeModal()"
+        [disabled]="isSaving"
+      >
+        Cancel
+      </button>
+
+      <button
+        type="button"
+        class="btn btn--primary modal-save-btn"
+        (click)="saveSchedule()"
+        [disabled]="isSaving"
+      >
+        {{ isSaving ? 'Saving...' : (isEditMode ? 'Update Schedule' : 'Save Schedule') }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================================= -->
+<!-- Schedule Details Modal -->
+<!-- ========================================================= -->
+<div
+  class="modal-overlay"
+  *ngIf="isDetailsModalOpen && selectedSchedule"
+>
+  <div class="modal-card">
+    <h3>Schedule Details</h3>
+
+    <div class="schedule-details">
+      <div>
+        <strong>Class:</strong>
+        {{ selectedSchedule.className }}
+      </div>
+      <div>
+        <strong>Subject:</strong>
+        {{ selectedSchedule.subject }}
+      </div>
+      <div>
+        <strong>Teacher:</strong>
+        {{ selectedSchedule.teacher }}
+      </div>
+      <div>
+        <strong>Group:</strong>
+        {{ selectedSchedule.group }}
+      </div>
+      <div>
+        <strong>Day:</strong>
+        {{ selectedSchedule.day }}
+      </div>
+      <div>
+        <strong>Time:</strong>
+        {{ selectedSchedule.time }}
+      </div>
+      <div>
+        <strong>Room:</strong>
+        {{ selectedSchedule.room }}
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button
+        type="button"
+        class="btn btn--primary modal-save-btn"
+        (click)="closeDetailsModal()"
+      >
+        Close
+      </button>
+    </div>
+  </div>
+</div>

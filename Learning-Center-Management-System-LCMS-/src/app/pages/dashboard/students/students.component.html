@@ -1,0 +1,274 @@
+<div class="students-page-container">
+
+  <!-- Header Banner -->
+  <div class="page-banner">
+    <div class="banner-text">
+      <h1>Students</h1>
+      <p>Manage and monitor all students in your learning center.</p>
+    </div>
+    <button class="btn-add" (click)="openAddStudentModal()">+ Add Student</button>
+  </div>
+
+  <!-- Cards Section -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon total"><i class="fa-solid fa-user-graduate"></i></div>
+      <div class="stat-info">
+        <span class="label">Total Students</span>
+        <h2>{{ totalStudents }}</h2>
+        <span class="sub">All students</span>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon active"><i class="fa-solid fa-user-check"></i></div>
+      <div class="stat-info">
+        <span class="label">Active Students</span>
+        <h2>{{ activeStudents }}</h2>
+        <span class="sub">Currently active</span>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon inactive"><i class="fa-solid fa-user-clock"></i></div>
+      <div class="stat-info">
+        <span class="label">Inactive Students</span>
+        <h2>{{ inactiveStudents }}</h2>
+        <span class="sub">Currently inactive</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Table Card Section -->
+  <div class="table-card">
+    <div class="table-header-action">
+      <div class="title-area">
+        <h3>Students List</h3>
+        <p>{{ filteredStudents.length }} students found</p>
+      </div>
+
+      <div class="filter-controls">
+        <select [(ngModel)]="selectedStatus" (change)="applyFilter()" class="filter-select">
+          <option value="all">All Status</option>
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
+        </select>
+
+        <div class="search-box">
+          <input
+            type="text"
+            [(ngModel)]="searchTerm"
+            (input)="applyFilter()"
+            placeholder="Search students..." />
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="loading-state">
+      <p>Loading students data...</p>
+    </div>
+
+    <!-- Table -->
+    <div class="table-responsive" *ngIf="!isLoading">
+      <table class="custom-table">
+        <thead>
+          <tr>
+            <th>STUDENT</th>
+            <th>GRADE</th>
+            <th>PHONE</th>
+            <th>STATUS</th>
+            <th class="text-center">ACTIONS</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let student of filteredStudents">
+            <td>
+              <div class="student-user-info">
+                <div class="avatar-badge">{{ getInitials(student.userId?.name ?? '') }}</div>
+                <div class="user-details">
+                  <span class="name">{{ student.userId?.name || 'N/A' }}</span>
+                  <span class="role">{{ student.studentCode || 'student' }}</span>
+                </div>
+              </div>
+            </td>
+
+            <td>
+              <span class="group-pill" *ngIf="student.grade">
+                {{ student.grade }}
+              </span>
+              <span class="no-group" *ngIf="!student.grade">
+                No Grade
+              </span>
+            </td>
+
+            <td>
+              <span class="phone-number">{{ student.userId?.phone || 'N/A' }}</span>
+            </td>
+
+            <td>
+              <span class="status-pill" [class.active]="student.isActive" [class.inactive]="!student.isActive">
+                • {{ student.isActive ? 'Active' : 'Inactive' }}
+              </span>
+            </td>
+
+            <td class="text-center">
+              <div class="action-buttons">
+                <button class="btn-icon view" title="View" (click)="openViewModal(student)">
+                  <i class="fa-regular fa-eye"></i>
+                </button>
+                <button class="btn-icon edit" title="Edit" (click)="openEditModal(student)">
+                  <i class="fa-regular fa-pen-to-square"></i>
+                </button>
+                <button class="btn-icon delete" title="Delete" (click)="onDeleteStudent(student)">
+                  <i class="fa-regular fa-trash-can"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+
+          <tr *ngIf="filteredStudents.length === 0">
+            <td colspan="5" class="empty-table">No students found.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <!-- Add Student Modal -->
+  <div class="modal-overlay" *ngIf="isAddModalOpen">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Add New Student</h3>
+        <button class="btn-close" (click)="closeAddStudentModal()">&times;</button>
+      </div>
+
+      <form>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Full Name</label>
+            <input type="text" [(ngModel)]="newStudent.name" name="name" required placeholder="Enter name" />
+          </div>
+
+          <div class="form-group">
+            <label>Student Phone</label>
+            <input type="text" [(ngModel)]="newStudent.phone" name="phone" required placeholder="010xxxxxxxx" />
+          </div>
+
+          <div class="form-group">
+            <label>Password</label>
+            <input type="password" [(ngModel)]="newStudent.password" name="password" required placeholder="••••••••" />
+          </div>
+
+          <div class="form-group">
+            <label>Parent Phone</label>
+            <input type="text" [(ngModel)]="newStudent.parentPhone" name="parentPhone" required placeholder="010xxxxxxxx" />
+          </div>
+
+          <div class="form-group">
+            <label>Grade</label>
+            <input type="text" [(ngModel)]="newStudent.grade" name="grade" required placeholder="e.g. Grade 10" />
+          </div>
+
+          <div class="form-group">
+            <label>Gender</label>
+            <select [(ngModel)]="newStudent.gender" name="gender" required>
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-cancel" (click)="closeAddStudentModal()">Cancel</button>
+          <button type="button" class="btn-save" (click)="submitAddStudent()" [disabled]="isSubmitting">
+            {{ isSubmitting ? 'Saving...' : 'Save Student' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Edit Student Modal -->
+  <div class="modal-overlay" *ngIf="isEditModalOpen">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Edit Student</h3>
+        <button class="btn-close" (click)="closeEditStudentModal()">&times;</button>
+      </div>
+
+      <form>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Full Name</label>
+            <input type="text" [(ngModel)]="editStudentData.name" name="editName" required />
+          </div>
+
+          <div class="form-group">
+            <label>Student Phone</label>
+            <input type="text" [(ngModel)]="editStudentData.phone" name="editPhone" required />
+          </div>
+
+          <div class="form-group">
+            <label>Parent Phone</label>
+            <input type="text" [(ngModel)]="editStudentData.parentPhone" name="editParentPhone" required />
+          </div>
+
+          <div class="form-group">
+            <label>Grade</label>
+            <input type="text" [(ngModel)]="editStudentData.grade" name="editGrade" required />
+          </div>
+
+          <div class="form-group">
+            <label>Gender</label>
+            <select [(ngModel)]="editStudentData.gender" name="editGender">
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Status</label>
+            <select [(ngModel)]="editStudentData.isActive" name="editIsActive">
+              <option [ngValue]="true">Active</option>
+              <option [ngValue]="false">Inactive</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-cancel" (click)="closeEditStudentModal()">Cancel</button>
+          <button type="button" class="btn-save" (click)="submitEditStudent()" [disabled]="isSubmitting">
+            {{ isSubmitting ? 'Updating...' : 'Update Student' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- View Student Modal -->
+  <div class="modal-overlay" *ngIf="isViewModalOpen && selectedStudentForView">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Student Details</h3>
+        <button class="btn-close" (click)="closeViewModal()">&times;</button>
+      </div>
+
+      <div class="view-details-grid">
+        <p><strong>Code:</strong> {{ selectedStudentForView.studentCode }}</p>
+        <p><strong>Name:</strong> {{ selectedStudentForView.userId?.name || 'N/A' }}</p>
+        <p><strong>Phone:</strong> {{ selectedStudentForView.userId?.phone || 'N/A' }}</p>
+        <p><strong>Parent Phone:</strong> {{ selectedStudentForView.parentPhone || 'N/A' }}</p>
+        <p><strong>Grade:</strong> {{ selectedStudentForView.grade || 'N/A' }}</p>
+        <p><strong>Gender:</strong> {{ selectedStudentForView.gender || 'N/A' }}</p>
+        <p><strong>Status:</strong> {{ selectedStudentForView.isActive ? 'Active' : 'Inactive' }}</p>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn-cancel" (click)="closeViewModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+</div>
