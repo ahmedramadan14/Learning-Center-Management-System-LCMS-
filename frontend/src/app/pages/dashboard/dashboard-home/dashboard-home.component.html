@@ -275,152 +275,32 @@
     <!-- Overview Card -->
     <!-- =================================================== -->
 
-    <div class="overview-card">
+    <div
+      class="overview-card"
+      *ngIf="!isStudent"
+    >
 
       <div class="card-header">
 
         <div class="card-header-icon">
 
-          <i
-            class="bi"
-            [ngClass]="isStudent ? 'bi-calendar3' : 'bi-graph-up-arrow'"
-            aria-hidden="true"
-          ></i>
+          <i class="bi bi-graph-up-arrow" aria-hidden="true"></i>
 
         </div>
 
         <div>
 
           <h3>
-            {{ isStudent ? "Today's Schedule & Classes" : "Quick Overview" }}
+            Quick Overview
           </h3>
 
           <p>
-            {{
-              isStudent
-                ? "Your registered sessions for today"
-                : "System Highlights"
-            }}
+            System Highlights
           </p>
 
         </div>
 
       </div>
-
-
-      <!-- ================================================= -->
-      <!-- Student Classes -->
-      <!-- ================================================= -->
-
-      <div
-        class="today-classes-list"
-        *ngIf="isStudent"
-      >
-
-
-        <!-- Class 1 -->
-
-        <div class="class-item-card">
-
-          <div class="class-time">
-
-            <div class="class-time-icon">
-              <i class="bi bi-clock" aria-hidden="true"></i>
-            </div>
-
-            <div>
-              <strong>
-                04:00 PM
-              </strong>
-
-              <span>
-                2 Hours
-              </span>
-            </div>
-
-          </div>
-
-
-          <div class="class-details">
-
-            <h4>
-              Mathematics - Physics Prep
-            </h4>
-
-            <p>
-              <i class="bi bi-person-workspace" aria-hidden="true"></i>
-              Mr. Ahmed
-            </p>
-
-            <p>
-              <i class="bi bi-geo-alt" aria-hidden="true"></i>
-              Hall 3
-            </p>
-
-          </div>
-
-
-          <span class="upcoming-badge">
-            <i class="bi bi-clock" aria-hidden="true"></i>
-            Upcoming
-          </span>
-
-        </div>
-
-
-        <!-- Class 2 -->
-
-        <div class="class-item-card">
-
-          <div class="class-time">
-
-            <div class="class-time-icon">
-              <i class="bi bi-clock" aria-hidden="true"></i>
-            </div>
-
-            <div>
-
-              <strong>
-                06:30 PM
-              </strong>
-
-              <span>
-                1.5 Hours
-              </span>
-
-            </div>
-
-          </div>
-
-
-          <div class="class-details">
-
-            <h4>
-              Chemistry Group B
-            </h4>
-
-            <p>
-              <i class="bi bi-person-workspace" aria-hidden="true"></i>
-              Dr. Hassan
-            </p>
-
-            <p>
-              <i class="bi bi-geo-alt" aria-hidden="true"></i>
-              Lab 1
-            </p>
-
-          </div>
-
-
-          <span class="upcoming-badge">
-            <i class="bi bi-clock" aria-hidden="true"></i>
-            Upcoming
-          </span>
-
-        </div>
-
-      </div>
-
 
       <!-- ================================================= -->
       <!-- Staff / Parent Overview -->
