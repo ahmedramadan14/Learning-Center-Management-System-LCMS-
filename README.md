@@ -96,8 +96,8 @@ Each role has its own permissions and dashboard.
 ### Notifications
 
 * System notifications
-* Firebase-based notification support
-* Real-time notification capability
+* Real-time notifications using Socket.IO
+* Real-time communication between server and clients
 
 ### Admin Dashboard
 
@@ -126,21 +126,21 @@ The admin can manage the main system entities, including:
 
 ### Backend
 
-- Node.js
-- Express.js
-- JavaScript
-- MongoDB
-- Mongoose
-- MongoDB Atlas
-- JWT
-- bcrypt / bcryptjs
-- Express Validator
-- Joi
-- Multer
-- Socket.IO
-- Nodemailer / SMTP
-- Morgan
-- CORS
+* Node.js
+* Express.js
+* JavaScript
+* MongoDB
+* Mongoose
+* MongoDB Atlas
+* JWT
+* bcrypt / bcryptjs
+* Express Validator
+* Joi
+* Multer
+* Socket.IO
+* Nodemailer / SMTP
+* Morgan
+* CORS
 
 ### Frontend
 
@@ -158,9 +158,7 @@ The admin can manage the main system entities, including:
 * MongoDB Atlas
 * VS Code
 
-
-
-### Teacher Approval Flow
+## Teacher Approval Flow
 
 Teachers require admin approval before accessing protected teacher features.
 
@@ -185,7 +183,7 @@ Teacher Can Access
 Protected Features
 ```
 
-### Frontend Responsibilities
+## Frontend Responsibilities
 
 * User interface
 * Angular routing
@@ -195,8 +193,9 @@ Protected Features
 * Authentication state
 * Displaying system data
 * Role-based dashboards
+* Real-time notification handling
 
-### Backend Responsibilities
+## Backend Responsibilities
 
 * REST API
 * Authentication
@@ -205,6 +204,7 @@ Protected Features
 * Request validation
 * Database operations
 * Security
+* Real-time communication
 * Notifications
 * API responses
 
@@ -234,3 +234,184 @@ Main development areas include:
 ## License
 
 This project is developed for educational and project purposes.
+
+# Getting Started
+
+Follow these instructions to set up and run the project locally on your machine.
+
+## Prerequisites
+
+Make sure you have the following installed on your system:
+
+* **Node.js** (v18 or higher)
+* **npm** (Node Package Manager)
+* **Angular CLI**
+* **MongoDB** (Local instance or MongoDB Atlas account)
+
+Install Angular CLI if it is not already installed:
+
+```bash
+npm install -g @angular/cli
+```
+
+## Installation & Setup
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/ahmedramadan14/Learning-Center-Management-System-LCMS-.git
+cd Learning-Center-Management-System-LCMS-
+```
+
+### 2. Backend Setup
+
+Navigate to the backend directory:
+
+```bash
+cd backend
+```
+
+Install the backend dependencies:
+
+```bash
+npm install
+```
+
+Create a `.env` file inside the backend directory and configure the required environment variables.
+
+Example:
+
+```env
+PORT=3000
+MONGO_URI=your_mongodb_connection_string
+JWT_SECRET=your_jwt_secret
+JWT_EXPIRES_IN=7d
+
+SMTP_HOST=your_smtp_host
+SMTP_PORT=587
+SMTP_USER=your_smtp_username
+SMTP_PASSWORD=your_smtp_password
+
+CLIENT_URL=http://localhost:4200
+```
+
+Start the backend development server:
+
+```bash
+npm run dev
+```
+
+The backend will normally run on:
+
+```text
+http://localhost:3000
+```
+
+### 3. Frontend Setup
+
+Open a new terminal and navigate to the frontend directory:
+
+```bash
+cd frontend
+```
+
+Install the frontend dependencies:
+
+```bash
+npm install
+```
+
+Start the Angular development server:
+
+```bash
+ng serve
+```
+
+The frontend will normally run on:
+
+```text
+http://localhost:4200
+```
+
+## Running the Project
+
+After starting both servers:
+
+```text
+Frontend
+http://localhost:4200
+       │
+       │ HTTP / REST API
+       ▼
+Backend
+http://localhost:3000
+       │
+       ▼
+MongoDB
+```
+
+Open the frontend URL in your browser to use the system.
+
+## Environment Variables
+
+Do not commit your `.env` file to GitHub.
+
+Make sure sensitive values such as:
+
+* Database credentials
+* JWT secret
+* SMTP credentials
+* API keys
+
+are stored only in environment variables.
+
+## API Testing
+
+The backend APIs can be tested using:
+
+* **Postman**
+* **Hoppscotch**
+
+For protected endpoints, include the JWT token in the request headers:
+
+```http
+Authorization: Bearer <JWT_TOKEN>
+```
+
+## Git Workflow
+
+The project uses Git and GitHub for version control.
+
+Recommended workflow:
+
+```text
+main
+  │
+  └── dev
+       │
+       ├── feature/auth
+       ├── feature/students
+       ├── feature/attendance
+       ├── feature/exams
+       ├── feature/payments
+       └── feature/notifications
+```
+
+Create a new feature branch:
+
+```bash
+git checkout dev
+git pull origin dev
+
+git checkout -b feature/your-feature
+```
+
+After completing the feature:
+
+```bash
+git add .
+git commit -m "feat: add your feature"
+git push origin feature/your-feature
+```
+
+Then create a Pull Request targeting the `dev` branch.
